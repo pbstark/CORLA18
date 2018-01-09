@@ -12,77 +12,77 @@ In Colorado, comparison audits have been ballot-level (i.e., batches consisting 
 ballot). 
 In this section, we derive a method for batches of arbitrary size, which might be useful
 for Colorado to audit contests that include CVR counties and legacy counties.
+We keep the \emph{a priori} error bounds tighter than the ``super-simple'' 
+method~\citep{stark10d}.
+To keep the notation simpler, we consider only a single contest, but the 
+MACRO approach \citep{stark09c,stark10d} trivially extends the result to 
+auditing $C>1$ contests simultaneously.
+The derivation is for plurality contests, including ``vote-for-$k$'' plurality contests.
+Majority and super-majority contests such as bond measures are a minor 
+modification~\citep{stark08a}.\footnote{%
+  So are some forms of preferential and approval voting, such as Borda count, and
+  proportional representation contests, such as D'Hondt~\citep{starkTeague14}.
+  Changes for IRV/STV are more complicated.
+}
 
-
-\bf{IGNORE NOTES BELOW}
 \subsection{Notation}
 \begin{itemize}
-    \item  $C$ contests under audit
-    \item  $N$ ballots were cast in all. (There might not be any contest that appears on all $N$ ballots)
-    \item  Contest $c$ appears on (at most) $N_c$ of the $N$ cast ballots. ($N$ and $\{N_c\}_{c=1}^C$ are known.)
-    \item  $\mathcal{W}_c$: the set of reported winners of contest $c$
-    \item  $\mathcal{L}_c$: the set of reported losers of contest $c$
+    \item  $N$ ballots were cast in all. (The contest might not appear on all $N$ ballots)
+    \item  $\mathcal{W}$: the set of reported winners of the contest
+    \item  $\mathcal{L}$: the set of reported losers of the contest
     \item  $n_p$: number of ballots in batch $p$
     \item  $v_{pi} \in \{0, 1\}$: the reported votes for candidate $i$ in batch $p$
     \item  $a_{pi} \in \{0, 1\}$: actual votes for candidate $i$ in batch $p$. 
-                  If contest $c$ does not appear in batch $p$, then $a_{pi} = 0$.
+                  If the contest does not appear in batch $p$, then $a_{pi} = 0$.
     \item  $V_{w\ell} \equiv \sum_{p=1}^N (v_{pw} - v_{p\ell})$: 
-Reported margin in the stratum of reported winner $w \in \mathcal{W}_c$ over reported loser 
-$\ell \in \mathcal{L}_c$ in contest $c$.
+Reported margin in the stratum of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$.
     \item  $V$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
-$V \equiv \min_c \min_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} V_{w \ell}$
+$V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
     \item  $\mu = V/N$: the ``diluted stratum margin,'' the margin in the stratum in votes divided by the total number of ballots in the stratum
     \item  $A_{w\ell} \equiv \sum_{p=1}^N (a_{pw} - a_{p\ell})$: 
-actual margin in the stratum of reported winner $w \in \mathcal{W}_c$ over reported loser 
-$\ell \in \mathcal{L}_c$ in contest $c$
+actual margin in the stratum of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$
 \end{itemize}
 If the contest is entirely contained in the stratum, then
-the reported winners of all $C$ contests are the actual winners of those contests if
+the reported winners of the contest are the actual winners if
 $$ 
-   \min_c \min_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} A_{w\ell} > 0.
+   \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} A_{w\ell} > 0.
 $$
 Here, we address the case that the contest may include a portion outside the stratum.
-Instead of testing whether the true margins in the stratum are nonpositive, we ask whether they
-are less than or equal to some threshold.
+To combine independent procedures in different strata, it is convenient
+to be able to test whether the net error in a stratum exceeds a given threshold.
 
 We won't test that inequality directly.
 Instead, we will test a condition that is sufficient but not necessary for the
 inequality to hold, to get a computationally simple test that
-is still conservative (the simultaneous risk is below its nominal value).
+is still conservative (the risk is not larger than its nominal value).
 
 For every winner, loser pair $(w, \ell)$, we want to test
 whether the overstatement error exceeds a fraction $\lambda$ of the overall margin 
-$V_{w\ell}$The reported winners of contest $c$ are correct if for every pair $w \in \mathcal{W}_c$,
-$\ell \in \mathcal{L}_c$,
+$V_{w\ell}$,
+that is, we want to establish
 $$
-   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < 1.
+   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < \lambda.
 $$
-This condition says that the error in $V_{w\ell}$ is less than $V_{w\ell}$.
-The reported winners of all the contests are correct if for every contest $c$,
-the previous relation holds, i.e., if
-$$
-   \max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c}
-   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < 1.
-$$
-Now the maximum (over $c$ and, for each contest $c$, over all winner, loser pairs in
-that contest) of sums
+Now the maximum (over all winner, loser pairs) of sums
 is not larger than the sum of maxima; that is,
 $$
-\max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c}
+\max_{w \in \mathcal{W},  \ell \in \mathcal{L}}
    \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}
    \le
-  \sum_{p=1}^N  \max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c} 
+  \sum_{p=1}^N  \max_{w \in \mathcal{W},  \ell \in \mathcal{L}} 
   (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
 $$
 Hence, if 
 $$
-\sum_{p=1}^N  \max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c} 
+\sum_{p=1}^N  \max_{w \in \mathcal{W},  \ell \in \mathcal{L}} 
   (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < 1,
 $$
 all the reported outcomes must be correct.
 Define 
 $$
-  e_p \equiv \max_c \max_{w \in \mathcal{W}_c \ell \in \mathcal{L}_c} (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
+  e_p \equiv \max_{w \in \mathcal{W} \ell \in \mathcal{L}} (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
 $$
 Then the reported outcomes of all the contests must be correct if 
 $$ 
@@ -91,7 +91,7 @@ $$
 
 To see that a different way, suppose that the outcome of one or more contests is wrong.
 Then there is some contest $c$ and some reported (winner, loser) pair
-$w \in \mathcal{W}_c, \ell \in \mathcal{L}_c$ for which
+$w \in \mathcal{W}, \ell \in \mathcal{L}$ for which
 
 $$ 
    0 \ge A_{w\ell} = V_{w\ell} - (V_{w\ell} - A_{w\ell}) =
@@ -109,11 +109,11 @@ But
 $$
 \frac{v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
 \le 
-\max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
+\max_{w \in \mathcal{W}, \ell \in \mathcal{L}} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
 $$
 $$
 \le 
-\max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
+\max_{w \in \mathcal{W}, \ell \in \mathcal{L}} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
 = e_p,
 $$
 so if the outcome is wrong, $E = \sum_p e_p \ge 1$.
@@ -134,7 +134,7 @@ $$
 $$
 Hence,
 $$
-    e_p \le \max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} 
+    e_p \le \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
     \frac{v_{pw} - v_{p\ell} + 1}{V_{w\ell}} \equiv \tilde{u}_p.
 $$
 
@@ -168,9 +168,9 @@ At worst, the CVR for ballot $p$ shows a vote for the "least-winning" apparent w
 that contest.
 Since $V_{w\ell} \ge V$ and $0 \le v_{pi} \le 1$,
 $$ 
-   \tilde{u}_p = \max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} 
+   \tilde{u}_p =  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
     \frac{v_{pw} - v_{p\ell} + 1}{V_{w\ell}}
-    \le \max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} 
+    \le  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
     \frac{1 - 0 + 1}{V_{w\ell}}
     \le \frac{2}{V}.
 $$
