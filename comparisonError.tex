@@ -1,0 +1,200 @@
+\section{Comparison audits of a tolerable overstatement in votes}
+\label{sec:comparisonError}
+
+We consider auditing in a single stratum to test whether the overstatement of any margin
+(in votes) exceeds some fraction $\lambda$ of the overall margin $V_{w\ell}$ between
+reported winner $w$ and reported loser $\ell$.
+If the stratum contains all the ballots cast in the contest, then for $\lambda = 1$, this 
+would confirm the election outcome.
+For stratified audits, we might want to test other values of $\lambda$, as described above.
+
+In Colorado, comparison audits have been ballot-level (i.e., batches consisting of a single
+ballot). 
+In this section, we derive a method for batches of arbitrary size, which might be useful
+for Colorado to audit contests that include CVR counties and legacy counties.
+
+
+\bf{IGNORE NOTES BELOW}
+\subsection{Notation}
+\begin{itemize}
+    \item  $C$ contests under audit
+    \item  $N$ ballots were cast in all. (There might not be any contest that appears on all $N$ ballots)
+    \item  Contest $c$ appears on (at most) $N_c$ of the $N$ cast ballots. ($N$ and $\{N_c\}_{c=1}^C$ are known.)
+    \item  $\mathcal{W}_c$: the set of reported winners of contest $c$
+    \item  $\mathcal{L}_c$: the set of reported losers of contest $c$
+    \item  $n_p$: number of ballots in batch $p$
+    \item  $v_{pi} \in \{0, 1\}$: the reported votes for candidate $i$ in batch $p$
+    \item  $a_{pi} \in \{0, 1\}$: actual votes for candidate $i$ in batch $p$. 
+                  If contest $c$ does not appear in batch $p$, then $a_{pi} = 0$.
+    \item  $V_{w\ell} \equiv \sum_{p=1}^N (v_{pw} - v_{p\ell})$: 
+Reported margin in the stratum of reported winner $w \in \mathcal{W}_c$ over reported loser 
+$\ell \in \mathcal{L}_c$ in contest $c$.
+    \item  $V$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
+$V \equiv \min_c \min_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} V_{w \ell}$
+    \item  $\mu = V/N$: the ``diluted stratum margin,'' the margin in the stratum in votes divided by the total number of ballots in the stratum
+    \item  $A_{w\ell} \equiv \sum_{p=1}^N (a_{pw} - a_{p\ell})$: 
+actual margin in the stratum of reported winner $w \in \mathcal{W}_c$ over reported loser 
+$\ell \in \mathcal{L}_c$ in contest $c$
+\end{itemize}
+If the contest is entirely contained in the stratum, then
+the reported winners of all $C$ contests are the actual winners of those contests if
+$$ 
+   \min_c \min_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} A_{w\ell} > 0.
+$$
+Here, we address the case that the contest may include a portion outside the stratum.
+Instead of testing whether the true margins in the stratum are nonpositive, we ask whether they
+are less than or equal to some threshold.
+
+We won't test that inequality directly.
+Instead, we will test a condition that is sufficient but not necessary for the
+inequality to hold, to get a computationally simple test that
+is still conservative (the simultaneous risk is below its nominal value).
+
+For every winner, loser pair $(w, \ell)$, we want to test
+whether the overstatement error exceeds a fraction $\lambda$ of the overall margin 
+$V_{w\ell}$The reported winners of contest $c$ are correct if for every pair $w \in \mathcal{W}_c$,
+$\ell \in \mathcal{L}_c$,
+$$
+   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < 1.
+$$
+This condition says that the error in $V_{w\ell}$ is less than $V_{w\ell}$.
+The reported winners of all the contests are correct if for every contest $c$,
+the previous relation holds, i.e., if
+$$
+   \max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c}
+   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < 1.
+$$
+Now the maximum (over $c$ and, for each contest $c$, over all winner, loser pairs in
+that contest) of sums
+is not larger than the sum of maxima; that is,
+$$
+\max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c}
+   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}
+   \le
+  \sum_{p=1}^N  \max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c} 
+  (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
+$$
+Hence, if 
+$$
+\sum_{p=1}^N  \max_c \max_{w \in \mathcal{W}_c,  \ell \in \mathcal{L}_c} 
+  (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < 1,
+$$
+all the reported outcomes must be correct.
+Define 
+$$
+  e_p \equiv \max_c \max_{w \in \mathcal{W}_c \ell \in \mathcal{L}_c} (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
+$$
+Then the reported outcomes of all the contests must be correct if 
+$$ 
+  E \equiv \sum_{p=1}^N e_p < 1.
+$$
+
+To see that a different way, suppose that the outcome of one or more contests is wrong.
+Then there is some contest $c$ and some reported (winner, loser) pair
+$w \in \mathcal{W}_c, \ell \in \mathcal{L}_c$ for which
+
+$$ 
+   0 \ge A_{w\ell} = V_{w\ell} - (V_{w\ell} - A_{w\ell}) =
+   V_{w\ell} - \sum_{p=1}^N (v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}),
+$$
+i.e.,
+$$ 
+\sum_{p=1}^N (v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}) \ge V_{w\ell}.
+$$
+Diving both sides by $V_{w\ell}$ gives
+$$
+\sum_{p=1}^N \frac{v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}} \ge 1.
+$$
+But
+$$
+\frac{v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
+\le 
+\max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
+$$
+$$
+\le 
+\max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
+= e_p,
+$$
+so if the outcome is wrong, $E = \sum_p e_p \ge 1$.
+Thus a risk-limiting audit can rely on testing whether $E \ge 1$.
+If the hypothesis $E \ge 1$ can be rejected at significance level $\alpha$,
+we can conclude that all the reported outcomes are correct.
+
+Testing whether $E \ge 1$ would require a very large sample if we knew nothing at
+all about $e_p$ without auditing ballot $p$: a single large value of $e_p$ could make
+$E$ arbitrarily large.
+Fortunately, there is an \emph{a priori} upper bound for $e_p$.
+Whatever the reported votes $v_{pi}$ are on ballot $p$, we can find the
+potential values of the actual votes $a_{pi}$ that would make the
+error $e_p$ largest, because $a_{pi}$ can only be zero or one:
+$$
+    \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}} \le 
+    \frac{v_{pw}- 0 - v_{p\ell} + 1}{V_{w\ell}}.
+$$
+Hence,
+$$
+    e_p \le \max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} 
+    \frac{v_{pw} - v_{p\ell} + 1}{V_{w\ell}} \equiv \tilde{u}_p.
+$$
+
+Knowing that $e_p \le \tilde{u}_p$ might let us conclude reliably that $E < 1$
+by examining only a small fraction of the ballots---depending on the 
+values $\{ \tilde{u}_p\}_{p=1}^N$ and on the values of $\{e_p\}$ for the audited ballots.
+
+To make inferences about $E$, it is helpful to work with the \emph{taint} $t_p \equiv \frac{e_p}{\tilde{u}_p} \le 1$.
+Define $\tilde{U} \equiv \sum_{p=1}^N \tilde{u}_p$.
+Suppose we draw ballots at random with replacement, with probability $\tilde{u}_p/\tilde{U}$
+of drawing ballot $p$ in each draw, $p = 1, \ldots, N$.
+(Since $\tilde{u}_p \ge 0$, these are all positive numbers, and they sum to 1,
+so they define a probability distribution on the $N$ ballots.)
+
+Let $T_j$ be the value of $t_p$ for the ballot $p$ selected in the $j$th draw.
+Then $\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$, and
+$$
+  \mathbb{E} T_1 = \sum_{p=1}^N \tilde{u}_p/\tilde{U} t_p =
+  \frac{1}{\tilde{U}}\sum_{p=1}^N \tilde{u}_p \frac{e_p}{\tilde{u}_p} = 
+  \frac{1}{\tilde{U}} \sum_{p=1}^N e_p = E/\tilde{U}.
+$$
+Thus $E = \tilde{U} \mathbb{E} T_1$. 
+
+So, if we have strong evidence that
+$\mathbb{E} T_1 < 1/\tilde{U}$, we have
+strong evidence that $E < 1$.
+
+This approach can be simplified even further by noting that $\tilde{u}_p$ has
+a simple upper bound that does not depend on any $v_{pi}$.
+At worst, the CVR for ballot $p$ shows a vote for the "least-winning" apparent winner of the contest with the smallest margin, but a hand interpretation shows a vote for the runner-up in
+that contest.
+Since $V_{w\ell} \ge V$ and $0 \le v_{pi} \le 1$,
+$$ 
+   \tilde{u}_p = \max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} 
+    \frac{v_{pw} - v_{p\ell} + 1}{V_{w\ell}}
+    \le \max_c \max_{w \in \mathcal{W}_c, \ell \in \mathcal{L}_c} 
+    \frac{1 - 0 + 1}{V_{w\ell}}
+    \le \frac{2}{V}.
+$$
+
+Thus, if we define $u_p \equiv 2/V$ and
+sample ballots at random with probability proportional to $u_p$, in fact
+we will sample ballots with \emph{equal} probability.
+Define
+$$ 
+   U \equiv \sum_{p=1}^N \frac{2}{V} = \frac{2N}{V} = 2/\mu
+$$
+and re-define $t_p \equiv e_p/u_p$ (rather than $e_p/\tilde{u}_p$);
+let $T_j$ be the value of $t_p$ for the ballot selected at random in the
+$j$th draw, as before.
+Then still $\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$,
+and
+$$
+  \mathbb{E} T_1 = \sum_{p=1}^N \frac{u_p}{U} t_p =
+  \frac{1}{U}\sum_{p=1}^N u_p \frac{e_p}{u_p} = 
+  \frac{1}{U} \sum_{p=1}^N e_p = E/U = \frac{\mu}{2} E,
+$$
+i.e., 
+$$ 
+    E = \frac{2}{\mu}\mathbb{E} T_1.
+$$
+So, if we have evidence that $\mathbb{E} T_1 < \mu/2 = 1/U$, we have evidence that 
+$E < 1$.

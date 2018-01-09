@@ -1,0 +1,338 @@
+\documentclass[12pt]{article}
+
+\bibliographystyle{plainnat}
+\usepackage{graphicx}
+\usepackage{amssymb,amsmath,color}
+\usepackage[breaklinks=true]{hyperref}
+\usepackage[round]{natbib}
+%\usepackage{amsthm}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage[noend]{algpseudocode}
+\newtheorem{thm}{Theorem}
+\newtheorem{definition}{Definition}
+
+\newcommand{\beq}{\begin{equation}}
+\newcommand{\eeq}{\end{equation}}
+\newcommand{\ben}{\begin{enumerate}}
+\newcommand{\een}{\end{enumerate}}
+
+\newcommand{\mc}[1]{\ensuremath{\mathcal{#1}}}
+\newcommand{\mb}[1]{\ensuremath{\mathbb{#1}}}
+\newcommand{\ul}[1]{\ensuremath{\underline{#1}}}
+\newcommand{\RM}{\emph{RM}}
+\newcommand{\A}{\emph{A}}
+\newcommand{\B}{\emph{B}}
+\newcommand{\C}{\emph{C}}
+\newcommand{\EE}{\bb{E}}
+\newcommand{\PP}{\bb{P}}
+\newcommand{\bpi}{\bar{\pi}}
+\newcommand{\bp}{\bar{p}}
+
+\newcommand{\comment}[1]{}
+\newcommand{\note}[1]{\textcolor{red}{\sc #1}}
+
+
+
+\title{Auditing Colorado's 2018 Primaries}
+
+\author{
+   Mark Lindeman\\
+   Neal McBurnett\\
+   Kellie Ottoboni\\
+   Ronald L.~Rivest\\
+   Philip B.~Stark
+}
+
+\date{Draft \today}
+
+\begin{document}
+\maketitle
+
+
+\begin{abstract}
+Colorado's current audit software (RLATool) needs to be improved to audit partisan 
+primaries in Colorado in 2018, even to draw the sample for the audit:
+the current version of RLATool does not allow the user to select the sample size, nor does
+it directly allow an unstratified random sample to be drawn across counties.
+Similarly, RLATool needs to be modified to recognize that contests can cross jurisdictional
+boundaries; currently, it treats every contest as if it were entirely
+contained in a single county.
+Margins and risk limits apply to entire contests, not to the portion of a contest
+included in a county.
+Second, to audit a contest that includes voters in ``legacy'' counties 
+(counties with voting systems that cannot export cast vote records) 
+and voters in counties with newer systems requires new statistics, if one wants to
+keep the efficiency of ballot-level comparison audits that the newer systems
+afford.
+Third, auditing contests that appear only on a subset of ballots can
+be made much more efficient if the sample can be drawn from just those ballots
+that contain the contest.
+While allowing samples to be restricted to ballots reported to contain a particular
+is not essential for the June, 2018 primaries, it will be necessary
+eventually to make it feasible to audit smaller contests.
+\end{abstract}
+
+\section{Introduction}
+A risk-limiting audit (RLA) of an election is a procedure that
+has a known, pre-specified minimum chance of correcting the electoral outcome if the outcome
+is incorrect---that is, if the reported outcome differs from the outcome that a full manual
+tally of the votes would show. 
+RLAs require a durable, voter-verifiable record of voter intent, such as paper ballots,
+and they assume that this audit trail is sufficiently complete and accurate that a full hand
+tally would show the true electoral outcome.
+That assumption is not automatically satisfied: a \emph{compliance audit} is required.
+
+Risk-limiting audits are generally incremental: they examine more ballots, or batches of ballots,
+until either (i)~there is strong statistical evidence that a full hand tabulation would confirm the outcome,
+or (ii)~the audit has led to a full hand tabulation, the result of which becomes the official
+result.
+
+RLAs have been piloted in California, Colorado, and Ohio, and a test of
+RLA procedures has been conducted in Arizona.
+RLA bills are being drafted or are already under consideration in Virginia, Washington, and other states.
+A number of laws have either allowed or mandated risk-limiting post election audits,
+including California AB~2023 (Salda\~{n}a), SB~360 (Padilla), and AB~44 (Mullin);
+Rhode Island SB~413A and HB~5704A; and Colorado Revised Statutes (CRS)~1-7-515.
+
+CRS~1-7-515 requires 
+Colorado to implement risk-limiting audits in 2017.
+(There are provisions to allow the Secretary of State to exempt some counties.)
+The first statewide risk-limiting election audits took place in November, 2017. 
+
+Colorado's ``uniform voting system'' program has led
+many Colorado counties to purchase (or to plan to purchase) voting systems
+that are auditable at the ballot level: those systems export cast vote records (CVRs)
+for individual ballots in a manner that allows the corresponding paper ballot to be identified,
+and conversely, make it possible to find the cast vote record corresponding to any
+particular paper ballot.
+We call counties that have such systems ``CVR'' counties.
+It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
+
+Other counties (``legacy'' or ``non-CVR'' counties) 
+have legacy systems that do not allow the system to be audited
+at the level of individual ballots.
+Their election results can still be audited provided their voting systems
+create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is
+conserved to ensure that it remains accurate and intact, and organized well enough
+to permit ballots to be selected at random.
+Pilot audits in California suggest that the most efficient way to audit such systems
+is by a ``ballot-polling'' audit 
+(in contrast to ``batch-level comparison audits,'' for example).
+
+There is currently no literature on how to perform risk-limiting audits of contests
+that include CVR counties and non-CVR counties, other than by using the lowest
+common denominator, ballot-polling, which does not take advantage of the CVRs
+(and thus is expected to require more auditing than a method that does take
+advantage of the CVRs).
+
+This document focuses on near-term requirements for risk-limiting audits in Colorado: June and November 2018.
+
+\subsection{Colorado in June, 2018}
+We understand that for June, 2018, Colorado Secretary of State Wayne Williams intends to require
+a risk-limiting audit of at least one statewide contest in addition
+to a countywide contest in each county.
+
+Auditing efficiency is controlled in part by how well the audit sample can be focused on ballots that
+contain the contests under audit.
+Some contests are on (essentially) every ballot, for instance the governor's race.
+Others, such as mayoral contests, may appear on only a small fraction of ballots cast in
+a county.
+Partisan primaries---even for statewide office---are somewhere in between,
+because in general no single party's primary appears on every ballot cast in the state.
+Thus, either we accept a cut to efficiency and sample ballots from counties (or collections of counties)
+but keep the simplicity of being able to sample uniformly, or we develop a way to
+focus the auditing on the ballots that contain the contest.
+The latter requires external information, e.g., from SCORE, as discussed below.
+
+Moreover, party primaries for statewide offices (and perhaps other contests) will
+include CVR counties and non-CVR counties, so we need a method to audit
+across mixed jurisdictional voting technology.
+
+This report addresses both issues, providing a handful of ways of dealing with heterogeneous
+voting technology, varying in efficiency, complexity, and on whom the burden of the audit falls.
+
+\section{Crude (and unpleasant) approaches}
+
+\subsection{Hand count legacy counties}
+The simplest approach to combining legacy counties with CVR counties is to require every
+legacy county to do a full hand count of the primaries, and to conduct a 
+ballot-level comparison audit in CVR counties, based on contest margins adjusted for
+the results of the manual tallies in the CVR counties.
+For instance, imagine a contest with two candidates, reported winner $w$ and reported loser $\ell$.
+Suppose the total number of reported votes for candidate~$w$ is $V_w$ 
+and the total for candidate~$\ell$ is $V_\ell$, so that $V_w > V_\ell$, since 
+$w$ is the reported winner.
+Suppose that a full manual tally of the votes in the legacy counties shows $V_w'$ votes for $w$ and
+$V_\ell'$ votes for $\ell$.
+Suppose that a total of $N$ ballots were cast in the CVR counties.
+Then the diluted margin for the comparison audit in the CVR counties is 
+$[(V_w-V_w')-(V_\ell-V_\ell')]/N$.
+This approach is presumably unacceptable because it would require every legacy county to do a full hand
+count. 
+(But it would provide an incentive for those counties to upgrade their systems
+sooner rather than later, and it does not penalize CVR counties for the fact that their
+legacy siblings have not yet upgraded.)
+
+\subsection{Subtract error bounds for the legacy counties from vote totals}
+If ballot accounting and SCORE can give good upper bounds on the number of ballots cast in
+each party's primary in legacy counties, there are simple upper bounds on the total
+possible overstatement error each legacy county could contribute to the overall contest
+results; those can be subtracted from the overall margin (as in the previous subsection) and the
+remainder of the contests can be audited in CVR counties against the adjusted margins.
+For instance, consider a primary that appears on $N$ ballots in a legacy counties.
+Suppose that in legacy counties, the overall, statewide contest winner, $w$, is reported to have received $V_w'$ votes, and some loser, $\ell$, is reported to have received $V_\ell'$ votes. 
+(Note that $V_\ell'$ could be greater than $V_w'$: $w$ is not necessarily the reported winner in the legacy counties.)
+Then the most overstatement error that the county could possibly have in determining whether
+$w$ in fact beat $\ell$ is if every reported undervote, invalid vote, or vote for a different candidate, $t$, had 
+in fact been a vote for $\ell$ (producing a 1-vote overstatement), and every vote reported for 
+$w$ was in fact a vote for $\ell$ (producing a 2-vote overstatement).
+The reduction in the margin that would produce is 
+$N - V_w' - V_\ell' + 2V_w' = N + V_w' - V_\ell'$ votes.
+
+This approach may be unacceptable for at least two reasons:
+first, if the margin is small, it could easily lead to a full hand count in every county.
+Second, even if it doesn't lead to a full hand count, it penalizes CVR counties for the
+fact that non-CVR counties have not upgraded their systems, because it reduces the
+margin in every contest that includes a legacy county. 
+
+\subsection{Treat legacy counties as if every ballot selected from them for audit has a two-vote overstatement}
+A third simple-but-pessimistic approach is to sample uniformly from all counties as if one
+were performing a ballot-level comparison audit everywhere,  but to 
+treat any ballot
+selected from a legacy county as a two-vote overstatement.
+This approach is probably unacceptable for at least two reasons:
+first, if the margin is small, it could easily lead to a full hand count in every county.
+Second, even if it doesn't lead to a full hand count, it penalizes CVR counties for the
+fact that non-CVR counties have not upgraded their systems, because it will require expanding
+the sample (across all counties) every time a ballot is selected from a legacy county.
+
+
+\section{Variable batch sizes}
+
+A third approach is to perform a comparison audit across all counties, but to use batches consisting
+of more than one ballot (batch-level comparisons)
+in legacy counties and batches of a single ballot (ballot-level comparisons) in CVR counties.
+The constraint here is that the non-CVR counties need to be able to report vote subtotals
+for physically identifiable batches.
+If a county's voting system can only report subtotals by precinct but 
+the county does not sort paper ballots by
+precinct, this approach might require revising how the county handles its
+paper; I understand that this is the case in many Colorado counties.
+
+That said, many California counties that do not sort vote-by-mail (VBM)
+ballots by precinct conduct the statutory 1\% audits by manually retrieving the ballots 
+for just those precincts selected for audit from whatever physical batches they happen to be in: 
+the situation is identical to that in Colorado.
+
+Another solution is the ``Boulder-style'' batch-level audit, which requires generating 
+vote subtotals after each physical batch is scanned (and exporting those subtotals in machine-readable form).
+That in turn may require using extra memory cards, repeatedly initializing and deleting tabulation databases,
+or other measures that add complexity and opportunity for human error.
+
+While those two approaches are laborious, they would provide a viable short-term solution,
+especially combined with information from SCORE to check that the reported batch-level results contain the correct number of ballots for each contest under audit.
+Moreover, it feels ``fair'' to CVR counties, because it does not increase their workload 
+to compensate for the fact that some other counties have not upgraded their voting
+systems.
+
+This kind or variable-batch-size comparison audit approach would require modifying or augmenting
+RLATool in several ways: 
+
+\begin{enumerate}
+  \item the CVR reporting tool would need to be modified to allow non-CVR counties to
+report batch-level results in a manner analogous to how CVR counties report
+ballot-level results, or an external tool would need to be provided.
+
+  \item the sampling
+algorithm would have to allow sampling batches---and sampling them with unequal probability,
+because efficient batch-level audits involve sampling batches with probability proportional
+to a bound on the possible overstatement error in the batch.
+It would also need to calculate the appropriate sampling probability for each batch (of whatever size).
+Again, this could be accommodated using an external tool to draw the sample from legacy counties.
+
+  \item the risk calculations would need to be modified. 
+This, too, could be done with external software, with suitable provisions for capturing audit data
+from RLATool or directly from legacy counties.
+\end{enumerate}
+
+None of these changes is enormous; the mathematics and statistics are already worked out
+in published papers, and there is exemplar code for calculating the
+batch-level error bounds, drawing the samples with probability proportional to an
+error bound, and calculating the attained risk from the sample results.
+Indeed, this is the method that was used in several of California's pilot audits,
+including the audit in Orange County.
+A derivation of a method for comparison audits with variable batch sizes is given below
+in section~\ref{sec:comparisonError}.
+
+\section{Stratified ``hybrid'' audits}
+
+Other approaches involve \emph{stratification}: partitioning the cast ballots
+into non-overlapping groups and sampling independently from those groups.
+One could stratify by county, but in general it is simpler and more efficient
+statistically (i.e., results in auditing fewer ballots) to minimize the number of strata.
+We consider methods that use two strata: CVR counties and non-CVR counties. 
+Collectively, the ballots cast in CVR counties comprise one stratum and the ballots cast in 
+legacy counties comprise a second stratum; every ballot cast in the contest is in 
+exactly one of the two strata. 
+We assume that the samples are drawn from the
+two strata independently.
+
+\subsection{Partitioning the total permissible overstatement into strata}
+The simplest approach to stratification involves partitioning the risk limit and the tolerable
+overstatement error in tabulation into
+two pieces, one for the (pooled) CVR counties and one for the (pooled) non-CVR counties.
+Let $V_{w\ell} > 0$ denote the contest-wide margin (in votes) of reported winner 
+$w$ over reported loser
+$\ell$.
+Let $V_{w\ell,s}$ denote the margin (in votes) of reported winner $w$ over reported loser $\ell$
+in stratum $s$. 
+Note that $V_{w\ell,s}$ can be negative.
+Let $A_{w\ell}$ denote the margin (in votes)
+of reported winner $w$ over reported loser $\ell$ that 
+a full hand count of the entire contest would show, that is, the \emph{actual} margin rather
+than the \emph{reported} margin.
+Reported winner $w$ really beat reported loser $\ell$ if and only if $A_{w\ell} > 0$.
+Define $A_{w\ell,s}$ to be the actual margin (in votes) of $w$ over $\ell$ in stratum $s$;
+this too may be negative.
+
+Let $\omega_{w\ell,s} \equiv V_{w\ell,s} - A_{w\ell,s}$ be the \emph{overstatement}
+of the margin of $w$ over $\ell$ in stratum $s$.
+Reported winner $w$ really beat reported loser 
+$\ell$ iff $\omega_{w\ell} \equiv \omega_{w\ell,1} + \omega_{w\ell,2} < V_{w\ell}$.
+
+Pick $\lambda_1 \in \Re$ and define $\lambda_2 = 1-\lambda_1$.
+If $\omega_{w\ell,1} < \lambda_1 V_{w\ell}$ \emph{and} 
+$\omega_{w\ell,2} < \lambda_2 V_{w\ell}$, candidate $w$ really received more votes
+than candidate $\ell$.
+Some pairs can be ruled out \emph{a priori}, because (for instance) $\omega_{w\ell,s} \in [-2N_s, 2N_s]$,
+where $N_s$ is the number of ballots cast in stratum $s$.
+There are other simple, sharper bounds, sketched below.
+
+The choice of $\lambda_1$, the strata risk limits $\{\alpha_s\}$, and details of the
+audit procedures affect the workload and the overall risk limit.
+(See section~\ref{sec:stratumRisk}.)
+
+For ballot-level comparison audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$
+is discussed in section~\ref{sec:comparisonError}; it is a minor modification of the method
+embodied in RLATool.
+
+For ballot-polling audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$ is discussed in section~\ref{sec:pollingError}.
+Note that this requires a more substantial modification of the ballot-polling calculations currently in
+RLATool, because that calculation considers only the fraction of ballots with a vote for either 
+$w$ or $\ell$ that contain a vote for $w$, while we need to make an inference about the 
+difference between the number of votes for $w$ and the number of votes for $\ell$.
+This introduces an additional nuisance parameter, the number of ballots with votes for either
+$w$ or $\ell$.
+
+\input{stratumRisk}
+\input{totalAcrossStrata}
+\input{subcollections}
+\input{comparisonError}
+
+\section{Ballot-polling audits of a tolerable overstatement in votes}
+\label{sec:ballotPollError}
+
+\bibliography{./pbsBib}
+
+\end{document}
