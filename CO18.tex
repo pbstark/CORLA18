@@ -486,6 +486,13 @@ If $H_0$ is true, the chance that $\mbox{LR}$ is ever greater than $1/\alpha$
 is at most $\alpha$.
 
 \subsection{Ballot polling without replacement, accounting for undervotes and invalid votes}
+Suppose that the population contains $N_w$ ballots with a valid vote for $w$ but not $\ell$,
+$N_\ell$ ballots with a valid vote for $\ell$ but not $w$, and $N_u$ ballots with votes for both
+$w$ and $\ell$ or for neither $w$ nor $\ell$.
+Then $N = N_w + N_\ell + N_u$.
+Let $N_{w\ell} \equiv N_w + N_\ell$ be the number of ballots in the 
+population with a valid vote for $w$ or $\ell$ but not both.
+
 Suppose we have made $k$ draws from the pool of ballots and have observed $n_w(k)$ votes for the reported winner, 
 $n_\ell(k)$ votes for the reported loser, 
 and $n_U(k)$ votes for other candidates or invalid votes.
