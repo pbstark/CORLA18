@@ -6,9 +6,9 @@
 \usepackage[breaklinks=true]{hyperref}
 \usepackage[round]{natbib}
 %\usepackage{amsthm}
-\usepackage{algorithm}
-\usepackage{algorithmicx}
-\usepackage[noend]{algpseudocode}
+%\usepackage{algorithm}
+%\usepackage{algorithmicx}
+%\usepackage[noend]{algpseudocode}
 \newtheorem{thm}{Theorem}
 \newtheorem{definition}{Definition}
 
@@ -154,7 +154,7 @@ voting technology, varying in efficiency, complexity, and on whom the burden of 
 
 \section{Crude (and unpleasant) approaches}
 
-\subsection{Hand count legacy counties}
+\subsection{Hand count the legacy counties}
 The simplest approach to combining legacy counties with CVR counties is to require every
 legacy county to do a full hand count of the primaries, and to conduct a 
 ballot-level comparison audit in CVR counties, based on contest margins adjusted for
@@ -176,7 +176,7 @@ legacy siblings have not yet upgraded.)
 
 \subsection{Subtract error bounds for the legacy counties from vote totals}
 If ballot accounting and SCORE can give good upper bounds on the number of ballots cast in
-each party's primary in legacy counties, there are simple upper bounds on the total
+each contest in legacy counties, there are simple upper bounds on the total
 possible overstatement error each legacy county could contribute to the overall contest
 results; those can be subtracted from the overall margin (as in the previous subsection) and the
 remainder of the contests can be audited in CVR counties against the adjusted margins.
@@ -218,7 +218,7 @@ for physically identifiable batches.
 If a county's voting system can only report subtotals by precinct but 
 the county does not sort paper ballots by
 precinct, this approach might require revising how the county handles its
-paper; I understand that this is the case in many Colorado counties.
+paper; we understand that this is the case in many Colorado counties.
 
 That said, many California counties that do not sort vote-by-mail (VBM)
 ballots by precinct conduct the statutory 1\% audits by manually retrieving the ballots 
@@ -236,7 +236,7 @@ Moreover, it feels ``fair'' to CVR counties, because it does not increase their 
 to compensate for the fact that some other counties have not upgraded their voting
 systems.
 
-This kind or variable-batch-size comparison audit approach would require modifying or augmenting
+This kind of variable-batch-size comparison audit approach would require modifying or augmenting
 RLATool in several ways: 
 
 \begin{enumerate}
@@ -318,8 +318,8 @@ is discussed in section~\ref{sec:comparisonError}; it is a minor modification of
 embodied in RLATool.
 
 For ballot-polling audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$ is discussed in section~\ref{sec:pollingError}.
-Note that this requires a more substantial modification of the ballot-polling calculations currently in
-RLATool, because that calculation considers only the fraction of ballots with a vote for either 
+Note that this requires a more substantial modification of the standard ballot-polling calculations,
+because that calculation considers only the fraction of ballots with a vote for either 
 $w$ or $\ell$ that contain a vote for $w$, while we need to make an inference about the 
 difference between the number of votes for $w$ and the number of votes for $\ell$.
 This introduces an additional nuisance parameter, the number of ballots with votes for either
