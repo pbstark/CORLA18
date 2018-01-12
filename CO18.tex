@@ -77,7 +77,7 @@ eventually to make it feasible to audit smaller contests.
 A risk-limiting audit (RLA) of an election is a procedure that
 has a known, pre-specified minimum chance of correcting the electoral outcome if the outcome
 is incorrect---that is, if the reported outcome differs from the outcome that a full manual
-tally of the votes would show. 
+tabulation of the votes would find. 
 RLAs require a durable, voter-verifiable record of voter intent, such as paper ballots,
 and they assume that this audit trail is sufficiently complete and accurate that a full hand
 tally would show the true electoral outcome.
@@ -95,38 +95,47 @@ A number of laws have either allowed or mandated risk-limiting post election aud
 including California AB~2023 (Salda\~{n}a), SB~360 (Padilla), and AB~44 (Mullin);
 Rhode Island SB~413A and HB~5704A; and Colorado Revised Statutes (CRS)~1-7-515.
 
-CRS~1-7-515 requires 
-Colorado to implement risk-limiting audits in 2017.
+CRS~1-7-515 required 
+Colorado to implement risk-limiting audits beginning in 2017.
 (There are provisions to allow the Secretary of State to exempt some counties.)
-The first statewide risk-limiting election audits took place in November, 2017. 
+The first statewide risk-limiting election audits took place in Colorado in November, 2017. 
 
 Colorado's ``uniform voting system'' program has led
 many Colorado counties to purchase (or to plan to purchase) voting systems
 that are auditable at the ballot level: those systems export cast vote records (CVRs)
 for individual ballots in a manner that allows the corresponding paper ballot to be identified,
-and conversely, make it possible to find the cast vote record corresponding to any
+and conversely, make it possible to find the CVR corresponding to any
 particular paper ballot.
 We call counties that have such systems ``CVR'' counties.
 It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
+CVR counties can perform ``ballot-level comparisons,'' which are currently the
+most efficient approach to risk-limiting audits in that they require examining
+fewer ballots than other methods do, when the outcome of the contest under audit 
+is in fact correct.
 
 Other counties (``legacy'' or ``non-CVR'' counties) 
-have legacy systems that do not allow the system to be audited
-at the level of individual ballots.
-Their election results can still be audited provided their voting systems
-create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is
+have systems that do not allow auditors to check how the system
+interpreted voter intent for individual ballots.
+Their election results can still be audited, provided their voting systems
+create a voter-verifiable paper trail (\emph{e.g.}, voter-marked paper ballots) that is
 conserved to ensure that it remains accurate and intact, and organized well enough
 to permit ballots to be selected at random.
 Pilot audits in California suggest that the most efficient way to audit such systems
-is by a ``ballot-polling'' audit 
-(in contrast to ``batch-level comparison audits,'' for example).
+is by ``ballot-polling''  
+(in contrast to ``batch-level comparisons,'' for example).
 
-There is currently no literature on how to perform risk-limiting audits of contests
-that include CVR counties and non-CVR counties, other than by using the lowest
-common denominator, ballot-polling, which does not take advantage of the CVRs
-(and thus is expected to require more auditing than a method that does take
-advantage of the CVRs).
+There is currently no literature on how to perform risk-limiting audits 
+of contests that include CVR counties and non-CVR counties by combining
+ballot polling and ballot-level comparisons.
+Existing methods would either require all counties to use the lowest
+common denominator, ballot-polling (which does not take advantage of the CVRs,
+and thus is expected to require more auditing than a method that does take
+advantage of the CVRs), or would
+require non-CVR counties to perform batch-level comparisons, which were found in
+California to be (generally) less efficient than ballot-polling audits.
 
-This document focuses on near-term requirements for risk-limiting audits in Colorado: June and November 2018.
+This document focuses on near-term requirements for risk-limiting audits in 
+Colorado: June and November 2018.
 
 \subsection{Colorado in June, 2018}
 We understand that for June, 2018, Colorado Secretary of State Wayne Williams intends to require
@@ -150,7 +159,7 @@ include CVR counties and non-CVR counties, so we need a method to audit
 across mixed jurisdictional voting technology.
 
 This report addresses both issues, providing a handful of ways of dealing with heterogeneous
-voting technology, varying in efficiency, complexity, and on whom the burden of the audit falls.
+voting technology, varying in efficiency, complexity, and on whom any additional audit burden falls.
 
 \section{Crude (and unpleasant) approaches}
 
@@ -226,13 +235,13 @@ for just those precincts selected for audit from whatever physical batches they 
 the situation is identical to that in Colorado.
 
 Another solution is the ``Boulder-style'' batch-level audit, which requires generating 
-vote subtotals after each physical batch is scanned (and exporting those subtotals in machine-readable form).
+vote subtotals after each physical batch is scanned, and exporting those subtotals in machine-readable form.
 That in turn may require using extra memory cards, repeatedly initializing and deleting tabulation databases,
 or other measures that add complexity and opportunity for human error.
 
 While those two approaches are laborious, they would provide a viable short-term solution,
 especially combined with information from SCORE to check that the reported batch-level results contain the correct number of ballots for each contest under audit.
-Moreover, it feels ``fair'' to CVR counties, because it does not increase their workload 
+Moreover, it does not unduly increase the workload in CVR counties
 to compensate for the fact that some other counties have not upgraded their voting
 systems.
 
@@ -240,6 +249,7 @@ This kind of variable-batch-size comparison audit approach would require modifyi
 RLATool in several ways: 
 
 \begin{enumerate}
+
   \item the CVR reporting tool would need to be modified to allow non-CVR counties to
 report batch-level results in a manner analogous to how CVR counties report
 ballot-level results, or an external tool would need to be provided.
@@ -280,14 +290,14 @@ two strata independently.
 
 \subsection{Partitioning the total permissible overstatement into strata}
 The simplest approach to stratification involves partitioning the risk limit and the tolerable
-overstatement error in tabulation into
+overstatement error of the tabulation into
 two pieces, one for the (pooled) CVR counties and one for the (pooled) non-CVR counties.
 Let $V_{w\ell} > 0$ denote the contest-wide margin (in votes) of reported winner 
 $w$ over reported loser
 $\ell$.
 Let $V_{w\ell,s}$ denote the margin (in votes) of reported winner $w$ over reported loser $\ell$
 in stratum $s$. 
-Note that $V_{w\ell,s}$ can be negative.
+Note that $V_{w\ell,s}$ might be negative in one stratum.
 Let $A_{w\ell}$ denote the margin (in votes)
 of reported winner $w$ over reported loser $\ell$ that 
 a full hand count of the entire contest would show, that is, the \emph{actual} margin rather
@@ -317,9 +327,9 @@ For ballot-level comparison audits, auditing to ensure that $\omega_{w\ell,s} < 
 is discussed in section~\ref{sec:comparisonError}; it is a minor modification of the method
 embodied in RLATool.
 
-For ballot-polling audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$ is discussed in section~\ref{sec:pollingError}.
+For ballot-polling audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$ is discussed in section~\ref{sec:ballotPollError}.
 Note that this requires a more substantial modification of the standard ballot-polling calculations,
-because that calculation considers only the fraction of ballots with a vote for either 
+because the standard calculations consider only the fraction of ballots with a vote for either 
 $w$ or $\ell$ that contain a vote for $w$, while we need to make an inference about the 
 difference between the number of votes for $w$ and the number of votes for $\ell$.
 This introduces an additional nuisance parameter, the number of ballots with votes for either
@@ -329,9 +339,7 @@ $w$ or $\ell$.
 \input{totalAcrossStrata}
 \input{subcollections}
 \input{comparisonError}
-
-\section{Ballot-polling audits of a tolerable overstatement in votes}
-\label{sec:ballotPollError}
+\input{ballotPollError}
 
 We propose a conservative test as follows. 
 Suppose that the outcome is incorrect (this is the null hypothesis).
