@@ -52,13 +52,13 @@ The wrinkle is that treating the votes
 in the fully counted stratum as known changes the hypothesis being tested in a way that is itself random:
 whether the original null or a new null is tested depends on what the sample in the other stratum
 shows.
-(However, if the hypothesis changes, there's only one value possible for the new $\lambda_s$---which
+(However, if the hypothesis changes, there's only one value possible for $\lambda_s'$---which
 depends on the reported margin and the count in the other stratum---but it's unknown 
 until the other stratum count is known.)
 
 The solution is through conditioning. The samples in the two strata are independent. 
-Think of the overall procedure as concluding that the outcome (without a full
-hand count in both strata) if:
+Think of the overall procedure as concluding that the outcome is correct without a full
+hand count in both strata if:
 
 \begin{itemize}
    \item the original hypotheses are rejected in both strata (neither stratum is fully hand tabulated)
@@ -67,45 +67,30 @@ hand count in both strata) if:
             in that stratum is greater than the new limit, $\lambda_t' V_{w\ell}$ is rejected. 
 \end{itemize}
 
-These two possibilities are mutually exclusive, so the chance that either occurs is the
-sum of their chances.
-If the outcome is incorrect, the chance that the audit ends with the first possibility is at most
-$\max (\alpha_1, \alpha_2)$.
-(It is the maximum because the overstatement could be concentrated in the stratum audited to
-the higher risk limit.)
+Suppose that the outcome is incorrect. 
+Then in at least one stratum $s$, $\omega_{w\ell,s}\ge \lambda_s V_{w\ell}$.
+The chance that the audit leads to a full hand tabulation in that stratum is at least $1-\alpha_s$,
+in which case the ``correct'' count for that stratum will become known.
 
-The chance it ends with the second possibility when the outcome is incorrect 
-is more complicated to compute.
-If the outcome is incorrect, at least one of the strata has more error than its allocated tolerance.
-The chance that the audit proceeds to a full count in that stratum is at least $1-\alpha_s$. 
 What happens in the other stratum?
+We adjust the margin.
 The value of $\lambda_t'$ is fixed, but unknown before the audit starts.
-Consider the conditional probability that a sequential test would reject the hypothesis that the margin is less than $\lambda_s' V_{w\ell}$, given that the other stratum goes to a full count. 
-Because the tests in the two strata are independent, that's the same as the unconditional probability. 
-If we are using a sequential test in the remaining stratum $t$, the chance of ever rejecting the 
-hypothesis is at most $\alpha_t$ if the (new) null is true. 
+Consider the conditional probability that a sequential test would reject the hypothesis that the margin is less than $\lambda_t' V_{w\ell}$, given that the other stratum, $s$, gets a full manual tabulation. 
+Because the tests in the two strata are independent, that's the same as the unconditional probability
+that auditing stratum $t$ against the error tolerance $\lambda_t' V_{w\ell}$ would lead to a full
+hand tabulation. 
+If we are using a sequential test in the remaining stratum $t$, the chance that the audit will
+go to a full hand count in stratum $t$ is at least $1-\alpha_t$ if the (new) null is true (i.e.,
+if the outcome is incorrect). 
 The conditioning just ``delays'' looking at the value of the test statistic for the new null hypothesis; waiting does not increase the overall chance of incorrectly rejecting the null, 
 because the test is legitimately sequential.
 
-Thus an upper bound on the overall risk limit is 
-\beq
-    \alpha_{\mathrm{bound}} = \max (\alpha_1, \alpha_2) + \max((1-\alpha_1)\alpha_2, \alpha_1(1-\alpha_2)).
-\eeq
+Hence, for this procedure, the chance that there will be a full hand count in both strata is at least 
+$(1-\alpha_s)(1-\alpha_t)$ if the outcome is incorrect,
+even if the probability were zero that both of the original audits would proceed to a full hand count.
+The overall risk limit is thus not larger than $1 - (1-\alpha_s)(1-\alpha_t)$.
 
-This can be simplified. 
-Consider the second term:
-  
-\beq
-    \max((1-\alpha_1)\alpha_2, \alpha_1(1-\alpha_2)) = \max(\alpha_2, \alpha_1) - \alpha_1\alpha_2.
-\eeq
+Suppose we want the overall risk limit to be 5\%. 
+If we use a risk limit of 4\% in the no-CVR stratum and a risk limit of 1.04\% in the CVR stratum,
+the risk limit will be $1 - 0.96\times 0.9896 < 0.05$.
 
-Hence $\alpha_{\mathrm{bound}} = 2 \max(\alpha_1, \alpha_2) - \alpha_1\alpha_2$.
-If we set the risk limit to be the same in both strata ($\alpha_1 = \alpha_2 = \alpha_r$), then the
-overall risk limit is not larger than $2\alpha_r - \alpha_r^2$.
-To have a risk limit of $0.05$, then, we could take 
-$$
-    \alpha_r =  \frac{2 \pm \sqrt{4-4\times 0.05}}{2} = 1 \pm \sqrt{.95}.
-$$
-The relevant root is $1-\sqrt{.95} = 0.0253$.
-Thus if we audit each stratum to a risk limit of $0.0253$, the overall risk limit for the audit is not
-larger than $0.05$.
