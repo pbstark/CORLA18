@@ -353,11 +353,6 @@ or vote for $k$ of $C$ candidates (e.g., a city council election).
 Those restrictions can be relaxed somewhat; in particular, slight modifications allow
 the approach to work with majority, super-majority, approval, and Borda.
 
-There are two collections of ballots, $\mc{B}_1$, which contains $N_1$ ballots, 
-and $\mc{B}_2$, which contains $N_2$ ballots.
-The total number of ballots is $N \equiv N_1 + N_2$.
-We also refer to the two collections as \emph{strata}.
-
 There are $C$ candidates.
 The set $\mc{W}$ are the candidates reported to have won; the set $\mc{L}$ are those
 reported to have lost.
@@ -368,31 +363,13 @@ The audit stops when there is sufficiently strong statistical evidence that each
 $w \in \mc{W}$ in fact received more votes
 than each loser $\ell \in \mc{L}$.
 
-Let $\pi_s^c$ denote the fraction of ballots in stratum $s$ that show a vote for candidate $c$.
-The total number of votes for candidate $c$ is $N_1 \pi_1^c + N_2 \pi_2^c$.
-Candidate $w \in \mc{W}$ really beat candidate $\ell \in \mc{L}$ if and only if
-\beq
-    \sum_{s=1}^2 N_s \pi_s^w > \sum_{s=1}^2 N_s \pi_s^\ell,
-\eeq
-or, equivalently, iff
-\beq
-    \sum_{s=1}^2 N_s (\pi_s^w-\pi_s^\ell) > 0.
-\eeq
-To simplify the notation, for any $\pi \equiv (\pi_1, \pi_2)$, define 
-\beq
-    \bpi \equiv \frac{1}{N}\sum_{s=1}^2 N_s \pi_s,
-\eeq
-and for $p \equiv (p_1, p_2)$, define $\bp$ analogously.
-Then candidate $w \in \mc{W}$ really beat candidate $\ell \in \mc{L}$ if and only if
-$\bpi^w > \bpi^\ell$.
-
-There are a variety of ways to proceed; we sketch two here and visit others below.
+There are a variety of ways to proceed; we sketch two here.
 
 
 \subsection{Ballot polling for the weighted sum of proportions}
 The first approach is to test the hypothesis 
 $\bpi^w \le \bpi^\ell$ for every $(w, \ell)$ pair.
-Unstratified ballot-polling audits are based on the conditional 
+Ballot-polling audits are based on the conditional 
 probability that a randomly selected
 ballot shows a vote for $w$, given that it shows a vote for $w$ or for $\ell$
 \citep{lindemanStark12,lindemanEtal12}.
@@ -408,19 +385,16 @@ probabilities, but the uncertainty of those estimates would need to be taken int
 because of the dependence between the estimated fraction of ballots for $w$ among those for $w$ or $\ell$
 and the estimated number of ballots for either $w$ or $\ell$, that is difficult to do in a sharp way.
 
+Instead, we develop a test of the hypothesis that the conditional probability of observing a vote for $w$, 
+given that the ballots show a vote for $w$ or for $\ell$, is $p$ for any value of $p$.
+
 In this section, to illustrate the germ of the approach,
 we assume for simplicity that the contest is a plurality contest with $C=2$ candidates and
 that every ballot
 has a valid vote either for $w$ or for $\ell$, but not for both, so there are $N$ valid votes in all.
 This assumption rules out undervotes and invalid ballots, which need to be taken into
 account in real elections. 
-We show below in section~\ref{sec:trinomial} how that can be done.
-
-The reported winner purportedly received a fraction $p_s^w$ of the votes in stratum $s$.
-Thus $\bp^w > \bp^\ell$ and $N_1 p_1^w + N_2p_2^w > N/2$.
-In stratum $s$, we use Wald's sequential probability ratio test (SPRT) to
-test the hypothesis that $\pi_s^w = p_s$ against the alternative hypothesis 
-that the reported results are correct, that is, that $\pi_s^w = p_s^w$.
+We show below in section~\ref{subsec:trinomial} how that can be done.
 
 
 \subsection{Ballot polling without replacement, no undervotes or invalid ballots}
@@ -430,9 +404,9 @@ recapitulates~\citet[pp43--44]{wald45} in different notation, with some simplifi
 There is a population of $N$ items. 
 Item $j$ has ``value'' $a_j \in \{0, 1\}$. 
 
-We want to test the hypothesis $H_0$ that $\frac{1}{N}\sum_j a_j = 1/2$ against the
-alternative hypothesis $H_1$ that $\frac{1}{N}\sum_j a_j = \gamma$, for some
-fixed $\gamma > 1/2$.
+We want to test the hypothesis $H_0$ that $\frac{1}{N}\sum_j a_j = p_0$ against the
+alternative hypothesis $H_1$ that $\frac{1}{N}\sum_j a_j = p_1$, for some
+fixed $p_1 > p_0$.
 
 We will draw items sequentially, without replacement, such that the chance that 
 item~$i$ is selected in draw $j$, assuming it has not been selected already, is $1/(N-j+1)$.
@@ -443,8 +417,8 @@ Let $\mathbb B_j$ denote the index of the item selected at random in the $j$th d
 
 The chance that the first draw ${\mathbb B_1}$ gives an item with value 1, i.e., 
 $\Pr \{a_{\mathbb B_1} = 1\}$, is $\frac{1}{N}\sum_b a_b$.
-Under $H_0$, this chance is $p_{01} = 1/2$; under $H_1$, this chance is 
-$p_{11} = \gamma$.
+Under $H_0$, this chance is $p_{01} = p_0$; under $H_1$, this chance is 
+$p_{11} = p_1$.
 
 Given the values of $\{a_{\mathbb B_k}\}_{k=1}^i$, the conditional
 probability that the $i$th draw gives an item with value 1 is
@@ -456,13 +430,13 @@ $$
 Under $H_0$, this chance is
 
 $$
-   p_{0i} =  \frac{N/2 - \sum_{b \in {\mathcal B_{i-1}}} a_b}{N - i + 1}.
+   p_{0i} =  \frac{N p_0 - \sum_{b \in {\mathcal B_{i-1}}} a_b}{N - i + 1}.
 $$
 
 Under $H_1$, this chance is
 
 $$
-   p_{1i} = \frac{N \gamma - \sum_{b \in {\mathcal B_{i-1}}} a_b}{N - i+1}.
+   p_{1i} = \frac{N p_1 - \sum_{b \in {\mathcal B_{i-1}}} a_b}{N - i+1}.
 $$
 
 Let $X_i$ be the indicator of the event that the $i$th draw gives an item with
@@ -482,18 +456,19 @@ Then
 
 $$
     \mbox{LR} = \prod_{k=1}^i 
-    \left ( \frac{N/2 - A(k)}{N\gamma - A(k)} \right )^{X_k}
-    \left ( \frac{N-N/2 - (k-1-A(k))}{N-N\gamma - (k - 1 - A(k))} \right )^{1-X_k}
+    \left ( \frac{N p_0 - A(k)}{Np_1 - A(k)} \right )^{X_k}
+    \left ( \frac{N-N p_0 - (k-1-A(k))}{N-Np_1 - (k - 1 - A(k))} \right )^{1-X_k}
 $$
 $$
-   = \prod_{k=1}^i  \left ( \frac{N/2 - A(k)}{N\gamma - A(k)} \right )^{X_k}
-    \left ( \frac{N/2 - k + 1 + A(k)}{N(1-\gamma) - k + 1 + A(k)} \right )^{1-X_k}
+   = \prod_{k=1}^i  \left ( \frac{Np_0 - A(k)}{Np_1 - A(k)} \right )^{X_k}
+    \left ( \frac{Np_0 - k + 1 + A(k)}{N(1-p_1) - k + 1 + A(k)} \right )^{1-X_k}
 $$
 
 If $H_0$ is true, the chance that $\mbox{LR}$ is ever greater than $1/\alpha$
 is at most $\alpha$.
 
 \subsection{Ballot polling without replacement, accounting for undervotes and invalid votes}
+\label{subsec:trinomial}
 Suppose that the population contains $N_w$ ballots with a valid vote for $w$ but not $\ell$,
 $N_\ell$ ballots with a valid vote for $\ell$ but not $w$, and $N_u$ ballots with votes for both
 $w$ and $\ell$ or for neither $w$ nor $\ell$.
@@ -535,8 +510,9 @@ The test is conservative when the likelihood ratio is maximized, which occurs wh
 Given $n_U(k)$, we know that $N_{w\ell} \leq N - n_U(k)$.
 This maximal value changes each time we observe a ballot that is not for the winner or loser.
 
-
-
+As written, this likelihood ratio tests the null hypothesis that $N_w = \frac{N_{w\ell}}{2}$, 
+that the reported winner received the same number of votes as the reported loser.
+We may modify the hypothesized value of $N_w$ under the null to be any fraction of $N_{w\ell}$.
 
 
 \bibliography{./pbsBib}
