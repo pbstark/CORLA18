@@ -1,2 +1,78 @@
 \section{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
+
+\subsection{Tri-hypergeometric test using the diluted margin as the test statistic}
+
+We consider a single stratum $s$, containing $N_s$ ballots.
+We will sample individual ballots without replacement from stratum $s$.
+Of the $N_s$ ballots,
+$A_{w,s}$ have a vote for $w$ but not for $\ell$, $A_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $A_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
+We might draw a simple random sample of $n$ ballots ($n$ fixed ahead of time), or we might draw 
+sequentially without replacement, so the sample size $B$ could be random, including stopping rules that depend on the data.\footnote{%
+   Sampling with replacement leads to simpler arithmetic, but is not as efficient.
+}
+
+Regardless, we assume that, conditional on the attained sample size $n$, the ballots are a simple random sample of size $n$ from the $N_s$ ballots in the population.
+In the sample, $B_w$ contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ defined analogously.
+Then, conditional on $B=n$, the joint distribution of
+$(B_w, B_\ell, B_u)$ is tri-hypergeometric:
+
+\begin{equation}
+    \mathbb{P}_{A_{w,s}, A_{\ell,s}} \{ B_w = i, B_\ell = j \vert B=n \} = 
+     \frac{ {N_{w,s } \choose i}{N_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+\end{equation}
+
+To test, we will condition on the event $B=n$. 
+(In contrast, the BRAVO ballot-polling
+method~\citep{lindemanEtal12}
+conditions on $B_w+B_\ell = m$;
+we might instead consider conditioning on $B=n$ and $B_w + B_\ell = m$.)
+The test statistic will be the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
+This is the sample difference in the number of ballots for the winner and for the loser, divided by the 
+total number of ballots in the sample.
+We want to test the compound hypothesis $A_{w,s} - A_{\ell,s} \le c$.
+The value of $c$ is inferred from the definition
+$\omega_{w\ell,s} \equiv V_{w\ell,s} - A_{w\ell,s} = V_{w,s} - V_{\ell,s} - (A_{w,s} -A_{\ell,s})$.
+Thus,
+$$
+    c = V_{w,s} - V_{\ell,s} - \omega_{w\ell,s} = V_{w\ell,s} - \lambda_s V_{w\ell}.
+$$
+The alternative is the compound hypothesis 
+$A_{w,s} - A_{\ell,s} > c$.\footnote{%
+    To use Wald's Sequential Probability Ratio Test, we might pick a simple alternative instead, e.g.,
+   $A_{w,s} = V_{w,s}$ and $A_{\ell,s} = V_{\ell,s}$, the reported values, assuming 
+   $V_{w,s} - V_{\ell,s} > c$.
+}
+Hence, we will reject for large values of $D$.
+Conditional on $B=n$, the event $D = (B_w - B_\ell)/B = d$ is the event $B_w - B_\ell = nd$.
+
+Suppose we observe $D=d$.
+The $p$-value of the simple hypothesis that there are $N_w$ ballots with
+a vote for $w$ but not for $\ell$, $N_\ell$ ballots with a vote for $\ell$ but not for $w$, and $N - N_w - N_\ell$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ (including undervotes and
+invalid ballots) is
+
+\begin{equation}
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n \right \} = 
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \vert B = n \} =
+   \sum_{(i, j) : i - j \geq nd; i+j \leq n; i, j\geq 0} 
+         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - N_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+\end{equation}
+Below we show empirically (but do not prove) that this tail probability is monotone increasing in $A_{w,s}$.
+
+\note{Address numerical stability and ways to simplify the expression.}
+
+The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
+that $A_{w,s} - A_{\ell,s} \le c$ for
+some fixed, known $c$.
+The (conditional) $p$-value of this composite hypothesis for $D=d$ is
+\begin{equation}
+  \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
+   \sum_{(i, j) : i - j \geq nd; i+j \leq n; i, j\geq 0} 
+         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
+\end{equation}
+wherever the summand is defined. 
+(Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
+If the empirical result mentioned above is true, then finding the maximum is trivial; if not,
+it is still at most a one-dimensional optimization problem.
+
+\note{We could condition on $B$ and $B_w + B_\ell$, which would give us a binomial \textellipsis Worth trying? Any intuitive argument for why it would be better or worse? Might make using SPRT easier.}
