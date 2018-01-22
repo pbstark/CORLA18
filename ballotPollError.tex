@@ -52,10 +52,12 @@ a vote for $w$ but not for $\ell$, $N_\ell$ ballots with a vote for $\ell$ but n
 invalid ballots) is
 
 \begin{equation}
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n \right \} = 
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \vert B = n \} =
-   \sum_{(i, j) : i - j \geq nd; i+j \leq n; i, j\geq 0} 
+\begin{aligned}
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n \right \} 
+  & = \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \vert B = n \} \\
+   & = \sum_{(i, j) : i - j \geq nd; i+j \leq n; i, j\geq 0} 
          \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - N_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+\end{aligned}
 \end{equation}
 Below we show empirically (but do not prove) that this tail probability is monotone increasing in $A_{w,s}$.
 
