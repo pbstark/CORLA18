@@ -22,11 +22,10 @@ $(B_w, B_\ell, B_u)$ is tri-hypergeometric:
      \frac{ {N_{w,s } \choose i}{N_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
 \end{equation}
 
-To test, we will condition on the event $B=n$. 
+To test, we will condition on the event $B=n$ and $B_w +B_\ell = m$. 
 (In contrast, the BRAVO ballot-polling
 method~\citep{lindemanEtal12}
-conditions on $B_w+B_\ell = m$;
-we might instead consider conditioning on $B=n$ and $B_w + B_\ell = m$.)
+conditions only on $B_w+B_\ell = m$.)
 The test statistic will be the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
 This is the sample difference in the number of ballots for the winner and for the loser, divided by the 
 total number of ballots in the sample.
@@ -53,15 +52,26 @@ invalid ballots) is
 
 \begin{equation}
 \begin{aligned}
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n \right \} 
-  & = \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \vert B = n \} \\
-   & = \sum_{(i, j) : i - j \geq nd; i+j \leq n; i, j\geq 0} 
-         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - N_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n, B_w+B_\ell = m \right \} 
+  & = \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \vert B = n, B_w+B_\ell = m \} \\
+   & = \sum_{i \geq (m+nd)/2} 
+         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}}.
 \end{aligned}
 \end{equation}
-Below we show empirically (but do not prove) that this tail probability is monotone increasing in $A_{w,s}$.
 
-\note{Address numerical stability and ways to simplify the expression.}
+%\note{Address numerical stability and ways to simplify the expression.}
+This expression holds the number of ballots for neither $w$ nor $\ell$ fixed.
+It may be simplified as a summation purely over the ballots for $w$ or $\ell$,
+ reminiscent of the hypergeometric distribution.
+In fact, the $p$-value is a rescaling of the tail probability of the hypergeometric distribution,
+with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a sample of size $m$.
+\begin{equation}
+\begin{aligned}
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n, B_w+B_\ell = m \right \} 
+   & =  \frac{ {N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}}\sum_{i \geq (m+nd)/2} {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} \\
+   & =  \frac{ {N_s - A_{w,s} - A_{\ell,s} \choose n-m} {A_{w,s}+A_{\ell,s} \choose m}}{{N_s \choose n}}\sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} }{{A_{w,s}+A_{\ell,s} \choose m}}.
+\end{aligned}
+\end{equation}
 
 The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
 that $A_{w,s} - A_{\ell,s} \le c$ for
@@ -69,12 +79,12 @@ some fixed, known $c$.
 The (conditional) $p$-value of this composite hypothesis for $D=d$ is
 \begin{equation}
   \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
-   \sum_{(i, j) : i - j \geq nd; i+j \leq n; i, j\geq 0} 
-         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
+   \sum_{i \geq (m+nd)/2} 
+         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}},
 \end{equation}
 wherever the summand is defined. 
 (Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
-If the empirical result mentioned above is true, then finding the maximum is trivial; if not,
-it is still at most a one-dimensional optimization problem.
-
-\note{We could condition on $B$ and $B_w + B_\ell$, which would give us a binomial \textellipsis Worth trying? Any intuitive argument for why it would be better or worse? Might make using SPRT easier.}
+We have shown empirically (but do not prove) that this tail probability, as a function of $A_{w,s}$,
+has a unique maximum.
+If the empirical result is true, then finding the maximum is trivial
+then it is a trivial one-dimensional optimization problem to compute the unconditional $p$-value.
