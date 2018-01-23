@@ -15078,6 +15078,72 @@ year = {1962}
 %%% End of ones added by VSY for BRAVO12
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                  
+%%% Start of entries added by Ron Rivest for CORLA18 paper
+
+@misc{Rivest-2018-bayesian-tabulation-audits,
+  author =        { Ronald L. Rivest },
+  title =         { Bayesian Tabulation Audits: Explained and Extended },
+  OPTdate =       { 2018-01-01 },
+  year =          { 2018 },
+  month =         { January 1, },
+  url =           { https://arxiv.org/abs/1801.00528 },
+  abstract = {%
+  Tabulation audits for an election provide statistical evidence that
+  a reported contest outcome is ``correct''
+  (meaning that the tabulation of votes was properly performed),
+  or else the tabulation audit determines the correct outcome.
+  \par
+  Stark
+  proposed \textbf{risk-limiting tabulation audits} for this purpose;
+  such audits are effective and are beginning to be used in
+  practice in Colorado and other states.
+  \par
+  We expand the study of election audits based on \textbf{Bayesian}
+  methods.  Such Bayesian audits
+  use a slightly different approach first introduced by Rivest and Shen in
+  2012.  (The risk-limiting audits
+  proposed by Stark are ``frequentist'' rather than Bayesian in
+  character.)
+  \par
+  We first provide a simplified presentation of
+  Bayesian tabulation audits.  
+  Suppose an election has been run and the tabulation of votes
+  reports a given outcome.
+  A Bayesian tabulation audit begins by drawing a random sample of the votes
+  in that contest, and tallying those votes.
+  It then considers what effect statistical variations of this tally 
+  have on the contest outcome.
+  If such variations almost always yield the previously-reported outcome,
+  the audit terminates, accepting the reported outcome.
+  Otherwise the audit is repeated with an enlarged sample.
+  \par
+  Bayesian audits are attractive because they work with \textbf{any}
+  method for determining the winner (such as ranked-choice voting).
+  \par
+  We then show how Bayesian audits may be extended to handle
+  more complex situations, such as
+  auditing contests that \emph{span multiple jurisdictions},
+  or are otherwise ``stratified.''
+  \par
+  We highlight the auditing of such multiple-jurisdiction contests
+  where some of the jurisdictions
+  have an electronic cast vote record (CVR) for each cast paper vote,
+  while the others do not.
+  Complex situations such as this may arise naturally when some counties
+  in a state have upgraded to new equipment, while others have not.
+  Bayesian audits are able to handle such situations
+  in a straightforward manner.
+  \par
+  We also discuss the benefits and relevant considerations for using
+  Bayesian audits in practice.
+  }                  
+}
+
+%%% end of entries added by Ron Rivest for CORLA18 paper
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%                  
+
+
 \bye
 
 Finley, D.R., and J.L. Boockholdt. 1987. A continuous constrained optimization model for audit sampling. Auditing: A Journal of Practice & Theory (Vol. 6 No. 2, Spring): 22-39.
