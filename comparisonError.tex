@@ -15,7 +15,7 @@ for Colorado to audit contests that include CVR counties and legacy counties.
 We keep the \emph{a priori} error bounds tighter than the ``super-simple'' 
 method~\citep{stark10d}.
 To keep the notation simpler, we consider only a single contest, but the 
-MACRO approach \citep{stark09c,stark10d} trivially extends the result to 
+MACRO test statistic \citep{stark09c,stark10d} automatically extends the result to 
 auditing $C>1$ contests simultaneously.
 The derivation is for plurality contests, including ``vote-for-$k$'' plurality contests.
 Majority and super-majority contests such as bond measures are a minor 
@@ -27,174 +27,156 @@ modification~\citep{stark08a}.\footnote{%
 
 \subsection{Notation}
 \begin{itemize}
-    \item  $N$ ballots were cast in all. (The contest might not appear on all $N$ ballots)
     \item  $\mathcal{W}$: the set of reported winners of the contest
     \item  $\mathcal{L}$: the set of reported losers of the contest
-    \item  $n_p$: number of ballots in batch $p$
+    \item  $N_s$ ballots were cast in all in the stratum. (The contest might not appear on all $N_s$ ballots.)
+    \item  $P$ ``batches'' of ballots are in the stratum. A batch contains one or more ballots. Every ballot in the stratum is in exactly one batch.
+    \item  $n_p$: number of ballots in batch $p$. $N_s = \sum_{p=1}^P n_p$.
     \item  $v_{pi} \in \{0, 1\}$: the reported votes for candidate $i$ in batch $p$
     \item  $a_{pi} \in \{0, 1\}$: actual votes for candidate $i$ in batch $p$. 
-                  If the contest does not appear in batch $p$, then $a_{pi} = 0$.
-    \item  $V_{w\ell} \equiv \sum_{p=1}^N (v_{pw} - v_{p\ell})$: 
-Reported margin in the stratum of reported winner $w \in \mathcal{W}$ over reported loser 
-$\ell \in \mathcal{L}$.
-    \item  $V$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
-$V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
-    \item  $\mu = V/N$: the ``diluted stratum margin,'' the margin in the stratum in votes divided by the total number of ballots in the stratum
-    \item  $A_{w\ell} \equiv \sum_{p=1}^N (a_{pw} - a_{p\ell})$: 
+                  If the contest does not appear on any ballot in batch $p$, then $a_{pi} = 0$.
+    \item  $V_{w\ell,s} \equiv \sum_{p=1}^P (v_{pw} - v_{p\ell})$: 
+Reported margin in stratum $s$ of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$, in votes.
+    \item  $V_s$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
+$V_s \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell, s}$
+    \item  $A_{w\ell,s} \equiv \sum_{p=1}^P (a_{pw} - a_{p\ell})$: 
 actual margin in the stratum of reported winner $w \in \mathcal{W}$ over reported loser 
-$\ell \in \mathcal{L}$
+$\ell \in \mathcal{L}$, in votes
+    \item  $V$: smallest reported overall margin among all $C$ contests audited using the same sample:
+$V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
 \end{itemize}
-If the contest is entirely contained in the stratum, then
+
+
+\subsection{Reduction to maximum relative overstatement}
+If the contest is entirely contained in stratum $s$, then
 the reported winners of the contest are the actual winners if
 $$ 
-   \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} A_{w\ell} > 0.
+   \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} A_{w\ell,s} > 0.
 $$
 Here, we address the case that the contest may include a portion outside the stratum.
-To combine independent procedures in different strata, it is convenient
-to be able to test whether the net error in a stratum exceeds a given threshold.
+To combine independent samples in different strata, it is convenient
+to be able to test whether the net overstatement error in a stratum exceeds a given threshold.
 
-We won't test that inequality directly.
-Instead, we will test a condition that is sufficient but not necessary for the
-inequality to hold, to get a computationally simple test that
-is still conservative (the risk is not larger than its nominal value).
+Instead of testing that condition directly, we will test a condition that is sufficient 
+but not necessary for the inequality to hold, to get a computationally simple test that
+is still conservative (i.e., the risk is not larger than its nominal value).
 
 For every winner, loser pair $(w, \ell)$, we want to test
-whether the overstatement error exceeds a fraction $\lambda$ of the overall margin 
-$V_{w\ell}$,
-that is, we want to establish
+whether the overstatement error exceeds some threshold, generally
+one tied to the reported margin between $w$ and $\ell$.
+For instance, for a simple stratified audit, we might take the threshold to be
+$\lambda_s V_{w\ell}$.
+
+We want to test whether
 $$
-   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < \lambda.
+   \sum_{p=1}^P (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} \ge \lambda_s.
 $$
-Now the maximum (over all winner, loser pairs) of sums
-is not larger than the sum of maxima; that is,
+The maximum of sums is not larger than the sum of the maxima; that is,
 $$
 \max_{w \in \mathcal{W},  \ell \in \mathcal{L}}
-   \sum_{p=1}^N (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}
+   \sum_{p=1}^P (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}
    \le
-  \sum_{p=1}^N  \max_{w \in \mathcal{W},  \ell \in \mathcal{L}} 
+  \sum_{p=1}^P  \max_{w \in \mathcal{W},  \ell \in \mathcal{L}} 
   (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
 $$
-Hence, if 
-$$
-\sum_{p=1}^N  \max_{w \in \mathcal{W},  \ell \in \mathcal{L}} 
-  (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} < 1,
-$$
-all the reported outcomes must be correct.
+
 Define 
 $$
-  e_p \equiv \max_{w \in \mathcal{W} \ell \in \mathcal{L}} (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
+  e_p \equiv \max_{w \in \mathcal{W} \ell \in \mathcal{L}} 
+     (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
 $$
-Then the reported outcomes of all the contests must be correct if 
+Then no reported margin is overstated by a fraction $\lambda_s$ or more
+if 
 $$ 
-  E \equiv \sum_{p=1}^N e_p < 1.
+  E \equiv \sum_{p=1}^P e_p < \lambda_s.
 $$
 
-To see that a different way, suppose that the outcome of one or more contests is wrong.
-Then there is some contest $c$ and some reported (winner, loser) pair
-$w \in \mathcal{W}, \ell \in \mathcal{L}$ for which
+Thus if we can reject the hypothesis $E \ge \lambda_s$, we can conclude that
+no pairwise margin was overstated by as much as a fraction $\lambda_s$.
 
-$$ 
-   0 \ge A_{w\ell} = V_{w\ell} - (V_{w\ell} - A_{w\ell}) =
-   V_{w\ell} - \sum_{p=1}^N (v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}),
-$$
-i.e.,
-$$ 
-\sum_{p=1}^N (v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}) \ge V_{w\ell}.
-$$
-Diving both sides by $V_{w\ell}$ gives
-$$
-\sum_{p=1}^N \frac{v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}} \ge 1.
-$$
-But
-$$
-\frac{v_{pw} - a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
-\le 
-\max_{w \in \mathcal{W}, \ell \in \mathcal{L}} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
-$$
-$$
-\le 
-\max_{w \in \mathcal{W}, \ell \in \mathcal{L}} \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}}
-= e_p,
-$$
-so if the outcome is wrong, $E = \sum_p e_p \ge 1$.
-Thus a risk-limiting audit can rely on testing whether $E \ge 1$.
-If the hypothesis $E \ge 1$ can be rejected at significance level $\alpha$,
-we can conclude that all the reported outcomes are correct.
-
-Testing whether $E \ge 1$ would require a very large sample if we knew nothing at
-all about $e_p$ without auditing ballot $p$: a single large value of $e_p$ could make
+Testing whether $E \ge \lambda_s$ would require a very large sample if we knew nothing at
+all about $e_p$ without auditing batch $p$: a single large value of $e_p$ could make
 $E$ arbitrarily large.
-Fortunately, there is an \emph{a priori} upper bound for $e_p$.
-Whatever the reported votes $v_{pi}$ are on ballot $p$, we can find the
+But there is an \emph{a priori} upper bound for $e_p$.
+Whatever the reported votes $v_{pi}$ are in batch~$p$, we can find the
 potential values of the actual votes $a_{pi}$ that would make the
-error $e_p$ largest, because $a_{pi}$ can only be zero or one:
+error $e_p$ largest, because $a_{pi}$ must be between 0 and $n_p$,
+the number of ballots in batch~$p$:
 $$
     \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}} \le 
-    \frac{v_{pw}- 0 - v_{p\ell} + 1}{V_{w\ell}}.
+    \frac{v_{pw}- 0 - v_{p\ell} + n_p}{V_{w\ell}}.
 $$
 Hence,
-$$
+\begin{equation} \label{eq:uDef}
     e_p \le \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
-    \frac{v_{pw} - v_{p\ell} + 1}{V_{w\ell}} \equiv \tilde{u}_p.
-$$
+    \frac{v_{pw} - v_{p\ell} + n_p}{V_{w\ell}} \equiv u_p.
+\end{equation}
 
-Knowing that $e_p \le \tilde{u}_p$ might let us conclude reliably that $E < 1$
-by examining only a small fraction of the ballots---depending on the 
-values $\{ \tilde{u}_p\}_{p=1}^N$ and on the values of $\{e_p\}$ for the audited ballots.
+Knowing that $e_p \le u_p$ might let us conclude reliably that $E < \lambda_s$
+by examining only a small number of batches---depending on the 
+values $\{ u_p\}_{p=1}^P$ and on the values of $\{e_p\}$ for the audited batches.
 
-To make inferences about $E$, it is helpful to work with the \emph{taint} $t_p \equiv \frac{e_p}{\tilde{u}_p} \le 1$.
-Define $\tilde{U} \equiv \sum_{p=1}^N \tilde{u}_p$.
-Suppose we draw ballots at random with replacement, with probability $\tilde{u}_p/\tilde{U}$
-of drawing ballot $p$ in each draw, $p = 1, \ldots, N$.
-(Since $\tilde{u}_p \ge 0$, these are all positive numbers, and they sum to 1,
-so they define a probability distribution on the $N$ ballots.)
+To make inferences about $E$, it is helpful to work with the \emph{taint} 
+$t_p \equiv \frac{e_p}{u_p} \le 1$.
+Define $U \equiv \sum_{p=1}^P u_p$.
+Suppose we draw batches at random with replacement, with probability $u_p/U$
+of drawing batch $p$ in each draw, $p = 1, \ldots, P$.
+(Since $u_p \ge 0$, these are all positive numbers, and they sum to 1,
+so they define a probability distribution on the $P$ batches.)
 
-Let $T_j$ be the value of $t_p$ for the ballot $p$ selected in the $j$th draw.
+Let $T_j$ be the value of $t_p$ for the batch $p$ selected in the $j$th draw.
 Then $\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$, and
 $$
-  \mathbb{E} T_1 = \sum_{p=1}^N \tilde{u}_p/\tilde{U} t_p =
-  \frac{1}{\tilde{U}}\sum_{p=1}^N \tilde{u}_p \frac{e_p}{\tilde{u}_p} = 
-  \frac{1}{\tilde{U}} \sum_{p=1}^N e_p = E/\tilde{U}.
+  \mathbb{E} T_1 = \sum_{p=1}^P u_p/U t_p =
+  \frac{1}{U}\sum_{p=1}^P u_p \frac{e_p}{u_p} = 
+  \frac{1}{U} \sum_{p=1}^P e_p = E/U.
 $$
-Thus $E = \tilde{U} \mathbb{E} T_1$. 
+Thus $E = U \mathbb{E} T_1$. 
 
 So, if we have strong evidence that
-$\mathbb{E} T_1 < 1/\tilde{U}$, we have
-strong evidence that $E < 1$.
+$\mathbb{E} T_1 < \lambda_s/U$, we have
+strong evidence that $E < \lambda_s$.
 
-This approach can be simplified even further by noting that $\tilde{u}_p$ has
-a simple upper bound that does not depend on any $v_{pi}$.
-At worst, the CVR for ballot $p$ shows a vote for the "least-winning" apparent winner of the contest with the smallest margin, but a hand interpretation shows a vote for the runner-up in
-that contest.
-Since $V_{w\ell} \ge V$ and $0 \le v_{pi} \le 1$,
+This approach can be simplified even further by noting that $u_p$ has
+a simple upper bound that does not depend on $v_{pi}$.
+At worst, the reported result for batch $p$ shows $n_p$ votes for the 
+``least-winning'' apparent winner of the contest with the smallest margin, 
+but a hand interpretation would show that all $n_p$ ballots in the batch 
+had votes for the runner-up in that contest.
+Since $V_{w\ell} \ge V$ and $0 \le v_{pi} \le n_p$,
 $$ 
-   \tilde{u}_p =  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
-    \frac{v_{pw} - v_{p\ell} + 1}{V_{w\ell}}
+    u_p =  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
+    \frac{v_{pw} - v_{p\ell} + n_p}{V_{w\ell}}
     \le  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
-    \frac{1 - 0 + 1}{V_{w\ell}}
-    \le \frac{2}{V}.
+    \frac{n_p - 0 + n_p}{V_{w\ell}}
+    \le \frac{2n_p}{V}.
 $$
-
-Thus, if we define $u_p \equiv 2/V$ and
-sample ballots at random with probability proportional to $u_p$, in fact
-we will sample ballots with \emph{equal} probability.
-Define
-$$ 
-   U \equiv \sum_{p=1}^N \frac{2}{V} = \frac{2N}{V} = 2/\mu
-$$
-and re-define $t_p \equiv e_p/u_p$ (rather than $e_p/\tilde{u}_p$);
-let $T_j$ be the value of $t_p$ for the ballot selected at random in the
-$j$th draw, as before.
-Then still $\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$,
+Thus if we use $2n_p/V$ in lieu of $u_p$, we still get conservative results.
+(We also need to re-define $U$ to be the sum of those upper bounds.)
+An intermediate, still conservative approach would be to use this upper bound for
+batches that consist of a single ballot, but use the sharper bound \ref{eq:uDef}
+when $n_p > 1$.
+Regardless, for the new definition of $u_p$ and $U$,
+$\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$,
 and
 $$
-  \mathbb{E} T_1 = \sum_{p=1}^N \frac{u_p}{U} t_p =
-  \frac{1}{U}\sum_{p=1}^N u_p \frac{e_p}{u_p} = 
-  \frac{1}{U} \sum_{p=1}^N e_p = E/U = \frac{\mu}{2} E,
+  \mathbb{E} T_1 = \sum_{p=1}^P \frac{u_p}{U} t_p =
+  \frac{1}{U}\sum_{p=1}^P u_p \frac{e_p}{u_p} = 
+  \frac{1}{U} \sum_{p=1}^P e_p = E/U.
 $$
-i.e., 
-$$ 
-    E = \frac{2}{\mu}\mathbb{E} T_1.
-$$
-So, if we have evidence that $\mathbb{E} T_1 < \mu/2 = 1/U$, we have evidence that 
-$E < 1$.
+
+So, if we have evidence that $\mathbb{E} T_1 < \lambda_s/U$, we have evidence that 
+$E < \lambda_s$.
+
+\subsection{Testing $\mathbb{E} T_1 \ge \lambda_s/U$}
+
+To test whether $\mathbb{E} T_1 < \lambda_s/U$, there are a variety of methods available.
+One particularly ``clean'' sequential method is based on Wald's~\cite{wald45} Sequential Probability
+Ratio Test (SPRT).
+Harold Kaplan pointed out this method on a website that no longer exists.
+A derivation of this ``Kaplan-Wald'' method is given in~\citet[Appendix A]{starkTeague14};
+to apply the method here, take $t = \lambda_s$ in their equation~18.
+
+A different sequential method, the Kaplan-Markov method (also due to Harold Kaplan), 
+is given in~\citet{stark09b}.
