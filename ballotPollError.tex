@@ -92,8 +92,65 @@ values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
 wherever the summand is defined. 
 (Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
 
+\subsubsection{Optimizing over the parameter $c$}
+The following result enables us to only test hypotheses along the boundary of the null set.
+\note{input packages to enable theorems, if desired}
 
-\note{discuss the role of c: the p-value is increasing as c goes to 0?}
+\begin{theorem}
+Assume that $A_{w,s} > cm/2$, $B_w > B_\ell$, and $c>0$.
+Suppose the composite null hypothesis is $N_w - N_\ell \leq c$.
+The $p$-value is maximized on the boundary of the null region, i.e. when $N_w - N_\ell = c$.
+\end{theorem}
+
+\note{Check other cases: when these assumptions aren't true}
+
+\begin{proof}
+Without loss of generality, let $c=0$ and assume $A_{w,s}$ is fixed.
+
+The $p$-value $p_0$ for the simple hypothesis that $c=0$ is
+
+\begin{equation}
+  p_0 = \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s} \choose m}} = \sum_{i \geq (m+nd)/2} T_i,
+\end{equation}
+
+where $T_i$ is defined as the $i$th term in the summand.
+
+Assume that $c>0$ is given.
+The $p$-value $p_c$ for this simple hypothesis is
+\begin{align*}
+p_c &=   \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s}+c \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s}+c \choose m}}  \\
+   &= \sum_{i \geq (m+nd)/2} T_i \frac{(A_{w,s} + c)(A_{w,s}+c-1)\cdots(A_{w,s}+1)(2A_{w,s}+c-m)\cdots(2A_{w,s}+1) }
+   {(A_{w,s}+c-i)\cdots(A_{w,s}+1-i)(2A_{w,s}+c)\cdots(2A_{w,s}+1)} .
+\end{align*}
+
+Terms in the fraction can be simplified: choose the corresponding pairs in the numerator and denominator.
+Fractions of the form $(A_{w,s}+c + j)/(A_{w,s}+j-i)$ can be expressed as $1 + i/(A_{w,s}+j-i)$.
+Fractions of the form $(2A_{w,s}+k-m)/(2A_{w,s}+k)$ can be expressed as $1 - m/(2A_{w,s}+k)$.
+Thus, the $p$-value can be written as 
+
+\begin{align*}
+p_c &= \sum_{i \geq (m+nd)/2} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + j - i}\right)\left(1 - \frac{m}{2A_{w,s}+j}\right) \\
+&> \sum_{i \geq (m+nd)/2} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right) \\
+&= \sum_{i \geq (m+nd)/2} T_i \left[ \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right) \right]^c \\
+&= \sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{i(2A_{w,s}+c) - m(A_{w,s}-i+c) - im}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c \\
+&= \sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{A_{w,s}(2i-m) - c(m-i)}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c 
+\end{align*}
+
+This can be bounded.
+The assumption that $B_w > B_\ell$ implies that $m = B_w+B_\ell \leq 2i \leq 2B_w$ for all $i \leq B_w$.
+Thus, $2i-m \geq 1$ and $m-i \geq m-B_w \geq m/2$.
+So,
+
+$$p_c >\sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{A_{w,s} - cm/2}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c > \sum_{i \geq (m+nd)/2} T_i  = p_0$$
+
+
+
+
+
+\end{proof}
+
+
+\subsubsection{Optimizing over the parameter $A_{w,s}$}
 
 We have shown empirically (but do not prove) that this tail probability, as a function of $A_{w,s}$,
 has a unique maximum at one of the endpoints.
