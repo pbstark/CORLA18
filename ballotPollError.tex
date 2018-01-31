@@ -94,15 +94,15 @@ wherever the summand is defined.
 
 \subsubsection{Optimizing over the parameter $c$}
 The following result enables us to only test hypotheses along the boundary of the null set.
-\note{input packages to enable theorems, if desired}
 
-\begin{theorem}
+\begin{thm}
 Assume that $A_{w,s} > cm/2$, $B_w > B_\ell$, and $c>0$.
 Suppose the composite null hypothesis is $N_w - N_\ell \leq c$.
 The $p$-value is maximized on the boundary of the null region, i.e. when $N_w - N_\ell = c$.
-\end{theorem}
+\end{thm}
 
-\note{Check other cases: when these assumptions aren't true}
+\note{This seems to hold for $c<0$ too. The proof doesn't so much matter on $c=0$ and $c>0$, but the difference between the two values. 
+Should think about whether this is worth adding, whether the assumptions there are useful.}
 
 \begin{proof}
 Without loss of generality, let $c=0$ and assume $A_{w,s}$ is fixed.
