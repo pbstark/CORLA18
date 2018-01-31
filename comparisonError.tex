@@ -30,21 +30,34 @@ modification~\citep{stark08a}.\footnote{%
     \item  $\mathcal{W}$: the set of reported winners of the contest
     \item  $\mathcal{L}$: the set of reported losers of the contest
     \item  $N_s$ ballots were cast in all in the stratum. (The contest might not appear on all $N_s$ ballots.)
-    \item  $P$ ``batches'' of ballots are in the stratum. A batch contains one or more ballots. Every ballot in the stratum is in exactly one batch.
+    \item  $P$ ``batches'' of ballots are in stratum $s$. A batch contains one or more ballots. Every ballot in stratum $s$ is in exactly one batch.
     \item  $n_p$: number of ballots in batch $p$. $N_s = \sum_{p=1}^P n_p$.
     \item  $v_{pi} \in \{0, 1\}$: the reported votes for candidate $i$ in batch $p$
     \item  $a_{pi} \in \{0, 1\}$: actual votes for candidate $i$ in batch $p$. 
                   If the contest does not appear on any ballot in batch $p$, then $a_{pi} = 0$.
+                  
     \item  $V_{w\ell,s} \equiv \sum_{p=1}^P (v_{pw} - v_{p\ell})$: 
 Reported margin in stratum $s$ of reported winner $w \in \mathcal{W}$ over reported loser 
 $\ell \in \mathcal{L}$, in votes.
+
+    \item  $V_{w\ell}$: 
+Overall reported margin of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$, in votes, for the entire contest (not just stratum $s$)
+
     \item  $V_s$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
 $V_s \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell, s}$
+
+   \item  $V$: smallest reported overall margin among all $C$ contests audited using the same sample:
+$V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
+
     \item  $A_{w\ell,s} \equiv \sum_{p=1}^P (a_{pw} - a_{p\ell})$: 
 actual margin in the stratum of reported winner $w \in \mathcal{W}$ over reported loser 
 $\ell \in \mathcal{L}$, in votes
-    \item  $V$: smallest reported overall margin among all $C$ contests audited using the same sample:
-$V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
+
+    \item  $A_{w\ell}$: 
+actual margin of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$, in votes, for the entire contest (not just in stratum $s$)
+
 \end{itemize}
 
 
