@@ -1,7 +1,7 @@
 \section{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
-\subsection{Tri-hypergeometric test using the diluted margin as the test statistic}
+\subsection{Conditional hypergeometric test}
 
 We consider a single stratum $s$, containing $N_s$ ballots.
 We will sample individual ballots without replacement from stratum $s$.
@@ -19,13 +19,9 @@ $(B_w, B_\ell, B_u)$ is tri-hypergeometric:
 
 \begin{equation}
     \mathbb{P}_{A_{w,s}, A_{\ell,s}} \{ B_w = i, B_\ell = j \vert B=n \} = 
-     \frac{ {N_{w,s } \choose i}{N_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+     \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
 \end{equation}
 
-To test, we will condition on the event $B=n$ and $B_w +B_\ell = m$. 
-(In contrast, the BRAVO ballot-polling
-method~\citep{lindemanEtal12}
-conditions only on $B_w+B_\ell = m$.)
 The test statistic will be the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
 This is the sample difference in the number of ballots for the winner and for the loser, divided by the 
 total number of ballots in the sample.
@@ -46,45 +42,128 @@ Hence, we will reject for large values of $D$.
 Conditional on $B=n$, the event $D = (B_w - B_\ell)/B = d$ is the event $B_w - B_\ell = nd$.
 
 Suppose we observe $D=d$.
-The $p$-value of the simple hypothesis that there are $N_w$ ballots with
-a vote for $w$ but not for $\ell$, $N_\ell$ ballots with a vote for $\ell$ but not for $w$, and $N - N_w - N_\ell$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ (including undervotes and
+To test, we will condition on the event $B=n$ and $B_w +B_\ell = m$. 
+(In contrast, the BRAVO ballot-polling
+method~\citep{lindemanEtal12}
+conditions only on $B_w+B_\ell = m$.)
+The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
+a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
+and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ (including undervotes and
 invalid ballots) is
 
 \begin{equation}
 \begin{aligned}
    \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n, B_w+B_\ell = m \right \} 
   & = \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \vert B = n, B_w+B_\ell = m \} \\
-   & = \sum_{i \geq (m+nd)/2} 
-         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}}.
+  & = \frac{\mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \cap B = n \cap B_w+B_\ell = m \} }{ \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{  B = n \cap B_w+B_\ell = m \} }\\
+   & = \frac{ 
+   \sum_{i \geq (m+nd)/2} 
+         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}} }{
+         \frac{ {A_{w,s} + A_{\ell, s} \choose m}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}}} \\
+     & = \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} }{{A_{w,s} + A_{\ell, s} \choose m}}.
 \end{aligned}
 \end{equation}
 
-%\note{Address numerical stability and ways to simplify the expression.}
-This expression holds the number of ballots for neither $w$ nor $\ell$ fixed.
-It may be simplified as a summation purely over the ballots for $w$ or $\ell$,
- reminiscent of the hypergeometric distribution.
-In fact, the $p$-value is a rescaling of the tail probability of the hypergeometric distribution,
+In fact, this conditional $p$-value is the tail probability of the hypergeometric distribution
 with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a sample of size $m$.
-\begin{equation}
-\begin{aligned}
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n, B_w+B_\ell = m \right \} 
-   & =  \frac{ {N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}}\sum_{i \geq (m+nd)/2} {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} \\
-   & =  \frac{ {N_s - A_{w,s} - A_{\ell,s} \choose n-m} {A_{w,s}+A_{\ell,s} \choose m}}{{N_s \choose n}}\sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} }{{A_{w,s}+A_{\ell,s} \choose m}}.
-\end{aligned}
-\end{equation}
+This calculation is numerically stable and fast, as properties of the hypergeometric distribution are available
+and well-tested in all standard statistics software.
+
+\note{Check this}
+In simulations, the conditional hypergeometric test for an audit showed better performance than
+using the tri-hypergeometric distribution directly.
+The conditional hypergeometric test tended to correctly reject the null hypothesis more frequently and in one example, its $p$-value was
+smaller than the corresponding tri-hypergeometric $p$-value about 80\% of the time.
+Furthermore, the tri-hypergeometric distribution is not widely available in statistical packages and its $p$-value calculation involves 
+summing over two variables (as opposed to just one in the hypergeometric case), making calculations much slower.
+For these reasons, we propose conditioning on both $B=n$ and $B_w+B_\ell=m$ to yield the conditional hypergeometric test.
+
+\subsection{Maximizing the $p$-value over the null set}
 
 The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
 that $A_{w,s} - A_{\ell,s} \le c$ for
 some fixed, known $c$.
-The (conditional) $p$-value of this composite hypothesis for $D=d$ is
+The (conditional) $p$-value of this composite hypothesis for $D=d$ is the maximum $p$-value for all
+values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
 \begin{equation}
   \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
-   \sum_{i \geq (m+nd)/2} 
-         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}},
+   \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} }{{A_{w,s} + A_{\ell, s} \choose m}},
 \end{equation}
 wherever the summand is defined. 
 (Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
+
+\subsubsection{Optimizing over the parameter $c$}
+The following result enables us to only test hypotheses along the boundary of the null set.
+
+\begin{thm}
+Assume that $A_{w,s} > cm/2$, $B_w > B_\ell$, and $c>0$.
+Suppose the composite null hypothesis is $N_w - N_\ell \leq c$.
+The $p$-value is maximized on the boundary of the null region, i.e. when $N_w - N_\ell = c$.
+\end{thm}
+
+\note{This seems to hold for $c<0$ too. The proof doesn't so much matter on $c=0$ and $c>0$, but the difference between the two values. 
+Should think about whether this is worth adding, whether the assumptions there are useful.}
+
+\begin{proof}
+Without loss of generality, let $c=0$ and assume $A_{w,s}$ is fixed.
+
+The $p$-value $p_0$ for the simple hypothesis that $c=0$ is
+
+\begin{equation}
+  p_0 = \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s} \choose m}} = \sum_{i \geq (m+nd)/2} T_i,
+\end{equation}
+
+where $T_i$ is defined as the $i$th term in the summand.
+
+Assume that $c>0$ is given.
+The $p$-value $p_c$ for this simple hypothesis is
+\begin{align*}
+p_c &=   \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s}+c \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s}+c \choose m}}  \\
+   &= \sum_{i \geq (m+nd)/2} T_i \frac{(A_{w,s} + c)(A_{w,s}+c-1)\cdots(A_{w,s}+1)(2A_{w,s}+c-m)\cdots(2A_{w,s}+1) }
+   {(A_{w,s}+c-i)\cdots(A_{w,s}+1-i)(2A_{w,s}+c)\cdots(2A_{w,s}+1)} .
+\end{align*}
+
+Terms in the fraction can be simplified: choose the corresponding pairs in the numerator and denominator.
+Fractions of the form $(A_{w,s}+c + j)/(A_{w,s}+j-i)$ can be expressed as $1 + i/(A_{w,s}+j-i)$.
+Fractions of the form $(2A_{w,s}+k-m)/(2A_{w,s}+k)$ can be expressed as $1 - m/(2A_{w,s}+k)$.
+Thus, the $p$-value can be written as 
+
+\begin{align*}
+p_c &= \sum_{i \geq (m+nd)/2} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + j - i}\right)\left(1 - \frac{m}{2A_{w,s}+j}\right) \\
+&> \sum_{i \geq (m+nd)/2} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right) \\
+&= \sum_{i \geq (m+nd)/2} T_i \left[ \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right) \right]^c \\
+&= \sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{i(2A_{w,s}+c) - m(A_{w,s}-i+c) - im}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c \\
+&= \sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{A_{w,s}(2i-m) - c(m-i)}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c 
+\end{align*}
+
+This can be bounded.
+The assumption that $B_w > B_\ell$ implies that $m = B_w+B_\ell \leq 2i \leq 2B_w$ for all $i \leq B_w$.
+Thus, $2i-m \geq 1$ and $m-i \geq m-B_w \geq m/2$.
+So,
+
+$$p_c >\sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{A_{w,s} - cm/2}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c > \sum_{i \geq (m+nd)/2} T_i  = p_0$$
+
+
+
+
+
+\end{proof}
+
+
+\subsubsection{Optimizing over the parameter $A_{w,s}$}
+
 We have shown empirically (but do not prove) that this tail probability, as a function of $A_{w,s}$,
-has a unique maximum.
-If the empirical result is true, then finding the maximum is trivial
-then it is a trivial one-dimensional optimization problem to compute the unconditional $p$-value.
+has a unique maximum at one of the endpoints.
+If the empirical result is true, then finding the maximum is trivial;
+otherwise, it is a trivial one-dimensional optimization problem to compute the unconditional $p$-value.
+
+\subsection{Conditional testing}
+If the conditional tests are always conducted at significance level $\alpha$ or less, i.e., so that
+$\mathbb{P} \{\mbox{Type I error} | B = n, B_w+B_\ell = m\} \le \alpha$, then the
+overall procedure has significance level $\alpha$ or less:
+\begin{eqnarray}
+    \mathbb{P} \{\mbox{Type I error}\} &=& \sum_{n=0}^N\sum_{m=0}^{N} \mathbb{P} \{\mbox{Type I error} |  B = n, B_w+B_\ell = m\} \mathbb{P} \{ B = n, B_w+B_\ell = m \} \nonumber \\
+       & \le & \sum_{n=0}^N\sum_{m=0}^{N}  \alpha \mathbb{P} \{  B = n, B_w+B_\ell = m \}  =  \alpha.
+\end{eqnarray}
+
+In particular, this implies that our conditional hypergeometric test will have the correct risk limit unconditionally.
