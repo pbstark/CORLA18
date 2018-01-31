@@ -8,12 +8,13 @@ We will sample individual ballots without replacement from stratum $s$.
 Of the $N_s$ ballots,
 $A_{w,s}$ have a vote for $w$ but not for $\ell$, $A_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $A_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
 We might draw a simple random sample of $n$ ballots ($n$ fixed ahead of time), or we might draw 
-sequentially without replacement, so the sample size $B$ could be random, including stopping rules that depend on the data.\footnote{%
+sequentially without replacement, so the sample size $B$ could be random.
+For instance, the rule for determining $B$ could depend on the data.\footnote{%
    Sampling with replacement leads to simpler arithmetic, but is not as efficient.
 }
 
 Regardless, we assume that, conditional on the attained sample size $n$, the ballots are a simple random sample of size $n$ from the $N_s$ ballots in the population.
-In the sample, $B_w$ contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ defined analogously.
+In the sample, $B_w$ ballots contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ defined analogously.
 Then, conditional on $B=n$, the joint distribution of
 $(B_w, B_\ell, B_u)$ is tri-hypergeometric:
 
@@ -35,38 +36,34 @@ $$
 The alternative is the compound hypothesis 
 $A_{w,s} - A_{\ell,s} > c$.\footnote{%
     To use Wald's Sequential Probability Ratio Test, we might pick a simple alternative instead, e.g.,
-   $A_{w,s} = V_{w,s}$ and $A_{\ell,s} = V_{\ell,s}$, the reported values, assuming 
+   $A_{w,s} = V_{w,s}$ and $A_{\ell,s} = V_{\ell,s}$, the reported values, provided 
    $V_{w,s} - V_{\ell,s} > c$.
 }
 Hence, we will reject for large values of $D$.
 Conditional on $B=n$, the event $D = (B_w - B_\ell)/B = d$ is the event $B_w - B_\ell = nd$.
 
 Suppose we observe $D=d$.
-To test, we will condition on the event $B=n$ and $B_w +B_\ell = m$. 
+The test will condition on the event $B=n$ and $B_w +B_\ell = m$. 
 (In contrast, the BRAVO ballot-polling
 method~\citep{lindemanEtal12}
 conditions only on $B_w+B_\ell = m$.)
 The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
 a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
-and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ (including undervotes and
+and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
+(including undervotes and
 invalid ballots) is
 
 \begin{equation}
-\begin{aligned}
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \vert B = n, B_w+B_\ell = m \right \} 
-  & = \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \vert B = n, B_w+B_\ell = m \} \\
-  & = \frac{\mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{ B_w - B_\ell \geq nd \cap B = n \cap B_w+B_\ell = m \} }{ \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s}\{  B = n \cap B_w+B_\ell = m \} }\\
-   & = \frac{ 
-   \sum_{i \geq (m+nd)/2} 
-         \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}} }{
-         \frac{ {A_{w,s} + A_{\ell, s} \choose m}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}}{{N_s \choose n}}} \\
-     & = \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} }{{A_{w,s} + A_{\ell, s} \choose m}}.
-\end{aligned}
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n, B_w+B_\ell = m \right \}.
 \end{equation}
+Now, given $B=n$, all samples of size $n$ from the ballots are equally likely, by hypothesis.
+Hence, in particular, all samples of size $n$ for which $B_w + B_\ell = m$ are equally likely.
+There are ${A_{w,s}+A_{\ell,s} \choose m}{N_s - A_{w,s}-A_{\ell,s} \choose n-m}$ such subsets.
+\note{Kellie will finish this}
 
-In fact, this conditional $p$-value is the tail probability of the hypergeometric distribution
+This conditional $p$-value is thus the tail probability of the hypergeometric distribution
 with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a sample of size $m$.
-This calculation is numerically stable and fast, as properties of the hypergeometric distribution are available
+This calculation is numerically stable and fast; tail probabilities of the hypergeometric distribution are available
 and well-tested in all standard statistics software.
 
 \note{Check this}
