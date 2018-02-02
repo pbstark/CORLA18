@@ -47,29 +47,50 @@ The test will condition on the event $B=n$ and $B_w +B_\ell = m$.
 (In contrast, the BRAVO ballot-polling
 method~\citep{lindemanEtal12}
 conditions only on $B_w+B_\ell = m$.)
+
+Given $B=n$, all samples of size $n$ from the ballots are equally likely, by hypothesis.
+Hence, in particular, all samples of size $n$ for which $B_w + B_\ell = m$ are equally likely.
+There are ${A_{w,s}+A_{\ell,s} \choose m}{N_s - A_{w,s}-A_{\ell,s} \choose n-m}$ such samples.
+Among these samples, $B_w$ may take values $i=0, 1, \dots, m$.
+For a fixed $i$, there are ${A_{w,s} \choose i}{A_{\ell, s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}$
+samples with $B_w=i$ and $B_\ell = m-i$.
+
+The factor ${N_s - A_{w,s} - A_{\ell,s} \choose n-m}$ counts the number of ways to sample $n-m$ of the
+remaining ballots.
+If we divide out this factor, we simply count the number of ways to sample ballots
+from the group of ballots for $w$ or for $\ell$.
+There are ${A_{w,s}+A_{\ell,s} \choose m}$ equally likely samples of size $m$ from
+the ballots with either a vote for $w$ or for $\ell$, but not both, 
+and of these samples, ${A_{w,s} \choose i}{A_{\ell, s} \choose m-i}$ contain $i$ ballots with a vote for $w$ but not $\ell$.
+Therefore, conditional on $B=n$ and $B_w+B_\ell=m$, the probability that $B_w=i$ is
+
+$$\frac{{A_{w,s} \choose i}{A_{\ell, s} \choose m-i}}{{A_{w,s}+A_{\ell,s} \choose m}}.$$
+
 The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
 a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
 and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
 (including undervotes and
-invalid ballots) is
+invalid ballots) is the sum of these probabilities for events when $B_w - B_\ell \geq nd$.
+This event occurs for $B_w \geq \frac{m+nd}{2}$.
+Therefore,
 
 \begin{equation}
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n, B_w+B_\ell = m \right \}.
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n, B_w+B_\ell = m \right \} = 
+   \sum_{i=(m+nd)/2}^{\min\{m, A_{w,s}\}} \frac{{A_{w,s} \choose i}{A_{\ell, s} \choose m-i}}{{A_{w,s}+A_{\ell,s} \choose m}}.
 \end{equation}
-Now, given $B=n$, all samples of size $n$ from the ballots are equally likely, by hypothesis.
-Hence, in particular, all samples of size $n$ for which $B_w + B_\ell = m$ are equally likely.
-There are ${A_{w,s}+A_{\ell,s} \choose m}{N_s - A_{w,s}-A_{\ell,s} \choose n-m}$ such subsets.
-\note{Kellie will finish this}
+
 
 This conditional $p$-value is thus the tail probability of the hypergeometric distribution
 with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a sample of size $m$.
 This calculation is numerically stable and fast; tail probabilities of the hypergeometric distribution are available
 and well-tested in all standard statistics software.
 
-\note{Check this}
-In simulations, the conditional hypergeometric test for an audit showed better performance than
-using the tri-hypergeometric distribution directly.
-The conditional hypergeometric test tended to correctly reject the null hypothesis more frequently and in one example, its $p$-value was
+In simulations, we compared the conditional hypergeometric test to testing using the tri-hypergeometric distribution directly.
+We used a population size of 1000 and varied the sampling rate from $1\%$ to $20\%$,
+ the fraction of ballots for $w$ or $\ell$ from $50\%$ to $90\%$,
+and  the actual margin from $1\%$ to $10\%$.
+The conditional hypergeometric test performed better than the tri-hypergeometric test:
+it tended to correctly reject the null hypothesis more frequently and in one example, its $p$-value was
 smaller than the corresponding tri-hypergeometric $p$-value about 80\% of the time.
 Furthermore, the tri-hypergeometric distribution is not widely available in statistical packages and its $p$-value calculation involves 
 summing over two variables (as opposed to just one in the hypergeometric case), making calculations much slower.
@@ -84,7 +105,7 @@ The (conditional) $p$-value of this composite hypothesis for $D=d$ is the maximu
 values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
 \begin{equation}
   \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
-   \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} }{{A_{w,s} + A_{\ell, s} \choose m}},
+   \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} \frac{ {A_{w,s} \choose i}{A_{\ell,s} \choose m-i} }{{A_{w,s} + A_{\ell, s} \choose m}},
 \end{equation}
 wherever the summand is defined. 
 (Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
@@ -107,18 +128,21 @@ Without loss of generality, let $c=0$ and assume $A_{w,s}$ is fixed.
 The $p$-value $p_0$ for the simple hypothesis that $c=0$ is
 
 \begin{equation}
-  p_0 = \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s} \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s} \choose m}} = \sum_{i \geq (m+nd)/2} T_i,
+  p_0 = \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} \frac{ {A_{w,s} \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s} \choose m}} =  \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i,
 \end{equation}
 
-where $T_i$ is defined as the $i$th term in the summand.
+where $T_i$ is defined as the $i$th term in the summand and $T_i \equiv 0$ for $i > \min\{m, A_{w,s}\}$.
 
 Assume that $c>0$ is given.
 The $p$-value $p_c$ for this simple hypothesis is
 \begin{align*}
-p_c &=   \sum_{i \geq (m+nd)/2} \frac{ {A_{w,s}+c \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s}+c \choose m}}  \\
-   &= \sum_{i \geq (m+nd)/2} T_i \frac{(A_{w,s} + c)(A_{w,s}+c-1)\cdots(A_{w,s}+1)(2A_{w,s}+c-m)\cdots(2A_{w,s}+1) }
-   {(A_{w,s}+c-i)\cdots(A_{w,s}+1-i)(2A_{w,s}+c)\cdots(2A_{w,s}+1)} .
+p_c &=   \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}+c\}} \frac{ {A_{w,s}+c \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s}+c \choose m}}  \\
+   &= \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i \frac{(A_{w,s} + c)(A_{w,s}+c-1)\cdots(A_{w,s}+1)(2A_{w,s}+c-m)\cdots(2A_{w,s}+1) }
+   {(A_{w,s}+c-i)\cdots(A_{w,s}+1-i)(2A_{w,s}+c)\cdots(2A_{w,s}+1)} + \Delta,
 \end{align*}
+
+where $\Delta \equiv \sum_{i=A_{w,s}+1}^{A_{w,s}+c} \frac{ {A_{w,s}+c \choose i}{A_{w,s} \choose m-i} }{{2A_{w,s}+c \choose m}} $
+ is nonzero whenever $A_{w,s} > m-c$.
 
 Terms in the fraction can be simplified: choose the corresponding pairs in the numerator and denominator.
 Fractions of the form $(A_{w,s}+c + j)/(A_{w,s}+j-i)$ can be expressed as $1 + i/(A_{w,s}+j-i)$.
@@ -126,11 +150,11 @@ Fractions of the form $(2A_{w,s}+k-m)/(2A_{w,s}+k)$ can be expressed as $1 - m/(
 Thus, the $p$-value can be written as 
 
 \begin{align*}
-p_c &= \sum_{i \geq (m+nd)/2} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + j - i}\right)\left(1 - \frac{m}{2A_{w,s}+j}\right) \\
-&> \sum_{i \geq (m+nd)/2} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right) \\
-&= \sum_{i \geq (m+nd)/2} T_i \left[ \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right) \right]^c \\
-&= \sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{i(2A_{w,s}+c) - m(A_{w,s}-i+c) - im}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c \\
-&= \sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{A_{w,s}(2i-m) - c(m-i)}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c 
+p_c &= \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + j - i}\right)\left(1 - \frac{m}{2A_{w,s}+j}\right)  + \Delta\\
+&> \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i \prod_{j=1}^c \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right)  + \Delta\\
+&= \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i \left[ \left(1 + \frac{i}{A_{w,s} + c - i}\right)\left(1 - \frac{m}{2A_{w,s}+c}\right) \right]^c + \Delta \\
+&= \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i \left[ 1 + \frac{i(2A_{w,s}+c) - m(A_{w,s}-i+c) - im}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c  + \Delta\\
+&= \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i \left[ 1 + \frac{A_{w,s}(2i-m) - c(m-i)}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c  + \Delta
 \end{align*}
 
 This can be bounded.
@@ -138,7 +162,7 @@ The assumption that $B_w > B_\ell$ implies that $m = B_w+B_\ell \leq 2i \leq 2B_
 Thus, $2i-m \geq 1$ and $m-i \geq m-B_w \geq m/2$.
 So,
 
-$$p_c >\sum_{i \geq (m+nd)/2} T_i \left[ 1 + \frac{A_{w,s} - cm/2}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c > \sum_{i \geq (m+nd)/2} T_i  = p_0$$
+$$p_c > \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i \left[ 1 + \frac{A_{w,s} - cm/2}{(A_{w,s} + c - i)(2A_{w,s}+c)} \right]^c + \Delta >  \sum_{i = (m+nd)/2}^{\min\{m, A_{w,s}\}} T_i  = p_0$$
 
 
 

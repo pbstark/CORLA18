@@ -38,6 +38,7 @@ stratum will be fully hand counted is at least $1-\alpha_s \ge 1- \alpha$.
 If both $\omega_{w\ell,1} \ge \lambda_1V_{w\ell}$
 and $\omega_{w\ell,2} \ge \lambda_2V_{w\ell}$, then the chance both are fully tabulated is
 $1-(1-\alpha_1)(1-\alpha_2)$, since the audit samples in the two strata are independent.
+\note{is it not just $(1-\alpha_1)(1-\alpha_2)$?  $P(fail to reject both) = P(fail to reject 1)P(fail to reject 2)$}
 
 What should we do if the audit leads to a full tally in one stratum?
 We consider two options.
@@ -86,6 +87,7 @@ Consider the conditional probability that a sequential test would reject the hyp
 Because the tests in the two strata are independent, that is the unconditional probability
 that auditing stratum $t$ against the error tolerance $\lambda_t' V_{w\ell}$ would lead to a full
 hand tabulation. 
+\note{mention that we are not using a sequential test in this paper?}
 If we are using a sequential test in the remaining stratum $t$, the chance that the audit will
 go to a full hand count in stratum $t$ is at least $1-\alpha_t$ if the (new) null is true (i.e.,
 if the outcome is incorrect). 
@@ -97,7 +99,7 @@ $(1-\alpha_s)(1-\alpha_t)$ if the outcome is incorrect,
 even if the probability were zero that both of the original audits would proceed to a full hand count.
 The overall risk limit is thus not larger than $1 - (1-\alpha_s)(1-\alpha_t)$.
 
-Suppose we want the overall risk limit to be 5\%. 
+As an example, suppose we want the overall risk limit to be 5\%. 
 If we use a risk limit of 4\% in the no-CVR stratum and a risk limit of 1.04\% in the CVR stratum,
 the risk limit will be $1 - 0.96\times 0.9896 < 0.05$.
 
