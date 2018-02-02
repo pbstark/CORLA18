@@ -85,10 +85,12 @@ with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a samp
 This calculation is numerically stable and fast; tail probabilities of the hypergeometric distribution are available
 and well-tested in all standard statistics software.
 
-\note{Check this}
-In simulations, the conditional hypergeometric test for an audit showed better performance than
-using the tri-hypergeometric distribution directly.
-The conditional hypergeometric test tended to correctly reject the null hypothesis more frequently and in one example, its $p$-value was
+In simulations, we compared the conditional hypergeometric test to testing using the tri-hypergeometric distribution directly.
+We used a population size of 1000 and varied the sampling rate from $1\%$ to $20\%$,
+ the fraction of ballots for $w$ or $\ell$ from $50\%$ to $90\%$,
+and  the actual margin from $1\%$ to $10\%$.
+The conditional hypergeometric test performed better than the tri-hypergeometric test:
+it tended to correctly reject the null hypothesis more frequently and in one example, its $p$-value was
 smaller than the corresponding tri-hypergeometric $p$-value about 80\% of the time.
 Furthermore, the tri-hypergeometric distribution is not widely available in statistical packages and its $p$-value calculation involves 
 summing over two variables (as opposed to just one in the hypergeometric case), making calculations much slower.
