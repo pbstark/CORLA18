@@ -47,10 +47,10 @@ If the audit uses this rule, then we can take $\alpha_1 = \alpha_2 = \alpha$, an
 risk limit $\alpha$.
 
 A second approach is to adjust the contest margin for the results of the manual tally in the
-fully counted stratum (call the stratum $t$), and continue to audit in the other, 
+fully counted stratum (call the stratum $s$), and continue to audit in the other, 
 but against the overall margin, adjusted for the ``known'' tally in the stratum that had 
-been counted: we test against the share $V_{w\ell} - A_{w\ell,t} \equiv \lambda_s' V_{w\ell}$, rather than 
-against the share $\lambda_s V_{w\ell}$.
+been counted: we test against the share $V_{w\ell} - A_{w\ell,s} \equiv \lambda_t' V_{w\ell}$, rather than 
+against the share $\lambda_t V_{w\ell}$.
 Then to reject the null hypothesis in that stratum is to conclude that the overall outcome is still correct.
 
 The statistical wrinkle is that adjusting for the manual tally in the hand-counted stratum 
@@ -58,7 +58,7 @@ changes the hypothesis being tested in the remaining
 stratum in a way that is itself random:
 whether the original null or a new null is tested depends on what the sample in the other stratum
 finds.
-However, if the hypothesis changes, there's only one value possible for $\lambda_s'$---which
+However, if the hypothesis changes, there's only one value possible for $\lambda_t'$---which
 depends on the reported margin and the count in the other stratum---but it's unknown 
 until the other stratum count is known.
 
@@ -69,7 +69,7 @@ hand count in both strata if:
 
 \begin{itemize}
    \item the original hypotheses are rejected in both strata (neither stratum is fully hand tabulated)
-   \item the hypothesis is not rejected in one stratum $s$; the threshold $\lambda_t$
+   \item the hypothesis is not rejected in stratum $s$; the threshold $\lambda_t$
             is adjusted in the other stratum, and the hypothesis that the overstatement error
             in that stratum is greater than the new limit, $\lambda_t' V_{w\ell}$ is rejected. 
 \end{itemize}
@@ -82,18 +82,15 @@ in which case the ``correct'' count for that stratum will become known.
 What happens in the other stratum?
 We adjust the margin (or tolerance for overstatement error) and keep auditing.
 The value of $\lambda_t'$ is fixed, but unknown before the audit starts.
-Consider the conditional probability that a sequential test would reject the hypothesis that the margin is less than $\lambda_t' V_{w\ell}$, given that the other stratum, $s$, is tabulated by hand.
-Because the tests in the two strata are independent, that is the unconditional probability
-that auditing stratum $t$ against the error tolerance $\lambda_t' V_{w\ell}$ would lead to a full
-hand tabulation. 
-\note{flesh out the argument without relying on sequential nature of the test: should hold purely
-on the basis of the unconditional test having the right level, and the samples being independent in 
-the two strata}
-If we are using a sequential test in the remaining stratum $t$, the chance that the audit will
-go to a full hand count in stratum $t$ is at least $1-\alpha_t$ if the (new) null is true (i.e.,
-if the outcome is incorrect). 
-The conditioning just delays looking at the value of the test statistic for the new null hypothesis; waiting does not increase the overall chance of incorrectly rejecting the null, 
-because the test is legitimately sequential.
+Consider the conditional probability that a test would reject the hypothesis that the margin is less than 
+$\lambda_t' V_{w\ell}$, given that the other stratum, $s$, is tabulated by hand.
+Because the tests in the two strata are statistically independent, conditioning on an event in stratum $s$
+does not affect the probability of rejection in stratum $t$.
+That is, the conditional probability of rejecting the null hypothesis for stratum $t$ 
+is equal to the corresponding unconditional probability.
+The chance that the audit will go to a full hand count in stratum $t$ is at least 
+$1-\alpha_t$ if the (new) null is true (i.e., if the outcome is incorrect). 
+The conditioning does not increase the overall chance of incorrectly rejecting the null.
 
 Hence, for this procedure, the chance that there will be a full hand count in both strata is at least 
 $(1-\alpha_s)(1-\alpha_t)$ if the outcome is incorrect,
