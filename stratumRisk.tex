@@ -68,15 +68,17 @@ for each stratum $s$, a family of level-$\alpha_s$ tests of the null hypothesis 
 the overstatement in the stratum is greater than or equal to $c$, for all feasible values of $c$.
 That is,
 \beq
-    \Pr \{ \mbox{reject hypothesis that} \omega_{w\ell,s} \ge c_s || \omega_{w\ell,s} \ge c_s \} \le \alpha_s,
+    \Pr \{ \mbox{reject hypothesis that } \omega_{w\ell,s} \ge c_s || \omega_{w\ell,s} \ge c_s \} \le \alpha_s,
 \eeq
 for $s = 1, 2$, and all feasible $c_s$.
 Moreover, we insist that the test depend on data only from ballots selected from its stratum.
 Because the samples in the two strata are independent, for all feasible pairs $c_1, c_2$,
-\beq \label{eq:stratum_families}
-    \Pr \{ \mbox{reject neither hypothesis} \omega_{w\ell,s} \ge c_s,\;\; s=1, 2 ||
-       \omega_{w\ell,s} \ge c_s \} \mbox{for both} s=1, 2 \} \ge (1-\alpha_1)(1-\alpha_2).
-\eeq
+\begin{align} \label{eq:stratum_families}
+    \Pr\{&\mbox{reject neither hypothesis } \omega_{w\ell,s} \ge c_s, \;\; s=1, 2 ||
+       \omega_{w\ell,s} \ge c_s  \mbox{ for both } s=1, 2 \} \nonumber \\ 
+       &= \prod_{s=1}^2 1 - \Pr \{ \mbox{reject hypothesis that } \omega_{w\ell,s} \ge c_s || \omega_{w\ell,s} \ge c_s \} \nonumber \\
+       & \ge (1-\alpha_1)(1-\alpha_2).
+\end{align}
 
 What is the chance that the audit leads to a full hand tabulation if the outcome is incorrect?
 One way the audit can lead to a full hand tally is if it leads to a full count in one stratum, 
