@@ -16,30 +16,30 @@ Also pick $\lambda_1$.
 Then if $\omega_{w\ell,1} < \lambda_1 V_{w\ell}$ and 
 $\omega_{w\ell,2} < \lambda_2 V_{w\ell}$,
 the outcome is correct.
-We audit stratum $s$ to test the hypothesis $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ 
+We audit each stratum $s$ to test the hypothesis $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ 
 with risk limit $\alpha_s$,
 as if it were its own election.
 We want to know the relationship between those two stratum-level ``risks'' and the 
 overall risk that the audit will not correct the outcome if the outcome is wrong.
-That depends in part on what we do if the audit in a given stratum leads to a full manual
+The overall risk depends on what we do if the audit in one stratum leads to a full manual
 tally of that stratum.
 
-Consider a few scenarios.
-The outcome is certainly correct if both net overstatements are less than their 
-respective thresholds. 
+Here are the possibilities.
+The outcome is certainly correct if, in both strata, the net overstatement in the stratum is less
+than its threshold. 
 For the outcome to be wrong, one or both strata need to have net overstatement
 $\omega_{w\ell,s}$
 greater than its corresponding threshold $\lambda_s V_{w\ell}$.
-If $\omega_{w\ell,1} + \omega_{w\ell,2} \ge V_{w\ell}$, then $\omega_{w\ell,1}\ge \lambda_1V_{w\ell}$
+That is, if $\omega_{w\ell,1} + \omega_{w\ell,2} \ge V_{w\ell}$, then $\omega_{w\ell,1}\ge \lambda_1V_{w\ell}$
 or $\omega_{w\ell,2}\ge \lambda_2V_{w\ell}$, or both.
-If the allocated overstatement is exceeded in only one stratum, $s$, then the chance that the 
-stratum will be fully hand counted is at least $1-\alpha_s \ge 1- \alpha$.
+If the allocated overstatement is exceeded in only one stratum, $h$, then the chance that the 
+stratum will be fully hand counted is at least $1-\alpha_h \ge 1- \alpha$.
 
 If both $\omega_{w\ell,1} \ge \lambda_1V_{w\ell}$
 and $\omega_{w\ell,2} \ge \lambda_2V_{w\ell}$, then the chance both are fully tabulated is
 $(1-\alpha_1)(1-\alpha_2)$, since the audit samples in the two strata are independent.
 
-What should we do if the audit leads to a full tally in one stratum?
+What should we do if the audit leads to a full tally in one stratum, $h$?
 We consider two options.
 The simpler is to automatically require a full hand count of the other stratum, 
 to set the record straight.
@@ -47,53 +47,62 @@ If the audit uses this rule, then we can take $\alpha_1 = \alpha_2 = \alpha$, an
 risk limit $\alpha$.
 
 A second approach is to adjust the contest margin for the results of the manual tally in the
-fully counted stratum (call the stratum $s$), and continue to audit in the other, 
+fully counted stratum, $h$, and continue to audit in the other, 
 but against the overall margin, adjusted for the ``known'' tally in the stratum that had 
-been counted: we test against the share $V_{w\ell} - A_{w\ell,s} \equiv \lambda_t' V_{w\ell}$, rather than 
-against the share $\lambda_t V_{w\ell}$.
-Then to reject the null hypothesis in that stratum is to conclude that the overall outcome is still correct.
+been counted: we test against the share $V_{w\ell} - A_{w\ell,h} \equiv \lambda_t' V_{w\ell}$, rather than 
+against its (originally allocated) share $\lambda_t V_{w\ell}$.
+Then to reject the new null hypothesis in stratum $t$ is to conclude that the overall outcome is correct.
 
-The statistical wrinkle is that adjusting for the manual tally in the hand-counted stratum 
-changes the hypothesis being tested in the remaining
-stratum in a way that is itself random:
-whether the original null or a new null is tested depends on what the sample in the other stratum
-finds.
-However, if the hypothesis changes, there's only one value possible for $\lambda_t'$---which
-depends on the reported margin and the count in the other stratum---but it's unknown 
-until the other stratum count is known.
+The statistical wrinkle is that adjusting for the manual tally in the hand-counted stratum $h$
+changes the hypothesis being tested in the other stratum $t$
+in a way that is itself random:
+whether the original null $\omega_{w\ell,s} \ge \lambda_t V_{w\ell}$ is tested
+or the new null $\omega_{w\ell,s} \ge \lambda_t' V_{w\ell}$ is tested depends on what the 
+sample reveals in stratum $h$.
+If the hypothesis does change, there is only one value possible for $\lambda_t'$---which
+depends on the reported margin $V_{w\ell}$ and the count $A_{w\ell,h}$ in 
+stratum $h$---but it is unknown until $A_{w\ell,h}$ is known.
 
-The solution is through conditioning. 
-The samples in the two strata are independent. 
-Think of the overall procedure as concluding that the outcome is correct without a full
-hand count in both strata if:
+We assume that before any data are collected, the audit specifies two families of tests:
+for each stratum $s$, a family of level-$\alpha_s$ tests of the null hypothesis that 
+the overstatement in the stratum is greater than or equal to $c$, for all feasible values of $c$.
+That is,
+\beq
+    \Pr \{ \mbox{reject hypothesis that} \omega_{w\ell,s} \ge c_s || \omega_{w\ell,s} \ge c_s \} \le \alpha_s,
+\eeq
+for $s = 1, 2$, and all feasible $c_s$.
+Moreover, we insist that the test depend on data only from ballots selected from its stratum.
+Because the samples in the two strata are independent, for all feasible pairs $c_1, c_2$,
+\beq \label{eq:stratum_families}
+    \Pr \{ \mbox{reject neither hypothesis} \omega_{w\ell,s} \ge c_s,\;\; s=1, 2 ||
+       \omega_{w\ell,s} \ge c_s \} \mbox{for both} s=1, 2 \} \ge (1-\alpha_1)(1-\alpha_2).
+\eeq
 
-\begin{itemize}
-   \item the original hypotheses are rejected in both strata (neither stratum is fully hand tabulated)
-   \item the hypothesis is not rejected in stratum $s$; the threshold $\lambda_t$
-            is adjusted in the other stratum, and the hypothesis that the overstatement error
-            in that stratum is greater than the new limit, $\lambda_t' V_{w\ell}$ is rejected. 
-\end{itemize}
+What is the chance that the audit leads to a full hand tabulation if the outcome is incorrect?
+One way the audit can lead to a full hand tally is if it leads to a full count in one stratum, 
+the null hypothesis in the other stratum is changed, and the audit in the second 
+stratum then proceeds to a full manual tally.
+(There are other ways the audit can lead to a full hand tally, for instance, if neither
+null hypothesis is rejected, but this is one way.)
 
-Suppose that the outcome is incorrect. 
-Then in at least one stratum $s$, $\omega_{w\ell,s}\ge \lambda_s V_{w\ell}$.
-The chance that the audit leads to a full hand tabulation in that stratum is at least $1-\alpha_s$,
-in which case the ``correct'' count for that stratum will become known.
+If the outcome is wrong, there is at least one stratum in which the overstatement $\omega_{w\ell,s}$ 
+exceeds the threshold $\lambda_s V_{w\ell}$.
+Let $h$ be one such stratum. 
+Then the chance the audit in stratum $h$ leads to a full manual tally in that stratum
+is at least $(1-\alpha_h)$.
+If the audit leads to a full manual tally in stratum~$h$ and the overall outcome is wrong,
+then the (new) null hypothesis in the other stratum, $t$ must be true.
+If we started to audit that new hypothesis \emph{ab initio}, the chance that we would reject it
+would be at most $\alpha_t$, so the chance the audit would lead to a full hand count 
+of stratum $t$ is at least $1-\alpha_t$.
+The question is whether ``changing hypotheses'' could make that chance smaller.
+The inequality \ref{eq:stratum_families} shows that it cannot: for any feasible pair of
+overstatements, $c = (c_1, c_2)$, if $\omega_{w\ell,1} \ge c_1$ and $\omega_{w\ell,2} \ge c_2$,
+the chance that neither the hypothesis $\omega_{w\ell,1} \ge c_1$ nor the hypothesis 
+$\omega_{w\ell,2} \ge c_2$ will be rejected is at least $(1-\alpha_1)(1-\alpha_2)$.
 
-What happens in the other stratum?
-We adjust the margin (or tolerance for overstatement error) and keep auditing.
-The value of $\lambda_t'$ is fixed, but unknown before the audit starts.
-Consider the conditional probability that a test would reject the hypothesis that the margin is less than 
-$\lambda_t' V_{w\ell}$, given that the other stratum, $s$, is tabulated by hand.
-Because the tests in the two strata are statistically independent, conditioning on an event in stratum $s$
-does not affect the probability of rejection in stratum $t$.
-That is, the conditional probability of rejecting the null hypothesis for stratum $t$ 
-is equal to the corresponding unconditional probability.
-The chance that the audit will go to a full hand count in stratum $t$ is at least 
-$1-\alpha_t$ if the (new) null is true (i.e., if the outcome is incorrect). 
-The conditioning does not increase the overall chance of incorrectly rejecting the null.
-
-Hence, for this procedure, the chance that there will be a full hand count in both strata is at least 
-$(1-\alpha_s)(1-\alpha_t)$ if the outcome is incorrect,
+And therefore, for this procedure, the chance that there will be a full hand count in both strata is at least 
+$(1-\alpha_1)(1-\alpha_2)$ if the outcome is incorrect,
 even if the probability were zero that both of the original audits would proceed to a full hand count.
 The overall risk limit is thus not larger than $1 - (1-\alpha_s)(1-\alpha_t)$.
 
