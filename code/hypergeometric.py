@@ -50,6 +50,7 @@ def diluted_margin_trihypergeometric(w, l, n, N_w, N_l, N):
                          sp.special.comb(N_u, n-p[0]-p[1], exact=True),\
                          pairs))/sp.special.comb(N, n, exact=True)
 
+
 def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
     """
     Conduct tri-hypergeometric test
@@ -75,9 +76,10 @@ def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
     Returns
     -------
     float
-        probability, under the null, that difference in the
-        number of votes for candidate w and the number of votes for candidate l 
-        will be greater than or equal to (w-l)
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n.
     """
     pvalue = 0
     N_u = N-N_w-N_l
@@ -95,11 +97,13 @@ def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
 def trihypergeometric_optim(sample, popsize, null_margin):
     '''
     Wrapper function for p-value calculations using the tri-hypergeometric distribution.
+    This function maximizes the p-value over all possible values of the nuisance parameter,
+    the number of votes for the reported winner in the population.
     
     Parameters
     ----------
     sample : array-like
-        sample of ballots. Values must be 0, 1, and np.nan.
+        sample of ballots. Values must be 0 (votes for l), 1 (votes for w), and np.nan (other votes).
     popsize : int
         total number of ballots in the population
     null_margin : int
@@ -107,9 +111,11 @@ def trihypergeometric_optim(sample, popsize, null_margin):
         N_w - N_l, under the null hypothesis
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n.
     '''
     
     w = sum(sample==1)
@@ -117,11 +123,13 @@ def trihypergeometric_optim(sample, popsize, null_margin):
     n = len(sample)
     u = n-w-l
 
-    # maximize p-value over N_wl
+    # maximize p-value over N_w
     optim_fun = lambda N_w: diluted_margin_trihypergeometric(w, l, n, N_w, N_w-null_margin, popsize)
+    # conditions are that N_w+N_l = 2*upper - c < N-u, N_l = upper-c > l, N_w = upper > w
     upper_Nw = int((popsize-u+null_margin)/2)
     lower_Nw = int(np.max([w, null_margin]))
     return np.max(list(map(optim_fun, range(lower_Nw, upper_Nw+1))))
+
 
 ### Hypergeometric tests
 
@@ -132,7 +140,9 @@ def diluted_margin_hypergeometric(w, l, N_w, N_l):
     H_0: N_w - N_l <= c
     H_1: N_w - N_l > c
     
-    using the diluted margin as test statistic
+    using the diluted margin as test statistic.
+    The test conditions on n and w+l.
+    
     Parameters
     ----------
     w : int
@@ -145,9 +155,11 @@ def diluted_margin_hypergeometric(w, l, N_w, N_l):
         total number of votes for l in the population *under the null*
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     """
     n = w+l
     pvalue = sp.stats.hypergeom.sf(w-1, N_w + N_l, N_w, n)
@@ -161,7 +173,9 @@ def diluted_margin_hypergeometric2(w, l, N_w, N_l):
     H_0: N_w - N_l <= c
     H_1: N_w - N_l > c
     
-    using the diluted margin as test statistic
+    using the diluted margin as test statistic.
+    The test conditions on n and w+l.
+    
     Parameters
     ----------
     w : int
@@ -174,9 +188,11 @@ def diluted_margin_hypergeometric2(w, l, N_w, N_l):
         total number of votes for l in the population *under the null*
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     """
     pvalue = 0
     delta = w-l
@@ -193,6 +209,9 @@ def diluted_margin_hypergeometric3(w, l, N_w, N_l):
     H_0: N_w - N_l <= c
     H_1: N_w - N_l > c
     
+    using the diluted margin as test statistic.
+    The test conditions on n and w+l.
+    
     Parameters
     ----------
     w : int
@@ -205,9 +224,11 @@ def diluted_margin_hypergeometric3(w, l, N_w, N_l):
         total number of votes for l in the population *under the null*
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     """
     delta = w-l
     n = w+l
@@ -224,11 +245,13 @@ def diluted_margin_hypergeometric3(w, l, N_w, N_l):
 def hypergeometric_optim(sample, popsize, null_margin):
     '''
     Wrapper function for p-value calculations using the hypergeometric distribution.
+    This function maximizes the p-value over all possible values of the nuisance parameter,
+    the number of votes for the reported winner in the population.
     
     Parameters
     ----------
     sample : array-like
-        sample of ballots. Values must be 0, 1, and np.nan.
+        sample of ballots. Values must be 0 (votes for l), 1 (votes for w), and np.nan (other votes).
     popsize : int
         total number of ballots in the population
     null_margin : int
@@ -236,9 +259,11 @@ def hypergeometric_optim(sample, popsize, null_margin):
         N_w - N_l, under the null hypothesis
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     '''
     
     w = sum(sample==1)
@@ -246,17 +271,13 @@ def hypergeometric_optim(sample, popsize, null_margin):
     n = len(sample)
     u = n-w-l    
 
-    # maximize p-value over N_wl
-    optim_fun = lambda N_w: -1*diluted_margin_hypergeometric(w, l, N_w, N_w-null_margin)
-    upper_WL_limit = (popsize-u+null_margin)/2
-    lower_WL_limit = w
+    # maximize p-value over N_w
+    optim_fun = lambda N_w: diluted_margin_hypergeometric(w, l, N_w, N_w-null_margin)
+    # conditions are that N_w+N_l = 2*upper - c < N-u, N_l = upper-c > l, N_w = upper > w
+    upper_Nw = int((popsize-u+null_margin)/2)
+    lower_Nw = int(np.max([w, null_margin]))
     
-    res = minimize_scalar(optim_fun, 
-                          bounds = [lower_WL_limit, upper_WL_limit], 
-                          method = 'bounded')
-    pvalue = -1*res['fun']
-    return pvalue
-
+    return np.max(list(map(optim_fun, range(lower_Nw, upper_Nw+1))))
 
 
 ### Unit tests
@@ -293,7 +314,10 @@ def test_diluted_margin_pvalue_trihyper():
     t4 = 1*1*1/sp.misc.comb(9, 5)                  # w=5, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
-
+    
+    # example 3: w=2, l=0, n=4, W=3, L=1, N=6. Result should be 0.4
+    np.testing.assert_almost_equal(diluted_margin_trihypergeometric(2, 0, 4, 3, 1, 6), 0.4)
+    np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(2, 0, 4, 3, 1, 6), 0.4)
 
 def test_find_pairs_hyper():
     # example: w=2, l=1, n=3
