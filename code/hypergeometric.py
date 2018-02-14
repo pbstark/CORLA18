@@ -76,9 +76,10 @@ def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
     Returns
     -------
     float
-        probability, under the null, that difference in the
-        number of votes for candidate w and the number of votes for candidate l 
-        will be greater than or equal to (w-l)
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n.
     """
     pvalue = 0
     N_u = N-N_w-N_l
@@ -96,11 +97,13 @@ def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
 def trihypergeometric_optim(sample, popsize, null_margin):
     '''
     Wrapper function for p-value calculations using the tri-hypergeometric distribution.
+    This function maximizes the p-value over all possible values of the nuisance parameter,
+    the number of votes for the reported winner in the population.
     
     Parameters
     ----------
     sample : array-like
-        sample of ballots. Values must be 0, 1, and np.nan.
+        sample of ballots. Values must be 0 (votes for l), 1 (votes for w), and np.nan (other votes).
     popsize : int
         total number of ballots in the population
     null_margin : int
@@ -108,9 +111,11 @@ def trihypergeometric_optim(sample, popsize, null_margin):
         N_w - N_l, under the null hypothesis
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n.
     '''
     
     w = sum(sample==1)
@@ -135,7 +140,9 @@ def diluted_margin_hypergeometric(w, l, N_w, N_l):
     H_0: N_w - N_l <= c
     H_1: N_w - N_l > c
     
-    using the diluted margin as test statistic
+    using the diluted margin as test statistic.
+    The test conditions on n and w+l.
+    
     Parameters
     ----------
     w : int
@@ -148,9 +155,11 @@ def diluted_margin_hypergeometric(w, l, N_w, N_l):
         total number of votes for l in the population *under the null*
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     """
     n = w+l
     pvalue = sp.stats.hypergeom.sf(w-1, N_w + N_l, N_w, n)
@@ -164,7 +173,9 @@ def diluted_margin_hypergeometric2(w, l, N_w, N_l):
     H_0: N_w - N_l <= c
     H_1: N_w - N_l > c
     
-    using the diluted margin as test statistic
+    using the diluted margin as test statistic.
+    The test conditions on n and w+l.
+    
     Parameters
     ----------
     w : int
@@ -177,9 +188,11 @@ def diluted_margin_hypergeometric2(w, l, N_w, N_l):
         total number of votes for l in the population *under the null*
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     """
     pvalue = 0
     delta = w-l
@@ -196,6 +209,9 @@ def diluted_margin_hypergeometric3(w, l, N_w, N_l):
     H_0: N_w - N_l <= c
     H_1: N_w - N_l > c
     
+    using the diluted margin as test statistic.
+    The test conditions on n and w+l.
+    
     Parameters
     ----------
     w : int
@@ -208,9 +224,11 @@ def diluted_margin_hypergeometric3(w, l, N_w, N_l):
         total number of votes for l in the population *under the null*
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     """
     delta = w-l
     n = w+l
@@ -227,11 +245,13 @@ def diluted_margin_hypergeometric3(w, l, N_w, N_l):
 def hypergeometric_optim(sample, popsize, null_margin):
     '''
     Wrapper function for p-value calculations using the hypergeometric distribution.
+    This function maximizes the p-value over all possible values of the nuisance parameter,
+    the number of votes for the reported winner in the population.
     
     Parameters
     ----------
     sample : array-like
-        sample of ballots. Values must be 0, 1, and np.nan.
+        sample of ballots. Values must be 0 (votes for l), 1 (votes for w), and np.nan (other votes).
     popsize : int
         total number of ballots in the population
     null_margin : int
@@ -239,9 +259,11 @@ def hypergeometric_optim(sample, popsize, null_margin):
         N_w - N_l, under the null hypothesis
     Returns
     -------
-    int
-        probability, under the null, of observing a number of votes for w 
-        greater than or equal to input w in the sample
+    float
+        conditional probability, under the null, that difference in the
+        number of votes for candidate w and the number of votes for candidate l,
+        divided by the sample size n, will be greater than or equal to (w-l)/n.
+        The test conditions on n and w+l.
     '''
     
     w = sum(sample==1)
