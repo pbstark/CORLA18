@@ -314,7 +314,10 @@ def test_diluted_margin_pvalue_trihyper():
     t4 = 1*1*1/sp.misc.comb(9, 5)                  # w=5, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
-
+    
+    # example 3: w=2, l=0, n=4, W=3, L=1, N=6. Result should be 0.4
+    np.testing.assert_almost_equal(diluted_margin_trihypergeometric(2, 0, 4, 3, 1, 6), 0.4)
+    np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(2, 0, 4, 3, 1, 6), 0.4)
 
 def test_find_pairs_hyper():
     # example: w=2, l=1, n=3
