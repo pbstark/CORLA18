@@ -50,6 +50,7 @@ def diluted_margin_trihypergeometric(w, l, n, N_w, N_l, N):
                          sp.special.comb(N_u, n-p[0]-p[1], exact=True),\
                          pairs))/sp.special.comb(N, n, exact=True)
 
+
 def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
     """
     Conduct tri-hypergeometric test
@@ -117,11 +118,13 @@ def trihypergeometric_optim(sample, popsize, null_margin):
     n = len(sample)
     u = n-w-l
 
-    # maximize p-value over N_wl
+    # maximize p-value over N_w
     optim_fun = lambda N_w: diluted_margin_trihypergeometric(w, l, n, N_w, N_w-null_margin, popsize)
+    # conditions are that N_w+N_l = 2*upper - c < N-u, N_l = upper-c > l, N_w = upper > w
     upper_Nw = int((popsize-u+null_margin)/2)
     lower_Nw = int(np.max([w, null_margin]))
     return np.max(list(map(optim_fun, range(lower_Nw, upper_Nw+1))))
+
 
 ### Hypergeometric tests
 
@@ -246,17 +249,13 @@ def hypergeometric_optim(sample, popsize, null_margin):
     n = len(sample)
     u = n-w-l    
 
-    # maximize p-value over N_wl
-    optim_fun = lambda N_w: -1*diluted_margin_hypergeometric(w, l, N_w, N_w-null_margin)
-    upper_WL_limit = (popsize-u+null_margin)/2
-    lower_WL_limit = w
+    # maximize p-value over N_w
+    optim_fun = lambda N_w: diluted_margin_hypergeometric(w, l, N_w, N_w-null_margin)
+    # conditions are that N_w+N_l = 2*upper - c < N-u, N_l = upper-c > l, N_w = upper > w
+    upper_Nw = int((popsize-u+null_margin)/2)
+    lower_Nw = int(np.max([w, null_margin]))
     
-    res = minimize_scalar(optim_fun, 
-                          bounds = [lower_WL_limit, upper_WL_limit], 
-                          method = 'bounded')
-    pvalue = -1*res['fun']
-    return pvalue
-
+    return np.max(list(map(optim_fun, range(lower_Nw, upper_Nw+1))))
 
 
 ### Unit tests
