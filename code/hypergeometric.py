@@ -11,7 +11,7 @@ import itertools
 
 ### Tri-hypergeometric distribution tests
 
-def diluted_margin_trihypergeometric(w, l, n, N_w, N_l, N):
+def diluted_margin_trihypergeometric(w, l, n, N_w, N_l, N, exact=True):
     """
     Conduct tri-hypergeometric test
     
@@ -33,6 +33,9 @@ def diluted_margin_trihypergeometric(w, l, n, N_w, N_l, N):
         total number of votes for l in the population *under the null*
     N : int
         total number of ballots in the population
+    exact : bool, optional
+        If exact is False, then floating point precision is used, 
+        otherwise exact long integer is computed.
     Returns
     -------
     float
@@ -45,13 +48,13 @@ def diluted_margin_trihypergeometric(w, l, n, N_w, N_l, N):
     pairs = itertools.product(range(n+1), range(n+1))   # Cartesian product
     pairs = itertools.filterfalse(lambda y: sum(y) > n or y[0] - y[1] < (w-l), pairs)
     pairs = itertools.filterfalse(lambda y: y[0] > N_w or y[1] > N_l or n-y[0]-y[1] > N_u, pairs)
-    return sum(map(lambda p: sp.special.comb(N_w, p[0], exact=True)*\
-                         sp.special.comb(N_l, p[1], exact=True)*\
-                         sp.special.comb(N_u, n-p[0]-p[1], exact=True),\
-                         pairs))/sp.special.comb(N, n, exact=True)
+    return sum(map(lambda p: sp.special.comb(N_w, p[0], exact=exact)*\
+                         sp.special.comb(N_l, p[1], exact=exact)*\
+                         sp.special.comb(N_u, n-p[0]-p[1], exact=exact),\
+                         pairs))/sp.special.comb(N, n, exact=exactsp.special.comb)
 
 
-def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
+def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N, exact=True):
     """
     Conduct tri-hypergeometric test
     
@@ -73,6 +76,9 @@ def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
         total number of votes for l in the population *under the null*
     N : int
         total number of ballots in the population
+    exact : bool, optional
+        If exact is False, then floating point precision is used, 
+        otherwise exact long integer is computed.
     Returns
     -------
     float
@@ -89,9 +95,9 @@ def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N):
             if ww+ll > n:
                 break
             else:
-                tmp += sp.misc.comb(N_l, ll)*sp.misc.comb(N_u, n-ww-ll)
-        pvalue += tmp * sp.misc.comb(N_w, ww)
-    return pvalue/sp.misc.comb(N, n)
+                tmp += sp.special.comb(N_l, ll, exact=exact)*sp.special.comb(N_u, n-ww-ll, exact=exact)
+        pvalue += tmp * sp.special.comb(N_w, ww, exact=exact)
+    return pvalue/sp.special.comb(N, n, exact=exact)
 
 
 def trihypergeometric_optim(sample, popsize, null_margin):
@@ -300,18 +306,18 @@ def test_find_pairs_trihyper():
     
 def test_diluted_margin_pvalue_trihyper():
     # example 1: w=2, l=1, n=3, W=L=U=2
-    t1 = 2*1*1/sp.misc.comb(6, 3) # w=1, l=0, u=2
-    t2 = 1*1*2/sp.misc.comb(6, 3) # w=2, l=0, u=1
-    t3 = 1*2*1/sp.misc.comb(6, 3) # w=2, l=1, u=0
+    t1 = 2*1*1/sp.special.comb(6, 3) # w=1, l=0, u=2
+    t2 = 1*1*2/sp.special.comb(6, 3) # w=2, l=0, u=1
+    t3 = 1*2*1/sp.special.comb(6, 3) # w=2, l=1, u=0
     t4 = 0                        # w=3, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric(2, 1, 3, 2, 2, 6), t1+t2+t3+t4)
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(2, 1, 3, 2, 2, 6), t1+t2+t3+t4)
     
     # example 2: w=4, l=1, n=5, W=5, L=U=2
-    t1 = sp.misc.comb(5, 3)*1*1/sp.misc.comb(9, 5) # w=3, l=0, u=2
-    t2 = sp.misc.comb(5, 4)*1*2/sp.misc.comb(9, 5) # w=4, l=0, u=1
-    t3 = sp.misc.comb(5, 4)*2*1/sp.misc.comb(9, 5) # w=4, l=1, u=0
-    t4 = 1*1*1/sp.misc.comb(9, 5)                  # w=5, l=0, u=0
+    t1 = sp.special.comb(5, 3)*1*1/sp.special.comb(9, 5) # w=3, l=0, u=2
+    t2 = sp.special.comb(5, 4)*1*2/sp.special.comb(9, 5) # w=4, l=0, u=1
+    t3 = sp.special.comb(5, 4)*2*1/sp.special.comb(9, 5) # w=4, l=1, u=0
+    t4 = 1*1*1/sp.special.comb(9, 5)                  # w=5, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
     
@@ -337,15 +343,15 @@ def test_find_pairs_hyper():
     
 def test_diluted_margin_pvalue_hyper():
     # example 1: w=2, l=1, n=3, W=L=U=2
-    t3 = 1*2/sp.misc.comb(4, 3)   # w=2, l=1, u=0
+    t3 = 1*2/sp.special.comb(4, 3)   # w=2, l=1, u=0
     t4 = 0                        # w=3, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_hypergeometric(2, 1, 2, 2), t3+t4)
     np.testing.assert_almost_equal(diluted_margin_hypergeometric2(2, 1, 2, 2), t3+t4)
     np.testing.assert_almost_equal(diluted_margin_hypergeometric3(2, 1, 2, 2), t3+t4)
     
     # example 1: w=4, l=1, n=5, W=5, L=U=2
-    t3 = sp.misc.comb(5, 4)*2/sp.misc.comb(7, 5)   # w=4, l=1, u=0
-    t4 = 1*1/sp.misc.comb(7, 5)                    # w=5, l=0, u=0
+    t3 = sp.special.comb(5, 4)*2/sp.special.comb(7, 5)   # w=4, l=1, u=0
+    t4 = 1*1/sp.special.comb(7, 5)                    # w=5, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_hypergeometric(4, 1, 5, 2), t3+t4)
     np.testing.assert_almost_equal(diluted_margin_hypergeometric2(4, 1, 5, 2), t3+t4)
     np.testing.assert_almost_equal(diluted_margin_hypergeometric3(4, 1, 5, 2), t3+t4)
