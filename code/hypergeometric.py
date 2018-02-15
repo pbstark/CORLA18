@@ -51,7 +51,7 @@ def diluted_margin_trihypergeometric(w, l, n, N_w, N_l, N, exact=True):
     return sum(map(lambda p: sp.special.comb(N_w, p[0], exact=exact)*\
                          sp.special.comb(N_l, p[1], exact=exact)*\
                          sp.special.comb(N_u, n-p[0]-p[1], exact=exact),\
-                         pairs))/sp.special.comb(N, n, exact=exactsp.special.comb)
+                         pairs))/sp.special.comb(N, n, exact=exact)
 
 
 def diluted_margin_trihypergeometric2(w, l, n, N_w, N_l, N, exact=True):
