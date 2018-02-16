@@ -69,6 +69,10 @@ def trihypergeometric_optim(sample, popsize, null_margin):
     This function maximizes the p-value over all possible values of the nuisance parameter,
     the number of votes for the reported winner in the population.
     
+    The maximization is done on the continuous approximation to the p-value, using gamma functions.
+    The maximum here is an upper bound on the true maximum, which must occur at an integer value
+    of the nuisance parameter N_w. Here, the maximum can occur at a non-integer value.
+    
     Parameters
     ----------
     sample : array-like
@@ -100,8 +104,8 @@ def trihypergeometric_optim(sample, popsize, null_margin):
     lower_Nw = int(np.max([w, null_margin]))
     
     res = minimize_scalar(optim_fun, 
-                       bounds = [lower_Nw, upper_Nw],
-                       method = 'bounded')
+                       bracket = [lower_Nw, upper_Nw],
+                       method = 'brent')
     pvalue = -1*res['fun']
     return pvalue
 
@@ -201,6 +205,9 @@ def trihypergeometric_optim_bruteforce(sample, popsize, null_margin, exact=True)
     Wrapper function for p-value calculations using the tri-hypergeometric distribution.
     This function maximizes the p-value over all possible values of the nuisance parameter,
     the number of votes for the reported winner in the population.
+    
+    The maximization is done by brute force, computing the tri-hypergeometric p-value at all
+    possible integer values of the nuisance parameter N_w. This can be very slow.
     
     Parameters
     ----------
@@ -412,6 +419,14 @@ def test_diluted_margin_pvalue_trihyper():
     t4 = 0                        # w=3, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric(2, 1, 3, 2, 2, 6), t1+t2+t3+t4)
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(2, 1, 3, 2, 2, 6), t1+t2+t3+t4)
+    np.testing.assert_almost_equal(diluted_margin_trihypergeometric_gamma(2, 1, 3, 2, 2, 6), t1+t2+t3+t4)
+    
+    sample = np.array([1]*2 + [0]*1)
+    pvalue1 = trihypergeometric_optim(sample, popsize=6, null_margin=0)
+    pvalue2 = trihypergeometric_optim_bruteforce(sample, popsize=6, null_margin=0)
+    np.testing.assert_array_less(t1+t2+t3+t4, pvalue1)
+    np.testing.assert_array_less(t1+t2+t3+t4, pvalue2)
+    np.testing.assert_almost_equal(pvalue1, pvalue2, decimal=1)
     
     # example 2: w=4, l=1, n=5, W=5, L=U=2
     t1 = comb(5, 3)*1*1/comb(9, 5) # w=3, l=0, u=2
@@ -420,11 +435,28 @@ def test_diluted_margin_pvalue_trihyper():
     t4 = 1*1*1/comb(9, 5)                  # w=5, l=0, u=0
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
+    np.testing.assert_almost_equal(diluted_margin_trihypergeometric_gamma(4, 1, 5, 5, 2, 9), t1+t2+t3+t4)
+    
+    sample = np.array([1]*4 + [0]*1)
+    pvalue1 = trihypergeometric_optim(sample, popsize=9, null_margin=3)
+    pvalue2 = trihypergeometric_optim_bruteforce(sample, popsize=9, null_margin=3)
+    np.testing.assert_array_less(t1+t2+t3+t4, pvalue1)
+    np.testing.assert_array_less(t1+t2+t3+t4, pvalue2)
+    np.testing.assert_almost_equal(pvalue1, pvalue2, decimal=1)
     
     # example 3: w=2, l=0, n=4, W=3, L=1, N=6. Result should be 0.4
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric(2, 0, 4, 3, 1, 6), 0.4)
     np.testing.assert_almost_equal(diluted_margin_trihypergeometric2(2, 0, 4, 3, 1, 6), 0.4)
-
+    np.testing.assert_almost_equal(diluted_margin_trihypergeometric_gamma(2, 0, 4, 3, 1, 6), 0.4)
+    
+    sample = np.array([1]*2 + [np.nan]*2)
+    pvalue1 = trihypergeometric_optim(sample, popsize=6, null_margin=2)
+    pvalue2 = trihypergeometric_optim_bruteforce(sample, popsize=6, null_margin=2)
+    np.testing.assert_almost_equal(0.4, pvalue1, decimal=1)
+    np.testing.assert_almost_equal(0.4, pvalue2, decimal=1)
+    np.testing.assert_almost_equal(pvalue1, pvalue2, decimal=1)
+    
+    
 def test_find_pairs_hyper():
     # example: w=2, l=1, n=3
     pairs = itertools.product(range(3+1), range(3+1))
