@@ -390,6 +390,35 @@ $w$ or $\ell$.
 \input{comparisonError}
 \input{ballotPollError}
 
+\section{Recommendations}
+
+\note{@all Please review this section and add your thoughts}
+
+We have outlined several methods that Colorado could adopt for their 2018 audits.
+The method we propose, which would be the most efficient given the constraints on time and software implementation,
+are stratified ``hybrid'' audits.
+In a stratified audit, CVR counties and no-CVR counties conduct separate audits.
+Each stratum has its own allowable overstatement and risk limit.
+
+The risk limits, $\alpha_1$ and $\alpha_2$, and allowable overstatement allocated to each stratum, $\lambda_1$ and $\lambda_2$,
+are parameters to be chosen.
+We give the following advice.
+
+\begin{itemize}
+\item Changing the allowable overstatement has a larger effect on workload than changing the risk limits.
+\item Increasing the allowable overstatement in a stratum will tend to decrease the stratum workload.
+\end{itemize}
+
+We provide two examples of stratified hybrid audits in Jupyter notebooks,
+located at \url{https://www.github.com/pbstark/CORLA18}.
+The first example uses a hypothetical medium-sized election with a total of $110,00$ votes with a diluted margin of $1.8\%$.
+Using the parameters we chose, the CVR stratum would examine 348 ballots on average and the no-CVR stratum could stop the audit
+after examining 200 ballots.
+The second example uses a hypothetical large statewide election with a total of 2 million ballots and a diluted margin of nearly $20\%$.
+Using the parameters we chose, the CVR stratum would examine 40 ballots on average and the no-CVR stratum could stop the audit
+after examining 20 ballots.
+These notebooks can be modified and run with different contest sizes, margins, risk limits, and allocations of allowable error, in order to
+estimate the workload of different scenarios.
 
 \bibliography{./pbsBib}
 
