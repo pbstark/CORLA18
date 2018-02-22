@@ -392,31 +392,68 @@ $w$ or $\ell$.
 
 \section{Recommendations}
 
-\note{@all Please review this section and add your thoughts}
+We have outlined several methods Colorado might use to audit cross-jurisdictional contests
+that include CVR counties and no-CVR counties.
+We expect that stratified ``hybrid'' audits will be the most palatable,
+given the constraints on time for software development and the logistics
+of the audit itself, because the workflow for counties would be the same
+as it was in November, 2017.
 
-We have outlined several methods that Colorado could adopt for their 2018 audits.
-The method we propose, which would be the most efficient given the constraints on time and software implementation,
-are stratified ``hybrid'' audits.
-In a stratified audit, CVR counties and no-CVR counties conduct separate audits.
-Each stratum has its own allowable overstatement and risk limit.
+What would change is the risk calculation ``behind the scene,'' including the
+algorithms used to decide when the audit can stop.
+Those algorithms could be implemented in software external to RLATool.
+The minimal modification to RLATool that would be required to conduct
+a hybrid audit is to allow the sample size from each county to be set manually,
+rather than using a formula that is based on the margin within that county alone.
 
-The risk limits, $\alpha_1$ and $\alpha_2$, and allowable overstatement allocated to each stratum, $\lambda_1$ and $\lambda_2$,
-are parameters to be chosen.
-We give the following advice.
-
+To conduct a hybrid audit, one must choose two numbers
+in addition to the risk limit $\alpha$:
 \begin{itemize}
-\item Changing the allowable overstatement has a larger effect on workload than changing the risk limits.
-\item Increasing the allowable overstatement in a stratum will tend to decrease the stratum workload.
+   \item one stratum-wise risk limit, $\alpha_1$ 
+(the other, $\alpha_2$, is determined from $\alpha_1$ and the overall risk limit, $\alpha$)
+   \item the tradeoff of the allowable overstatement between strata, $\lambda_1$
+(the value of $\lambda_2$ is $1-\lambda_1$)
 \end{itemize}
+Those parameters can be chosen essentially arbitrarily (provided $\alpha_1 \le \alpha$)
+and the audit will still be risk-limiting;
+however, they can be optimized to reduce the expected workload under various
+assumptions about tabulation errors in the two strata.
+(Software that can be used to run scenarios is available at 
+\url{https://www.github.com/pbstark/CORLA18}; see below.)
 
-We provide two examples of stratified hybrid audits in Jupyter notebooks,
-located at \url{https://www.github.com/pbstark/CORLA18}.
-The first example uses a hypothetical medium-sized election with a total of $110,00$ votes with a diluted margin of $1.8\%$.
-Using the parameters we chose, the CVR stratum would examine 348 ballots on average and the no-CVR stratum could stop the audit
-after examining 200 ballots.
-The second example uses a hypothetical large statewide election with a total of 2 million ballots and a diluted margin of nearly $20\%$.
-Using the parameters we chose, the CVR stratum would examine 40 ballots on average and the no-CVR stratum could stop the audit
-after examining 20 ballots.
+In either stratum, increasing the risk limit or increasing the allowable overstatement will decrease
+the required sample size from that stratum (assuming that the actual overstatement in
+that stratum is less than its allowable overstatement).
+The relative change in sample size as the risk limit changes scales similarly in the two strata, 
+because the risk limit 
+enters both ballot-level comparisons and ballot-polling the same way: as the logarithm.
+However, the relative change in sample sizes as the allowable overstatement changes
+scales quite differently in the two strata: linearly in the ballot-level comparison stratum,
+but quadratically in the ballot-polling stratum.
+Hence, the workload is not as sensitive to how the risk limit is allocated across strata
+as it is to how the allowable overstatement is allocated.
+
+\strong{Software and examples.}
+Examples of stratified hybrid audits are in Jupyter notebooks available
+at \url{https://www.github.com/pbstark/CORLA18}.
+The first example is a hypothetical medium-sized election with a total of 
+$110,00$ votes and a diluted margin of $1.8\%$.
+For the parameters we chose, if the audit in the CVR stratum found no errors, 
+it would terminate after examining 327 ballots.
+In X\% of 10,000 simulations, an audit of Y ballots from the no-CVR stratum
+would have sufficed to confirm that the overstatement error in that stratum
+did not exceed its allocation, Z\% of the margin.
+
+The second example is a hypothetical large statewide election with a total of 
+2~million ballots and a diluted margin of nearly $20\%$.
+For the parameters we chose, the CVR stratum would examine ??~ballots if no discrepancies
+were found. 
+In X\% of 10,000 simulations, an audit of Y ballots from the no-CVR stratum
+would have sufficed to confirm that the overstatement error in that stratum
+did not exceed its allocation, Z\% of the margin.
+
+A third notebook illustrates the workflow for conducting a hybrid audit of this kind.
+
 These notebooks can be modified and run with different contest sizes, margins, risk limits, and allocations of allowable error, in order to
 estimate the workload of different scenarios.
 
