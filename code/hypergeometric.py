@@ -244,8 +244,19 @@ def trihypergeometric_optim_bruteforce(sample, popsize, null_margin, exact=True)
     return np.max(list(map(optim_fun, range(lower_Nw, upper_Nw+1))))
 
 
+def gen_sample(w, n):
+    """
+    Helper function for `simulate_ballot_polling_power`
+    """
+    if w>0:
+        sample = np.array([0]*0 + [1]*w + [np.nan]*(n-w))
+    else:
+        sample = np.array([0]*-w + [1]*0 + [np.nan]*(n+w))
+    return sample
+    
+
 def simulate_ballot_polling_power(N_w, N_l, N, null_margin, n, alpha, reps=10000,
-    seed=987654321):
+    stepsize=5, seed=987654321, verbose=True):
     """
     Simulate the power of the trihypergeometric ballot polling audit.
     This simulation assumes that the reported vote totals are true and
@@ -269,29 +280,61 @@ def simulate_ballot_polling_power(N_w, N_l, N, null_margin, n, alpha, reps=10000
         risk limit
     reps : int
         number of simulation runs. Default is 10000
+    stepsize : int
+        when searching for the threshold margin, what step size to use? Default is 5
     seed : int
         random seed value for the pseudorandom number generator. Default is 987654321
+    verbose : bool
+        print (margin, pvalue) pairs? Default is True
     """
     np.random.seed(seed)
     
     # step 1: find diluted margin for which we'd reject
     # the p-value depends only on the margin, not the values of w and l
-    for mar in range(0, n):
-        w = mar
-        l = 0
-        sample = np.array([0]*l + [1]*w + [np.nan]*(n-w-l))
-        pvalue_mar = trihypergeometric_optim(sample, N, null_margin)
-        if pvalue_mar <= alpha:
-            threshold = mar
-            break
-    print("threshold margin is ", mar)
-
+    if verbose:
+        print("Step 1: find diluted margin for which the p-value <= alpha")
+    w = int(n*N_w/N)
+    sample = np.array([0]*0 + [1]*w + [np.nan]*(n-w))
+    pvalue_mar = trihypergeometric_optim(sample, N, null_margin)
+    if verbose:
+        print(w, pvalue_mar)
+    if pvalue_mar <= alpha:
+        while pvalue_mar <= alpha and w<=n and w>=-n:
+            w = w-stepsize
+            sample = gen_sample(w, n)
+            pvalue_mar = trihypergeometric_optim(sample, N, null_margin)
+            if verbose:
+                print(w, pvalue_mar)
+        while pvalue_mar > alpha and w<=n and w>=-n:
+            w = w+1
+            sample = gen_sample(w, n)
+            pvalue_mar = trihypergeometric_optim(sample, N, null_margin)
+            if verbose:
+                print(w, pvalue_mar)
+        threshold = w
+    else:
+        while pvalue_mar > alpha and w<=n and w>=-n:
+            w = w+stepsize
+            sample = gen_sample(w, n)
+            pvalue_mar = trihypergeometric_optim(sample, N, null_margin)
+            if verbose:
+                print(w, pvalue_mar)
+        while pvalue_mar <= alpha and w<=n and w>=-n:
+            w = w-1
+            sample = gen_sample(w, n)
+            pvalue_mar = trihypergeometric_optim(sample, N, null_margin)
+            if verbose:
+                print(w, pvalue_mar)
+        threshold = w+1
+    print("threshold margin is ", threshold)
+            
     # step 2: over many samples, compute diluted margin
     population = np.array([0]*int(N_l) + [1]*int(N_w) + [np.nan]*(N-N_w-N_l))
     rejects = 0
     for r in range(reps):
         sample = np.random.choice(population, size=n)
-        if trihypergeometric_optim(sample, N, null_margin) <= alpha:
+        obs_mar = np.sum(sample==1) - np.sum(sample==0)
+        if obs_mar >= threshold:
             rejects += 1
 
     # step 3: what fraction of these are >= the threshold?
