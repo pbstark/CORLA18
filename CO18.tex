@@ -433,26 +433,38 @@ but quadratically in the ballot-polling stratum.
 Hence, the workload is not as sensitive to how the risk limit is allocated across strata
 as it is to how the allowable overstatement is allocated.
 
-\strong{Software and examples.}
+\textbf{Software and examples.}
 Examples of stratified hybrid audits are in Jupyter notebooks available
 at \url{https://www.github.com/pbstark/CORLA18}.
 The first example is a hypothetical medium-sized election with a total of 
 $110,00$ votes and a diluted margin of $1.8\%$.
-For the parameters we chose, if the audit in the CVR stratum found no errors, 
-it would terminate after examining 327 ballots.
-In X\% of 10,000 simulations, an audit of Y ballots from the no-CVR stratum
+If the audit in the CVR stratum found no errors and the allowable overstatement error was 10\% of the margin, 
+it would terminate after examining 35 ballots.
+In over 95\% of 10,000 simulations, an audit of 200 ballots from the no-CVR stratum
 would have sufficed to confirm that the overstatement error in that stratum
-did not exceed its allocation, Z\% of the margin.
+did not exceed its allocation, 90\% of the margin.
 
 The second example is a hypothetical large statewide election with a total of 
 2~million ballots and a diluted margin of nearly $20\%$.
-For the parameters we chose, the CVR stratum would examine ??~ballots if no discrepancies
-were found. 
-In X\% of 10,000 simulations, an audit of Y ballots from the no-CVR stratum
+If the audit in the CVR stratum found no errors and the allowable overstatement error was 10\% of the margin, 
+it would terminate after examining 40 ballots.
+In over 95\% of 10,000 simulations, an audit of 70 ballots from the no-CVR stratum
 would have sufficed to confirm that the overstatement error in that stratum
-did not exceed its allocation, Z\% of the margin.
+did not exceed its allocation, 90\% of the margin.
 
 A third notebook illustrates the workflow for conducting a hybrid audit of this kind.
+The example election has a total of 2~million ballots.
+The reported margin is just over $1\%$, but in reality the vote totals for the reported winner
+and reported loser are identical in both strata.
+The example illustrates two scenarios.
+In the first scenario, the audit in the CVR stratum escalates to a full hand count and the allowable overstatement
+in the no-CVR stratum must be adjusted.
+Using the new allowable overstatement in the no-CVR stratum makes it impossible to terminate the audit,
+even for samples as large as 5\% of the ballots.
+In the second scenario, the audit in the no-CVR stratum terminates with a sample of 500 ballots.
+However, the audit in the CVR stratum will still lead to a full hand count and the audit in the no-CVR
+stratum must be redone using the adjusted allowable overstatement, putting us back in the first scenario.
+In both cases, the audit leads to a full recount of all the ballots.
 
 These notebooks can be modified and run with different contest sizes, margins, risk limits, and allocations of allowable error, in order to
 estimate the workload of different scenarios.
