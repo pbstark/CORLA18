@@ -15,7 +15,7 @@ def ballot_comparison_pvalue(n, gamma, o1, u1, o2, u2, reported_margin, N, null_
     n : int
         sample size
     gamma : float
-        value > 1 to inflate the allowable error
+        value > 1 to inflate the error bound, to avoid requiring full hand count for a single 2-vote overstatement
     o1 : int
         number of ballots that overstate any 
         margin by one vote but no margin by two votes
@@ -28,17 +28,18 @@ def ballot_comparison_pvalue(n, gamma, o1, u1, o2, u2, reported_margin, N, null_
         number of ballots that understate every margin by two votes
     reported_margin : float
         the smallest reported margin *in votes* between a winning
-        and losing candidate
+        and losing candidate for the contest as a whole, including any other strata
     N : int
-        number of votes cast
+        number of votes cast in the stratum
     null_lambda : float
-        value that describes the null difference between reported and actual votes
+        fraction of the overall margin (in votes) to test for in the stratum. If the overall margin is reported_margin,
+        test that the overstatement in this stratum does not exceed null_lambda*reported_margin
 
     Returns
     -------
     pvalue
     """
-    mu = reported_margin/N
+    mu = (null_lambda*reported_margin)/N   # diluted null margin in the stratum
     log_pvalue = n*np.log(1 - mu/(2*gamma)) - \
                     o1*np.log(1 - 1/(2*gamma)) - \
                     o2*np.log(1 - 1/gamma) - \
@@ -60,7 +61,7 @@ def findNmin_ballot_comparison(alpha, gamma, o1, u1, o2, u2,
     alpha : float
         risk limit
     gamma : float
-        value > 1 to inflate the allowable error
+        value > 1 to inflate the error bound, to avoid requiring full hand count for a single 2-vote overstatement
     o1 : int
         number of ballots that overstate any 
         margin by one vote but no margin by two votes
@@ -73,17 +74,18 @@ def findNmin_ballot_comparison(alpha, gamma, o1, u1, o2, u2,
         number of ballots that understate every margin by two votes
     reported_margin : float
         the smallest reported margin *in votes* between a winning
-        and losing candidate
+        and losing candidate in the contest as a whole, including any other strata
     N : int
-        number of votes cast
+        number of votes cast in the stratum 
     null_lambda : float
-        value that describes the null difference between reported and actual votes
+        fraction of the overall margin (in votes) to test for in the stratum. If the overall margin is reported_margin,
+        test that the overstatement in this stratum does not exceed null_lambda*reported_margin
         
     Returns
     -------
     n
     """
-    m = (reported_margin/null_lambda)/N
+    m = null_lambda*reported_margin/N
     val = -2*gamma/m * (np.log(alpha) +
                 o1*np.log(1 - 1/(2*gamma)) + \
                 o2*np.log(1 - 1/gamma) + \
@@ -105,40 +107,37 @@ def findNmin_ballot_comparison_rates(alpha, gamma, r1, s1, r2, s2,
     alpha : float
         risk limit
     gamma : float
-        value > 1 to inflate the allowable error
+        value > 1 to inflate the error bound, to avoid requiring full hand count for a single 2-vote overstatement
     r1 : int
-        rate of ballots that overstate any 
+        hypothesized rate of ballots that overstate any 
         margin by one vote but no margin by two votes
     s1 : int
-        rate of ballots that understate any margin by 
+        hypothesizedrate of ballots that understate any margin by 
         exactly one vote, and every margin by at least one vote
     r2 : int
-        rate of ballots that overstate any margin by two votes
+        hypothesizedrate of ballots that overstate any margin by two votes
     s2 : int
-        rate of ballots that understate every margin by two votes
+        hypothesizedrate of ballots that understate every margin by two votes
     reported_margin : float
         the smallest reported margin *in votes* between a winning
-        and losing candidate
+        and losing candidate in the contest as a whole, including any other strata
     N : int
-        number of votes cast
+        number of votes cast in the stratum
     null_lambda : float
-        value that describes the null difference between reported and actual votes
+        fraction of the overall margin (in votes) to test for in the stratum. If the overall margin is reported_margin,
+        test that the overstatement in this stratum does not exceed null_lambda*reported_margin
         
     Returns
     -------
     n
     """
-    n0 = np.nan
-    m = (reported_margin/N)/null_lambda
-
+    m = null_lambda*reported_margin/N
     denom = (np.log(1 - m/(2*gamma)) -
                 r1*np.log(1 - 1/(2*gamma))- \
                 r2*np.log(1 - 1/gamma) - \
                 s1*np.log(1 + 1/(2*gamma)) - \
                 s2*np.log(1 + 1/gamma) )
-    if denom < 0:
-        n0 = np.log(alpha)/denom
-    return np.ceil(n0)
+    return np.ceil(np.log(alpha)/denom) if denom < 0 else np.nan
 
 
 
