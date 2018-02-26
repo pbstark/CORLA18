@@ -170,7 +170,8 @@ that $i < \frac{N_{w\ell,s}+c}{2}$ -- it is a possible outcome under the null hy
 \subsubsection{Optimizing over the parameter $A_{w,s}$}
 
 We have shown empirically (but do not prove) that this tail probability, as a function of $A_{w,s}$,
-has a unique maximum at one of the endpoints.
+has a unique maximum at one of the endpoints when $A_{w,s}$ is either as small or as large as possible,
+given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$.
 If the empirical result is true, then finding the maximum is trivial;
 otherwise, it is a trivial one-dimensional optimization problem to compute the unconditional $p$-value.
 
@@ -179,8 +180,8 @@ If the conditional tests are always conducted at significance level $\alpha$ or 
 $\mathbb{P} \{\mbox{Type I error} | B = n\} \le \alpha$, then the
 overall procedure has significance level $\alpha$ or less:
 \begin{eqnarray}
-    \mathbb{P} \{\mbox{Type I error}\} &=& \sum_{n=0}^N\sum_{m=0}^{N} \mathbb{P} \{\mbox{Type I error} |  B = n\} \mathbb{P} \{ B = n \} \nonumber \\
-       & \le & \sum_{n=0}^N\sum_{m=0}^{N}  \alpha \mathbb{P} \{  B = n \}  =  \alpha.
+    \mathbb{P} \{\mbox{Type I error}\} &=& \sum_{n=0}^N \{\mbox{Type I error} |  B = n\} \mathbb{P} \{ B = n \} \nonumber \\
+       & \le & \sum_{n=0}^N \alpha \mathbb{P} \{  B = n \}  =  \alpha.
 \end{eqnarray}
 
 In particular, this implies that our conditional hypergeometric test will have the correct risk limit unconditionally.
