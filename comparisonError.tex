@@ -141,7 +141,7 @@ so they define a probability distribution on the $P$ batches.)
 Let $T_j$ be the value of $t_p$ for the batch $p$ selected in the $j$th draw.
 Then $\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$, and
 $$
-  \mathbb{E} T_1 = \sum_{p=1}^P u_p/U t_p =
+  \mathbb{E} T_1 = \sum_{p=1}^P \frac{u_p}{U} t_p =
   \frac{1}{U}\sum_{p=1}^P u_p \frac{e_p}{u_p} = 
   \frac{1}{U} \sum_{p=1}^P e_p = E/U.
 $$
