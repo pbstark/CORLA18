@@ -106,7 +106,12 @@ def trihypergeometric_optim(sample, popsize, null_margin):
     res = minimize_scalar(optim_fun, 
                        bracket = [lower_Nw, upper_Nw],
                        method = 'brent')
-    pvalue = -1*res['fun']
+    if res['x'] > upper_Nw:
+        pvalue = -1*optim_fun(upper_Nw)
+    elif res['x'] < lower_Nw:
+        pvalue = -1*optim_fun(lower_Nw)
+    else:
+        pvalue = -1*res['fun']
     return pvalue
 
 
