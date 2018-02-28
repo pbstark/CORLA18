@@ -331,7 +331,7 @@ def simulate_ballot_polling_power(N_w, N_l, N, null_margin, n, alpha, reps=10000
             if verbose:
                 print(w, pvalue_mar)
         threshold = w+1
-    print("threshold margin is ", threshold)
+    print("The critical value of the test is ", threshold)
             
     # step 2: over many samples, compute diluted margin
     population = np.array([0]*int(N_l) + [1]*int(N_w) + [np.nan]*(N-N_w-N_l))
