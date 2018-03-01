@@ -2,6 +2,7 @@ MIT License
 
 Copyright (c) [2018] [Mark Lindeman, Neal McBurnett, Kellie Ottoboni, Ronald L. Rivest, Philip B.~Stark]
 
+SOFTWARE:
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
@@ -19,3 +20,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+MANUSCRIPT:
+Other than the software and documentation of the software, other documents in this repository, including the manuscript, are licenses CC-BY 4.0.
+https://creativecommons.org/licenses/by/4.0/
