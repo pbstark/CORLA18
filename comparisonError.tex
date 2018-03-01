@@ -1,7 +1,9 @@
-\section{Comparison audits of a tolerable overstatement in votes}
+\section{Batch comparison audits of a tolerable overstatement in votes}
 \label{sec:comparisonError}
 
-We consider auditing in a single stratum to test whether the overstatement of any margin
+In this section we expand previous comparison auditing work (already embodied in RLATool) to handle two new requirements.  The first allows the specification of the $\lambda$ parameters discussed in section~\ref{sec:hybrid}. The second handles batch-level auditing.
+
+The first requirement requires that we consider auditing in a single stratum to test whether the overstatement of any margin
 (in votes) exceeds some fraction $\lambda$ of the overall margin $V_{w\ell}$ between
 reported winner $w$ and reported loser $\ell$.
 If the stratum contains all the ballots cast in the contest, then for $\lambda = 1$, this 
@@ -10,7 +12,7 @@ For stratified audits, we might want to test other values of $\lambda$, as descr
 
 In Colorado, comparison audits have been ballot-level (i.e., batches consisting of a single
 ballot). 
-In this section, we derive a method for batches of arbitrary size, which might be useful
+This section also addresses the second requirement by deriving a method for batches of arbitrary size, which might be useful
 for Colorado to audit contests that include CVR counties and legacy counties.
 We keep the \emph{a priori} error bounds tighter than the ``super-simple'' 
 method~\citep{stark10d}.

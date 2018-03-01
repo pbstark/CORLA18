@@ -54,13 +54,15 @@
 \begin{abstract}
 Colorado's current audit software (RLATool) needs to be improved to audit 
 contests that cross county lines and to audit small contests efficiently.
-First, the current version of RLATool does not allow the user to select the sample size, nor does
-it directly allow an unstratified random sample to be drawn across counties.
-Similarly, RLATool needs to be modified to recognize that contests can cross jurisdictional
+
+First, the current version (1.1.0) of RLATool
+needs to be modified to recognize and group together contests that cross jurisdictional
 boundaries; currently, it treats every contest as if it were entirely
 contained in a single county.
 Margins and risk limits apply to entire contests, not to the portion of a contest
 included in a county.
+RLATool also does not allow the user to select the sample size, nor does
+it directly allow an unstratified random sample to be drawn across counties.
 Second, to audit a contest that includes voters in ``legacy'' counties 
 (counties with voting systems that cannot export cast vote records) 
 and voters in counties with newer systems, new statistical methods are needed to
@@ -70,7 +72,7 @@ Third, auditing contests that appear only on a subset of ballots can
 be made much more efficient if the sample can be drawn from just those ballots
 that contain the contest.
 While allowing samples to be restricted to ballots reported to contain a particular
-is not essential for the June, 2018 primaries, it will be necessary
+is not essential, it will be necessary
 eventually to make it feasible to audit smaller contests.
 This paper discusses some of these issues and presents several
 methods for auditing contests that include counties with
@@ -105,7 +107,7 @@ Rhode Island SB~413A and HB~5704A; and Colorado Revised Statutes (CRS)~1-7-515.
 CRS~1-7-515 required 
 Colorado to implement risk-limiting audits beginning in 2017.
 (There are provisions to allow the Secretary of State to exempt some counties.)
-The first statewide risk-limiting election audits took place in Colorado in November, 2017.\footnote{%
+The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
  See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
 }
  
@@ -164,7 +166,7 @@ Section~\ref{sec:hybrid} presents our recommended approach, which combines ballo
 comparisons in counties that can perform them with ballot-polling in the no-CVR counties.
 All the approaches require new software, including at least minor modifications to RLATool.
 We provide example software implementing the risk calculations for
-our recommended approach as a Jupyter Python notebook.\footnote{%
+our recommended approach as a Python Jupyter notebook.\footnote{%
  See \url{https://github.com/pbstark/CORLA18}.
 }
 Section~\ref{sec:subcollections}
@@ -340,6 +342,8 @@ exactly one of the two strata.
 We assume that the samples are drawn from the
 two strata independently.
 
+As explained below, these stratified “hybrid” audits require the specification of some additional parameters: \lambda_1 for dividing the tolerable overstatement error up, and the strata risk limits $\{\alpha_s\}$.
+
 \subsection{Partitioning the total permissible overstatement into strata}
 The simplest approach to stratification involves partitioning the risk limit and the tolerable
 overstatement error of the tabulation into
@@ -377,7 +381,7 @@ audit procedures affect the workload and the overall risk limit.
 (See section~\ref{sec:stratumRisk} and section~\ref{sec:recommendations}.)
 
 For ballot-level comparison audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$
-is discussed in section~\ref{sec:comparisonError}; it is a minor modification of the method
+is discussed in section~\ref{sec:comparisonError}.  It is a minor modification of the method
 embodied in RLATool.
 
 For ballot-polling audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$ is discussed in section~\ref{sec:ballotPollError}.
@@ -407,7 +411,8 @@ What would change is the risk calculation ``behind the scene,'' including the
 algorithms used to decide when the audit can stop.
 Those algorithms could be implemented in software external to RLATool.
 The minimal modification to RLATool that would be required to conduct
-a hybrid audit is to allow the sample size from each county to be set manually,
+a hybrid audit is to allow the sample size from each county to be set externally,
+e.g. by uploading a parameter file,
 rather than using a formula that is based on the margin within that county alone.
 
 To conduct a hybrid audit, one must choose two numbers
@@ -441,7 +446,7 @@ as it is to how the allowable overstatement is allocated.
 Examples of stratified hybrid audits are in Jupyter notebooks available
 at \url{https://www.github.com/pbstark/CORLA18}.
 The first example is a hypothetical medium-sized election with a total of 
-$110,000$ votes and a diluted margin of $1.8\%$.
+$110,000$ votes and a diluted margin of $1.8\%$.  The risk limit is 10%.
 If the audit in the CVR stratum found no errors and the allowable overstatement error was 30\% of the margin, 
 it would terminate after examining 1,213 ballots.
 In over 90\% of 10,000 simulations, an audit of 250 ballots from the no-CVR stratum
@@ -450,7 +455,7 @@ did not exceed its allocation, 70\% of the margin.
 A sample of 450 ballots was sufficient to stop the audit in 99\% of simulations.
 
 The second example is a hypothetical large statewide election with a total of 
-2~million ballots and a diluted margin of nearly $20\%$.
+2~million ballots and a diluted margin of nearly $20\%$.  The risk limit is 5%.
 If the audit in the CVR stratum found no errors and the allowable overstatement error was 10\% of the margin, 
 it would terminate after examining 50 ballots.
 In over 90\% of 10,000 simulations, an audit of 50 ballots from the no-CVR stratum
@@ -461,7 +466,7 @@ A sample of 100 ballots was sufficient to stop the audit in 99\% of simulations.
 A third notebook illustrates the workflow for conducting a hybrid audit of this kind.
 The example election has a total of 2~million ballots.
 The reported margin is just over $1\%$, but in reality the vote totals for the reported winner
-and reported loser are identical in both strata.
+and reported loser are identical in both strata.  The risk limit is 5%.
 The example illustrates two scenarios.
 In the first scenario, the audit in the CVR stratum escalates to a full hand count and the allowable overstatement
 in the no-CVR stratum must be adjusted.
