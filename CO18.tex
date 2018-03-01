@@ -41,11 +41,10 @@
    Mark Lindeman\\
    Neal McBurnett\\
    Kellie Ottoboni\\
-   Ronald L.~Rivest\\
    Philip B.~Stark
 }
 
-\date{Draft \today}
+\date{Version: \today}
 
 \begin{document}
 \maketitle
@@ -53,26 +52,30 @@
 
 \begin{abstract}
 Colorado conducted risk-limiting tabulation audits (RLAs) across the state in 2017,
-including both ballot-level comparison audits and ballot polling audits.
-To date, methods to efficiently audit contests that cross county boundaries
-and combine ballot polling and ballot-level comparisons have not been available,
-and the audits only covered contests restricted to a single county.
+including both ballot-level comparison audits and ballot-polling audits.
+Those audits only covered contests restricted to a single county;
+methods to efficiently audit contests that cross county boundaries
+and combine ballot polling and ballot-level comparisons have not been available.
 
 Colorado's current audit software (RLATool) needs to be improved to audit
 these contests that cross county lines and to audit small contests efficiently.
 
-This paper addresses these needs. It presents stratified hybrid methods
-which handle combining ballot polling and ballot-level comparisons,
-as well as combinations of ballot-level comparison and
-variable-size batch comparison audits.
-The methods employ Fisher’s combining function and the conditional hypergeometric test.
-We also describe some simpler but less efficient approaches.
+This paper addresses these needs. 
+It presents extremely simple but inefficient methods, more efficient methods
+that combine ballot polling and ballot-level comparisons using stratified samples,
+and methods that combine ballot-level comparison and
+variable-size batch comparison audits in a way that does not require stratified
+sampling.
 
-We conclude with some recommendations, then illustrate these methods
-with some examples that compare them to existing approaches.
+We conclude with some recommendations, and illustrate our recommended method
+using examples that compare them to existing approaches.
 Exemplar open-source code and interactive Jupyter notebooks are provided
 that implement the methods and allow further exploration.
 \end{abstract}
+
+\noindent
+\textbf{Acknowledgements.}
+We are grateful to Ronald L.~Rivest for helpful conversations and suggestions.
 
 \section{Introduction}
 A risk-limiting audit (RLA) of an election is a procedure that
