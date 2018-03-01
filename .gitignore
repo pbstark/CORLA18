@@ -23,6 +23,11 @@
 *.log
 *.aux
 *.out
+*.dep
+*.fdb_latexmk
+*.fls
+*.blg
+*.bbl
 
 # Jupyter notebook checkpoints #
 ######################
