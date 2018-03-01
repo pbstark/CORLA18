@@ -20,7 +20,7 @@ To keep the notation simpler, we consider only a single contest, but the
 MACRO test statistic \citep{stark09c,stark10d} automatically extends the result to 
 auditing $C>1$ contests simultaneously.
 The derivation is for plurality contests, including ``vote-for-$k$'' plurality contests.
-Majority and super-majority contests such as bond measures are a minor 
+Majority and super-majority contests are a minor 
 modification~\citep{stark08a}.\footnote{%
   So are some forms of preferential and approval voting, such as Borda count, and
   proportional representation contests, such as D'Hondt~\citep{starkTeague14}.
@@ -46,10 +46,15 @@ $\ell \in \mathcal{L}$, in votes.
 Overall reported margin of reported winner $w \in \mathcal{W}$ over reported loser 
 $\ell \in \mathcal{L}$, in votes, for the entire contest (not just stratum $s$)
 
-    \item  $V_s$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
-$V_s \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell, s}$
-
-   \item  $V$: smallest reported overall margin among all $C$ contests audited using the same sample:
+% If I'm not punch drunk, we really did manage to keep generalizations across multiple contests out of 
+% the subsequent exposition. However, we still use V
+%
+%    \item  $V_s$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
+%$V_s \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell, s}$
+%
+%  \item  $V$: smallest reported overall margin among all $C$ contests audited using the same sample:
+% $V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
+    \item  $V$: smallest reported overall margin between any reported winner and reported loser:
 $V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
 
     \item  $A_{w\ell,s} \equiv \sum_{p=1}^P (a_{pw} - a_{p\ell})$: 
@@ -170,7 +175,7 @@ $$
 Thus if we use $2n_p/V$ in lieu of $u_p$, we still get conservative results.
 (We also need to re-define $U$ to be the sum of those upper bounds.)
 An intermediate, still conservative approach would be to use this upper bound for
-batches that consist of a single ballot, but use the sharper bound \ref{eq:uDef}
+batches that consist of a single ballot, but use the sharper bound (\ref{eq:uDef})
 when $n_p > 1$.
 Regardless, for the new definition of $u_p$ and $U$,
 $\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$,

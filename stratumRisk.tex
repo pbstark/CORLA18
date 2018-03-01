@@ -11,32 +11,26 @@ risk limit for the contest as a whole.
 Recall that the samples are drawn independently from the two strata.
 Pick $\alpha_1, \alpha_2 \in (0,\alpha)$.
 (Below we discuss the choice further.)
-Also pick $\lambda_1$.
-Then if $\omega_{w\ell,1} < \lambda_1 V_{w\ell}$ and 
-$\omega_{w\ell,2} < \lambda_2 V_{w\ell}$,
-the outcome is correct.
 We audit each stratum $s$ to test the hypothesis $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ 
+(the overstatement exceeds the tolerable overstatement) 
 at risk limit $\alpha_s$,
 as if it were its own election.
 The audits can be conducted at the same time or sequentially; there is no coordination
 between the audits unless one of them leads to a full hand count but the other does not:
 see below.
 
-We want to know the relationship between those two stratum-level ``risk limits'' $\alpha_1$ and
-$\alpha_2$ and the 
-overall risk that the audit will not correct the outcome if the outcome is wrong.
-The overall risk depends on what we do if the audit in one stratum leads to a full manual
-tally of that stratum.
+How do these two stratum-level ``risk limits'' $\alpha_1$ and
+$\alpha_2$ determine the 
+overall risk that the audit will not correct the outcome if the outcome is wrong?
+The overall risk depends on the rule for what we do if the audit in one stratum leads 
+to a full manual tally of that stratum.
 
-Here are the possibilities.
-The outcome is certainly correct if, in both strata, the net overstatement in the stratum is less
-than its threshold $\lambda_s V_{w\ell}$.
-For the outcome to be wrong, one or both strata need to have net overstatement
-$\omega_{w\ell,s}$
-greater than its corresponding threshold $\lambda_s V_{w\ell}$.
+Here are the possibilities. Bear in mind that for the outcome to be wrong, 
+at least one stratum must have a net overstatement
+greater its tolerable overstatement: 
 That is, if $\omega_{w\ell,1} + \omega_{w\ell,2} \ge V_{w\ell}$, then $\omega_{w\ell,1}\ge \lambda_1V_{w\ell}$
 or $\omega_{w\ell,2}\ge \lambda_2V_{w\ell}$, or both.
-If the threshold overstatement is exceeded in only one stratum, $h$, then the chance that the 
+If the tolerable overstatement is exceeded in only one stratum, $h$, then the chance that the 
 stratum will be fully hand counted is at least $1-\alpha_h \ge 1- \alpha$.
 
 If both $\omega_{w\ell,1} \ge \lambda_1V_{w\ell}$
@@ -45,29 +39,42 @@ are completely tabulated by hand is at least
 $(1-\alpha_1)(1-\alpha_2)$, since the audit samples in the two strata are independent.
 
 What should we do if the audit leads to a full tally in one stratum, $h$,
+that reveals that indeed its tolerable overstatement has been exceeded, 
 but the other audit has not led to a full tabulation, because it 
 has not started, because it is still underway, or because it terminated without
 a full hand tally?
 We consider two options.
 The simpler is to automatically require a full hand count of the other stratum. 
 If the audit uses this rule, then we can take $\alpha_1 = \alpha_2 = \alpha$, 
-and the procedure will have risk limit~$\alpha$.
+and the procedure will have risk limit~$\alpha$. However, this rule creates the
+possibility of requiring a full hand count in circumstances where it may seem
+substantively superfluous. For instance, one can imagine an audit of a statewide
+contest in which the tolerable overstatement in no-CVR counties is exceeded, 
+yet the outcome still could be verified without a full hand count in the CVR counties.
 
-A second approach is to adjust the contest margin for the results of the manual 
-tally in the fully counted stratum, $h$, and to audit the other
-against the overall margin, adjusted for the known manual tally $A_{w\ell,h}$
+The second approach is to adjust the tolerable overstatement in the other
+stratum in light of the known manual tally $A_{w\ell,h}$
 in the stratum $h$ that has been fully hand tallied:
-we test against the threshold 
+we will test against the threshold 
 $V_{w\ell} - A_{w\ell,h} \equiv \lambda_t' V_{w\ell}$, rather than 
-against its (original) threshold $\lambda_t V_{w\ell}$.
+the original value $\lambda_t V_{w\ell}$. (Because the overstatement
+in stratum $h$ exceeded the tolerable overstatement, the updated tolerable
+overstatement in stratum $t$ will be smaller than the original value.) 
 Then to reject the new null hypothesis in stratum $t$ is to conclude that the 
 overall outcome is correct.
 
 If and when the hypothesis in stratum $t$ changes, the audit
 in that stratum might be able to stop on the basis of the data already observed;
 it might need to continue; or---if it had stopped based on the original threshold
-$\lambda_t V_{w\ell}$, it might need to examine more ballots, possibly
+$\lambda_t V_{w\ell}$---it might need to examine more ballots, possibly
 continuing to a full hand tally.
+
+We will now show in detail that this rule allows the contest to be audited at 
+risk limit~$\alpha$ by selecting values of~$\alpha_1$ and~$\alpha_2$ that sum to
+a bit more than~$\alpha$: specifically, such that $(1-\alpha_1)(1-\alpha_2) < 1-\alpha$.
+For instance, suppose we want the overall risk limit to be 5\%. 
+If we use a risk limit of 4\% in the no-CVR stratum and a risk limit of 1.04\% in the CVR stratum,
+the overall risk limit is not larger than $1 - (1-\alpha_1)(1-\alpha_2) \equiv 1 - 0.96\times 0.9896 < 0.05$.
 
 The statistical wrinkle is that adjusting for the manual tally in the hand-counted 
 stratum $h$
@@ -112,7 +119,7 @@ Let $h$ be one such stratum.
 Then the chance the audit in stratum $h$ leads to a full manual tally in that stratum
 is at least $(1-\alpha_h)$.
 If the audit leads to a full manual tally in stratum~$h$ and the overall outcome is wrong,
-then the (new) null hypothesis in the other stratum, $t$ must be true.
+then the (new) null hypothesis in the other stratum, $t$, must be true.
 If we started to audit that new hypothesis \emph{ab initio}, the chance that we would reject it
 would be at most $\alpha_t$, so the chance the audit would lead to a full hand count 
 of stratum $t$ is at least $1-\alpha_t$.
@@ -125,9 +132,5 @@ $\omega_{w\ell,2} \ge c_2$ will be rejected is at least $(1-\alpha_1)(1-\alpha_2
 And therefore, for this procedure, the chance that there will be a full hand count in both strata is at least 
 $(1-\alpha_1)(1-\alpha_2)$ if the outcome is incorrect,
 even if the probability were zero that both of the original audits would proceed to a full hand count.
-The overall risk limit is thus not larger than $1 - (1-\alpha_s)(1-\alpha_t)$.
-
-As an example, suppose we want the overall risk limit to be 5\%. 
-If we use a risk limit of 4\% in the no-CVR stratum and a risk limit of 1.04\% in the CVR stratum,
-the risk limit will be $1 - 0.96\times 0.9896 < 0.05$.
-
+The overall risk limit is thus not larger than $1 - (1-\alpha_1)(1-\alpha_2)$
+.
