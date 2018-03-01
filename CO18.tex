@@ -264,7 +264,7 @@ Whereas the previous approach places the auditing burden created by obsolescent 
 the legacy counties, this approach places it entirely upon the CVR counties. Also, in a close contest, it 
 could require a full hand count in every county that might not otherwise be necessary.
 
-\subsection{Treat legacy counties as if every ballot selected from them for audit has a two-vote overstatement}
+\subsection{Treat legacy counties as if every ballot selected from them for audit has a two-vote overstatement}\label{sec:two-vote-over}
 A third simple-but-pessimistic approach is to sample uniformly from all counties as if one
 were performing a ballot-level comparison audit everywhere,  but to 
 treat any ballot
@@ -348,7 +348,8 @@ exactly one of the two strata.
 We assume that the samples are drawn from the
 two strata independently.
 
-As explained below, these stratified ‚Äúhybrid‚Äù audits require the specification of some additional parameters: \lambda_1 for dividing the tolerable overstatement error up, and the strata risk limits $\{\alpha_s\}$.
+As explained below, these stratified ``hybrid''Äù audits require the specification of some additional parameters: 
+$\lambda_1$ for dividing the tolerable overstatement error up, and the strata risk limits $\{\alpha_s\}$.
 
 \subsection{Partitioning the total permissible overstatement into strata}
 The simplest approach to stratification involves partitioning the risk limit and the tolerable
@@ -453,45 +454,52 @@ as it is to how the tolerable overstatement is allocated.
 \subsection{Software and examples}
 Examples of stratified hybrid audits are in Jupyter notebooks available
 at \url{https://www.github.com/pbstark/CORLA18}.
+The first two examples are contained in a single notebook, ``hybrid-audit-example-1''.
 The first example is a hypothetical medium-sized election with a total of 
-<<<<<<< HEAD
-$110,000$ votes and a diluted margin of $1.8\%$.
-If the audit in the CVR stratum found no errors and the tolerable overstatement error was 10\% of the margin, 
-it would terminate after examining 3642 ballots. (This workload would be randomly distributed across
-the CVR counties, roughly in proportion to ballots cast.)
-In over 95\% of 10,000 simulations, an audit of 200 ballots from the no-CVR stratum
-would have sufficed to confirm that the overstatement error in that stratum
-did not exceed its allocation, 90\% of the margin. As always, $\lambda_1$ could be adjusted to
-rebalance the expected workload between strata, perhaps taking into account the expected
-workload for audits of countywide or intra-county contests, so as to minimize (or quite possibly
-eliminate) any additional burden imposed by the stratified audit.
-
-The second example is a hypothetical large statewide election with a total of 
-2~million ballots and a diluted margin of nearly $20\%$.
-If the audit in the CVR stratum found no errors and the tolerable overstatement error was 10\% of the margin, 
-=======
-$110,000$ votes and a diluted margin of $1.8\%$.  The risk limit is 10%.
+$110,000$ votes and a diluted margin of $1.8\%$.  The risk limit is 10\%.
 If the audit in the CVR stratum found no errors and the allowable overstatement error was 30\% of the margin, 
 it would terminate after examining 1,213 ballots.
 In over 90\% of 10,000 simulations, an audit of 250 ballots from the no-CVR stratum
 would have sufficed to confirm that the overstatement error in that stratum
 did not exceed its allocation, 70\% of the margin.
 A sample of 450 ballots was sufficient to stop the audit in 99\% of simulations.
+As always, $\lambda_1$ could be adjusted to
+rebalance the expected workload between strata, perhaps taking into account the expected
+workload for audits of countywide or intra-county contests, so as to minimize (or quite possibly
+eliminate) any additional burden imposed by the stratified audit.
+
+If a CVR were available for all counties and we could have run a ballot-level comparison audit for the entire contest, 
+rather than stratifying, an audit with risk limit 10\% that found no errors would have concluded after examining just 239 ballots.
+The efficiency gained comes from two sources.
+First, ballot-level comparison audits are substantially more efficient than ballot-polling audits.
+Second, the hybrid audit requires dividing the margin and risk limit between two strata.
+This results in both strata using smaller risk limits.
+In order to keep the workload low, it is necessary to allocate a disproportionately high fraction of the margin
+to the no-CVR stratum;
+the CVR stratum must increase its workload to compensate.
+
+Another method discussed in Section~\ref{sec:two-vote-over} is to perform a ballot-level comparison audit statewide,
+but to treat any ballot sampled from the no-CVR county as showing a two-vote overstatement.
+In this example, this worst-case method would lead to a full hand count.
+However, the situation may be more optimistic for Colorado:
+if only 1.2\% of ballots came from the no-CVR stratum and the overall margin were in fact 10,000 votes,
+then this method would require checking 430 ballots.
 
 The second example is a hypothetical large statewide election with a total of 
-2~million ballots and a diluted margin of nearly $20\%$.  The risk limit is 5%.
+2~million ballots and a diluted margin of nearly $20\%$.  The risk limit is 5\%.
 If the audit in the CVR stratum found no errors and the allowable overstatement error was 10\% of the margin, 
->>>>>>> 14ef92cab137dfbf545e00aa70232fe2428ff5e4
 it would terminate after examining 50 ballots.
 In over 90\% of 10,000 simulations, an audit of 50 ballots from the no-CVR stratum
 would have sufficed to confirm that the overstatement error in that stratum
 did not exceed its allocation, 90\% of the margin.
 A sample of 100 ballots was sufficient to stop the audit in 99\% of simulations.
+If a CVR were available for all counties and we could have run a ballot-level comparison audit for the entire contest, 
+rather than stratifying, an audit with risk limit 5\% that found no errors would have concluded after examining just 24 ballots.
 
-A third notebook illustrates the workflow for conducting a hybrid audit of this kind.
+A second notebook illustrates the workflow for conducting a hybrid audit of this kind.
 The example election has a total of 2~million ballots.
 The reported margin is just over $1\%$, but in reality the vote totals for the reported winner
-and reported loser are identical in both strata.  The risk limit is 5%.
+and reported loser are identical in both strata.  The risk limit is 5\%.
 The example illustrates two scenarios.
 In the first scenario, the audit in the CVR stratum escalates to a full hand count and the allowable overstatement
 in the no-CVR stratum must be adjusted.
