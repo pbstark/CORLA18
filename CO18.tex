@@ -52,36 +52,26 @@
 
 
 \begin{abstract}
-Colorado's current audit software (RLATool) needs to be improved to audit 
-contests that cross county lines and to audit small contests efficiently.
+Colorado conducted risk-limiting tabulation audits (RLAs) across the state in 2017,
+including both ballot-level comparison audits and ballot polling audits.
+To date, methods to efficiently audit contests that cross county boundaries
+and combine ballot polling and ballot-level comparisons have not been available,
+and the audits only covered contests restricted to a single county.
 
-First, the current version (1.1.0) of RLATool
-needs to be modified to recognize and group together contests that cross jurisdictional
-boundaries; currently, it treats every contest as if it were entirely
-contained in a single county.
-Margins and risk limits apply to entire contests, not to the portion of a contest
-included in a county.
-RLATool also does not allow the user to select the sample size, nor does
-it directly allow an unstratified random sample to be drawn across counties.
-Second, to audit a contest that includes voters in ``legacy'' counties 
-(counties with voting systems that cannot export cast vote records) 
-and voters in counties with newer systems, new statistical methods are needed to
-keep the efficiency of ballot-level comparison audits that the newer systems
-afford.
-Third, auditing contests that appear only on a subset of ballots can
-be made much more efficient if the sample can be drawn from just those ballots
-that contain the contest.
-While allowing samples to be restricted to ballots reported to contain a particular
-<<<<<<< HEAD
-contest is not essential in the short run, it will be necessary
-% add missing word; don't tether to June
-=======
-is not essential, it will be necessary
->>>>>>> 14ef92cab137dfbf545e00aa70232fe2428ff5e4
-eventually to make it feasible to audit smaller contests.
-This paper discusses some of these issues and presents several
-methods for auditing contests that include counties with
-legacy systems and counties with newer systems.  
+Colorado's current audit software (RLATool) needs to be improved to audit
+these contests that cross county lines and to audit small contests efficiently.
+
+This paper addresses these needs. It presents stratified hybrid methods
+which handle combining ballot polling and ballot-level comparisons,
+as well as combinations of ballot-level comparison and
+variable-size batch comparison audits.
+The methods employ Fisher‚Äôs combining function and the conditional hypergeometric test.
+We also describe some simpler but less efficient approaches.
+
+We conclude with some recommendations, then illustrate these methods
+with some examples that compare them to existing approaches.
+Exemplar open-source code and interactive Jupyter notebooks are provided
+that implement the methods and allow further exploration.
 \end{abstract}
 
 \section{Introduction}
@@ -159,8 +149,33 @@ California to be (generally) less efficient than ballot-polling audits.%
   and no-CVR counties.
   }
 
+The open-source audit software used for Colorado's 2017 audits,
+RLATool (\url{https://github.com/FreeAndFair/ColoradoRLA/}),
+needs to be improved to audit
+contests that cross county lines and to audit small contests efficiently.
+
+First, the current version (1.1.0) of RLATool
+needs to be modified to recognize and group together contests that cross jurisdictional
+boundaries; currently, it treats every contest as if it were entirely
+contained in a single county.
+Margins and risk limits apply to entire contests, not to the portion of a contest
+included in a county.
+RLATool also does not allow the user to select the sample size, nor does
+it directly allow an unstratified random sample to be drawn across counties.
+Second, to audit a contest that includes voters in ``legacy'' counties
+(counties with voting systems that cannot export cast vote records)
+and voters in counties with newer systems, new statistical methods are needed to
+keep the efficiency of ballot-level comparison audits that the newer systems
+afford.
+Third, auditing contests that appear only on a subset of ballots can
+be made much more efficient if the sample can be drawn from just those ballots
+that contain the contest.
+While allowing samples to be restricted to ballots reported to contain a particular
+contest is not essential in the short run, it will be necessary
+eventually to make it feasible to audit smaller contests.
+
 This document focuses on near-term requirements for risk-limiting audits in Colorado.
-Section~\ref{sec:crude} presents a number of crude approaches 
+Section~\ref{sec:crude} presents a number of crude approaches
 that could be implemented easily
 but might require examining substantially more ballots.
 Section~\ref{sec:variable}
@@ -348,7 +363,7 @@ exactly one of the two strata.
 We assume that the samples are drawn from the
 two strata independently.
 
-As explained below, these stratified ``hybrid''Äù audits require the specification of some additional parameters: 
+As explained below, these stratified ``hybrid'' audits require the specification of some additional parameters:
 $\lambda_1$ for dividing the tolerable overstatement error up, and the strata risk limits $\{\alpha_s\}$.
 
 \subsection{Partitioning the total permissible overstatement into strata}
