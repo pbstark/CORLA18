@@ -26,4 +26,5 @@ Exemplar open-source code and interactive Jupyter notebooks are provided
 that implement the methods and allow further exploration.
 
 [Example Notebook 1](https://mybinder.org/v2/gh/pbstark/CORLA18/master?filepath=code%2Fhybrid-audit-example-1.ipynb)
+
 [Example Notebook 2](https://mybinder.org/v2/gh/pbstark/CORLA18/master?filepath=code%2Fhybrid-audit-example-2.ipynb)
