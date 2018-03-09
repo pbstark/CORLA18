@@ -1,0 +1,5 @@
+math
+numpy
+scipy >= 0.17.1
+itertools
+matplotlib
