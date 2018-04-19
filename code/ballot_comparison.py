@@ -39,14 +39,14 @@ def ballot_comparison_pvalue(n, gamma, o1, u1, o2, u2, reported_margin, N, null_
     -------
     pvalue
     """
-    mu = (null_lambda*reported_margin)/N   # diluted null margin in the stratum
-    log_pvalue = n*np.log(1 - mu/(2*gamma)) - \
+    U_s = 2*N/reported_margin
+    log_pvalue = n*np.log(1 - null_lambda/(gamma*U_s)) - \
                     o1*np.log(1 - 1/(2*gamma)) - \
                     o2*np.log(1 - 1/gamma) - \
                     u1*np.log(1 + 1/(2*gamma)) - \
                     u2*np.log(1 + 1/gamma)
     pvalue = np.exp(log_pvalue)
-    return pvalue
+    return np.min([pvalue, 1])
 
 
 def findNmin_ballot_comparison(alpha, gamma, o1, u1, o2, u2,
@@ -85,8 +85,8 @@ def findNmin_ballot_comparison(alpha, gamma, o1, u1, o2, u2,
     -------
     n
     """
-    m = null_lambda*reported_margin/N
-    val = -2*gamma/m * (np.log(alpha) +
+    U_s = 2*N/reported_margin
+    val = -gamma*U_s/null_lambda * (np.log(alpha) +
                 o1*np.log(1 - 1/(2*gamma)) + \
                 o2*np.log(1 - 1/gamma) + \
                 u1*np.log(1 + 1/(2*gamma)) + \
@@ -131,8 +131,8 @@ def findNmin_ballot_comparison_rates(alpha, gamma, r1, s1, r2, s2,
     -------
     n
     """
-    m = null_lambda*reported_margin/N
-    denom = (np.log(1 - m/(2*gamma)) -
+    U_s = 2*N/reported_margin
+    denom = (np.log(1 - null_lambda/(U_s*gamma)) -
                 r1*np.log(1 - 1/(2*gamma))- \
                 r2*np.log(1 - 1/gamma) - \
                 s1*np.log(1 + 1/(2*gamma)) - \
