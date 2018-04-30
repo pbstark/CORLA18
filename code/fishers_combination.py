@@ -27,7 +27,7 @@ def fisher_combined_pvalue(pvalues):
     return 1-scipy.stats.chi2.cdf(obs, df=2*len(pvalues))
 
 
-def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs):
+def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs, precise=True, plausible_lambda_range=None):
     """
     Find the smallest Fisher's combined statistic for p-values obtained 
     by testing two null hypotheses at level alpha using data X=(X1, X2) 
@@ -41,6 +41,10 @@ def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs):
     pvalue_funs : array_like
         functions for computing p-values. The observed statistics/sample and known parameters should be
         plugged in already. The function should take the lambda allocation AS INPUT and output a p-value.
+    precise : bool
+        Optional, should we refine the maximum found by minimize_scalar? Default is True
+    plausible_lambda_range : array-like
+        lower and upper limits to search over lambda. Optional, but will speed up the search
     
     Returns
     -------
@@ -58,25 +62,42 @@ def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs):
     assert len(pvalue_funs)==2
         
     # find range of possible lambda
-    lambda_upper = int(np.min([2*N[0]/overall_margin, 1+2*N[1]/overall_margin]))
-    lambda_lower = int(np.max([-2*N[0]/overall_margin, 1-2*N[1]/overall_margin]))
+    if plausible_lambda_range is None:
+        lambda_upper = int(np.min([2*N[0]/overall_margin, 1+2*N[1]/overall_margin]))+1
+        lambda_lower = int(np.max([-2*N[0]/overall_margin, 1-2*N[1]/overall_margin]))
+    else:
+        lambda_upper = plausible_lambda_range[1]
+        lambda_lower = plausible_lambda_range[0]
 
-    fisher_fun = lambda lam: -1*fisher_combined_pvalue([pvalue_funs[0](lam), pvalue_funs[1](1-lam)])
-    res = sp.optimize.minimize_scalar(fisher_fun, bounds=(lambda_lower, lambda_upper), method='bounded')
-    alloc_lambda = res['x']
-    pvalue = -1*res['fun']
-    
-    # go back and make sure that this is actually the maximizer within a window
     fisher_pvalues = []
-    test_lambdas = np.arange(alloc_lambda-0.5, alloc_lambda+0.5, 0.1)
+    cvr_pvalues = []
+    test_lambdas = np.arange(lambda_lower, lambda_upper+1, 0.5)
     for lam in test_lambdas:
         pvalue1 = np.min([1, pvalue_funs[0](lam)])
-        pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
-        fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
+        if pvalue1 < 0.01:
+            fisher_pvalues.append(0)
+        else:
+            pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
+            fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
+        print(lam, fisher_pvalues[-1])
+        
+    pvalue = np.max(fisher_pvalues)
+    alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
     
-    if np.max(fisher_pvalues) > pvalue:
-        pvalue = np.max(fisher_pvalues)
-        alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
+    # go back and make sure that this is actually the maximizer within a window
+    
+    if precise is True:
+        fisher_pvalues = []
+        test_lambdas = np.arange(alloc_lambda-0.5, alloc_lambda+0.5, 0.1)
+        for lam in test_lambdas:
+            pvalue1 = np.min([1, pvalue_funs[0](lam)])
+            pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
+            fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
+            print(lam, fisher_pvalues[-1])
+            
+        if np.max(fisher_pvalues) > pvalue:
+            pvalue = np.max(fisher_pvalues)
+            alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
     
     return {'max_pvalue' : pvalue,
             'min_chisq' : sp.stats.chi2.ppf(1 - pvalue, df=4),
@@ -115,7 +136,7 @@ def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
     assert len(pvalue_funs)==2
         
     # find range of possible lambda
-    lambda_upper = int(np.min([2*N[0]/overall_margin, 1+2*N[1]/overall_margin]))
+    lambda_upper = int(np.min([2*N[0]/overall_margin, 1+2*N[1]/overall_margin]))+1
     lambda_lower = int(np.max([-2*N[0]/overall_margin, 1-2*N[1]/overall_margin]))
 
     fisher_pvalues = []
@@ -132,3 +153,65 @@ def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
     plt.xlabel("Allocation of Allowable Error")
     plt.ylabel("Fisher Combined P-value")
     plt.show()
+    
+    
+def simulate_fisher_combined_audit(N_w1, N_l1, N_w2, N_l2, n1, n2, alpha,
+    reps=10000, verbose=False, plausible_lambda_range=None):
+    """
+    Simulate the Fisher method of combining a ballot comparison audit
+    and ballot polling audit, assuming the reported results are correct.
+    Return the fraction of simulations where the the audit successfully
+    confirmed the election results.
+    
+    Parameters
+    ----------
+    N_w1 : int
+        votes for the reported winner in the ballot comparison stratum
+    N_l1 : int
+        votes for the reported loser in the ballot comparison stratum
+    N_w2 : int
+        votes for the reported winner in the ballot polling stratum
+    N_l2 : int
+        votes for the reported loser in the ballot polling stratum
+    n1 : int
+        sample size in the ballot comparison stratum
+    n2 : int
+        sample size in the ballot polling stratum
+    alpha : float
+        risk limit
+    reps : int
+        number of times to simulate the audit. Default 10,000
+    verbose : bool
+        Optional, print iteration number if True
+    plausible_lambda_range : array-like
+        lower and upper limits to search over lambda. Optional, but will speed up the search
+    
+    Returns
+    -------
+    float : fraction of simulations where the the audit successfully
+    confirmed the election results
+    """
+    margin = (N_w1+N_w2)-(N_l1+N_l2)
+    N1 = N_w1+N_l1
+    N2 = N_w2+N_l2
+    pop2 = [1]*N_w2 + [0]*N_l2 + [np.nan]*(N2 - N_w2 - N_l2)
+    
+    cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1, gamma=1.03905, \
+                                   o1=0, u1=0, o2=0, u2=0,
+                                   reported_margin=margin, N=N1,
+                                   null_lambda=alloc)
+    fisher_pvalues = np.zeros(reps)
+    
+    for i in range(reps):
+        if verbose:
+            print(i)
+        sam = np.random.choice(pop2, n2, replace=False)
+        nocvr_pvalue = lambda alloc: trihypergeometric_optim(sample=sam, 
+                                        popsize=N2, 
+                                        null_margin=(N_w2-N_l2) - alloc*margin)
+        fisher_pvalues[i] = maximize_fisher_combined_pvalue(N=(N1, N2),
+                               overall_margin=margin, 
+                               pvalue_funs=[cvr_pvalue, nocvr_pvalue],
+                               precise=True,
+                               plausible_lambda_range=plausible_lambda_range)['max_pvalue']
+    return np.mean(fisher_pvalues <= alpha)
