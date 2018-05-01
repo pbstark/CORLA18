@@ -51,7 +51,15 @@
 
 
 \begin{abstract}
-Colorado conducted risk-limiting tabulation audits (RLAs) across the state in 2017,
+\note{Colorado passed a law mandating risk-limiting tabulation audits (RLAs) starting in 2018.
+Elections are conducted at the level of jurisdictions, without standardization across jurisdictions,
+so some counties use legacy voting machines.
+98.2\% of active Colorado voters are registered in counties that use machines that produce a cast vote record (CVR), 
+enabling efficient ballot-comparison audits.
+The remaining 1.8\% of voters are in counties that use machines that do not produce a CVR.
+These counties must use less efficient ballot-polling audits.
+}
+Colorado conducted RLAs across the state in 2017,
 including both ballot-level comparison audits and ballot-polling audits.
 Those audits only covered contests restricted to a single county;
 methods to efficiently audit contests that cross county boundaries
@@ -108,7 +116,9 @@ Colorado to implement risk-limiting audits beginning in 2017.
 The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
  See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
 }
- 
+Those audits only covered contests restricted to a single county,
+so counties could conduct audits independently.
+In future statewide elections and contests that cross county lines, counties will need to coordinate.
 
 Colorado's ``uniform voting system'' program\footnote{%
 \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
@@ -165,11 +175,13 @@ Margins and risk limits apply to entire contests, not to the portion of a contes
 included in a county.
 RLATool also does not allow the user to select the sample size, nor does
 it directly allow an unstratified random sample to be drawn across counties.
+
 Second, to audit a contest that includes voters in ``legacy'' counties
 (counties with voting systems that cannot export cast vote records)
 and voters in counties with newer systems, new statistical methods are needed to
-keep the efficiency of ballot-level comparison audits that the newer systems
+preserve the efficiency of ballot-level comparison audits that the newer systems
 afford.
+
 Third, auditing contests that appear only on a subset of ballots can
 be made much more efficient if the sample can be drawn from just those ballots
 that contain the contest.
@@ -187,6 +199,9 @@ This approach is statistically elegant and relatively efficient, but might requi
 handle their ballots.
 Section~\ref{sec:hybrid} presents our recommended approach, which combines ballot-level
 comparisons in counties that can perform them with ballot-polling in the no-CVR counties.
+This approach is generalizable to other stratified audits, where ballots are divided into two independent
+``strata,'' audited independently using appropriate methods, and combined into an audit of the
+overall contest.
 All the approaches require new software, including at least minor modifications to RLATool.
 We provide example software implementing the risk calculations for
 our recommended approach as a Python Jupyter notebook.\footnote{%
@@ -204,7 +219,7 @@ Section~\ref{sec:recommendations} summarizes our recommendations and
 considerations for implementation.
 
 \subsection{Priorities for Colorado audits}
-
+\note{for this particular paper focused on stratification, is the order of paragraphs here right?}
 Auditing efficiency is controlled in part by how well the audit can limit the sample to ballots that
 contain the contests under audit.
 Some contests are on (essentially) every ballot, for instance the governor's race.
@@ -221,11 +236,9 @@ as discussed below.
 
 Moreover, party primaries for statewide offices (and perhaps other contests) will
 include CVR counties and no-CVR counties, so we need a method to audit
-across both kinds of voting technology. % "mixed jurisdictional voting technology" is off-putting
+across both kinds of voting technology. 
 
-This report addresses both issues, providing 
-options for effectively auditing  % a handful of ways of dealing with   %% sounds almost morose 
-heterogeneous 
+This report addresses both issues, providing options for effectively auditing heterogeneous 
 voting technology, varying in efficiency, complexity, and on whom any additional audit burden falls.
 
 \section{Crude (and unpleasant) approaches} \label{sec:crude}
