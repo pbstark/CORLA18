@@ -2,19 +2,28 @@
 A more statistically efficient approach to ensuring that the overstatement error in the 
 two strata does not
 exceed the margin is to try to constrain the \emph{sum} of the overstatement errors in the two
-strata, rather than constrain the pieces separately:
-there are many ways that the total overstatement could be less than $V_{w\ell}$ without
-having the overstatement $\omega_{w\ell,s}$
-in stratum $s$ less than $\lambda_s V_{w\ell}$, $s = 1, 2$.
-To that end, imagine \emph{all} values $\lambda_1$.
-If, for all such pairs, we can reject the hypothesis that the 
+strata, rather than constrain the pieces separately.
+The null hypothesis $\omega_{w\ell, 1} + \omega_{w\ell, 2} \ge V_{w\ell}$ is true if and only if there exists \textit{some}
+values of $\lambda_1$ and $\lambda_2$ such that $\omega_{w\ell, s}\ge \lambda_s V_{w\ell}, s=1, 2$.\footnote{
+Namely, letting $\lambda_1 = \frac{\omega_{w\ell, 1}}{\omega_{w\ell, 1}+\omega_{w\ell, 2}}$ satisfies both inequalities.
+}
+Thus, fixing $\lambda_1$ and $\lambda_2$ at single values and requiring that we reject both stratum-level null hypotheses 
+will be inefficient:
+there are many ways that the total overstatement could be less than $V_{w\ell}$ (i.e., the alternative hypothesis is true) without
+having the overstatement $\omega_{w\ell,s}$ in stratum $s$ less than $\lambda_s V_{w\ell}$, $s = 1, 2$.
+
+To that end, imagine \emph{all} values ways of partitioning the error.
+If, for all $(\lambda_1, \lambda_2)$ pairs, we can reject the hypothesis that the 
 overstatement error in stratum~1 is greater than or equal to $\lambda_1 V_{w\ell}$ \emph{and} 
 the overstatement error in stratum~2 is greater than or equal to $\lambda_2 V_{w\ell}$, then
 we can conclude that the outcome is correct.
+This is more efficient because it only requires rejecting one of the two stratum-wise null hypotheses,
+for all possible $(\lambda_1, \lambda_2)$ pairs,
+rather than rejecting \textit{both} null hypotheses for a particular pair.
 
-To test the conjunction hypothesis (i.e., that both of those null hypotheses are false), we use 
+To test the conjunction hypothesis (i.e., that both of those null hypotheses are true), we use 
 Fisher's combining function.
-Let $p_s(\lambda)$ be the $p$-value of the hypothesis $\omega_{w\ell,s} \ge \lambda V_{w\ell}$.
+Let $p_s(\lambda_s)$ be the $p$-value of the hypothesis $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$.
 If the null hypothesis that $\omega_{w\ell,1} \ge \lambda_1 V_{w\ell}$ and 
 $\omega_{w\ell,2} \ge \lambda_2 V_{w\ell}$ is true, then the combination
 \beq
@@ -27,12 +36,14 @@ of freedom.\footnote{%
    the null hypothesis is true, it is in general stochastically smaller.
    This follows from a coupling argument along the lines of Theorem~4.12.3 in \citet{grimmett01}.
 }
+Fisher's combined statistic will be small when both null hypotheses are true and will be large when
+at least one null hypothesis is not true.
 
 Hence, if, for all $\lambda_1$ and $\lambda_2 = 1- \lambda_1$,
 the combined statistic $\chi(\lambda_1, \lambda_2)$ is greater than the 
 $1-\alpha$ quantile of the chi-square
 distribution with 4 degrees of freedom, the audit can stop.
 
-The calculation of $p_s(\lambda)$ 
-uses the procedures discussed in 
+This procedure involves maximizing Fisher's combined statistic over all pairs $(\lambda_1, \lambda_2)$.
+The calculation of $p_s(\lambda)$ uses the procedures discussed in 
 sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError}.
