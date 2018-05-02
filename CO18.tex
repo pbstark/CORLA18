@@ -6,6 +6,8 @@
 \usepackage{graphicx}
 \usepackage{amssymb,amsmath,color}
 \usepackage[breaklinks=true]{hyperref}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+
 \usepackage[anythingbreaks]{breakurl}
 \usepackage[round]{natbib}
 %\usepackage{amsthm}
@@ -40,11 +42,21 @@
 \title{Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program}
 
 \author{
-   Mark Lindeman\\
-   Neal McBurnett\\
-   Kellie Ottoboni\\
-   Philip B.~Stark
+   Mark Lindeman\inst{1}\orcidID{x} \and
+   Neal McBurnett\inst{2}\orcidID{0000-0001-8667-1830} \and
+   Kellie Ottoboni\inst{3}\orcidID{0000-0002-9107-3402} \and
+   Philip B.~Stark\inst{3}\orcidID{0000-0002-3771-9604}
 }
+\authorrunning{M. Lindeman et al.}
+
+\institute{Mark's affiliation \and
+Neal's affiliation \and
+Department of Statistics, University of California, Berkeley, CA, USA}
+%\email{lncs@springer.com}\\
+%\url{http://www.springer.com/gp/computer-science/lncs} \and
+%ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
+%\email{\{abc,lncs\}@uni-heidelberg.de}}
+
 
 \date{Version: \today}
 
@@ -70,6 +82,7 @@ variable-size batch comparison audits without stratification,
 noting the changes to RLATool that each of these methods would require.
 
 We provide open-source reference implementations of the preferred methods in Jupyter notebooks.
+\keywords{First keyword  \and Second keyword \and Another keyword.}
 \end{abstract}
 
 \noindent
@@ -353,7 +366,7 @@ from RLATool or directly from legacy counties.
 \end{enumerate}
 
 None of these changes is enormous; the mathematics and statistics are already worked out
-in published papers \note{cite them}, and there is exemplar code for calculating the
+in published papers \textbf{\textcolor{red}{PROVIDE CITES}}, and there is exemplar code for calculating the
 batch-level error bounds, drawing the samples with probability proportional to an
 error bound, and calculating the attained risk from the sample results.
 Indeed, this is the method that was used in several of California's pilot audits,
