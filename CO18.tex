@@ -1,17 +1,19 @@
-\documentclass[12pt]{article}
+%\documentclass[12pt]{article}
+\documentclass[runningheads]{llncs}
 
-\bibliographystyle{plainnat}
+%\bibliographystyle{plainnat}
+\bibliographystyle{splncs04}
 \usepackage{graphicx}
 \usepackage{amssymb,amsmath,color}
 \usepackage[breaklinks=true]{hyperref}
 \usepackage[anythingbreaks]{breakurl}
 \usepackage[round]{natbib}
-\usepackage{amsthm}
+%\usepackage{amsthm}
 %\usepackage{algorithm}
 %\usepackage{algorithmicx}
 %\usepackage[noend]{algpseudocode}
 \newtheorem{thm}{Theorem}
-\newtheorem{definition}{Definition}
+%\newtheorem{definition}{Definition}
 
 \newcommand{\beq}{\begin{equation}}
 \newcommand{\eeq}{\end{equation}}
@@ -31,7 +33,7 @@
 \newcommand{\bp}{\bar{p}}
 
 \newcommand{\comment}[1]{}
-\newcommand{\note}[1]{\textcolor{red}{\sc #1}}
+%\newcommand{\note}[1]{\textcolor{red}{\sc #1}}
 
 
 
@@ -270,7 +272,6 @@ close contests where ballot polling is not efficient. (But it does have the adva
 counties to do additional auditing to compensate for the legacy counties.)
 
 \subsection{Subtract error bounds for the legacy counties from vote totals}
-\note{what does ``ballot accounting'' mean? What information does SCORE provide?}
 If ballot accounting and SCORE data can provide good upper bounds on the number of ballots cast in
 each contest in legacy counties, there are simple upper bounds on the total
 possible overstatement error each legacy county could contribute to the overall contest
