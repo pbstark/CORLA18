@@ -61,47 +61,47 @@ Therefore,
 \end{equation}
 
 
-\subsection{Conditional hypergeometric test}
-Another approach is to condition on both the events $B=n$ and $B_w+B_\ell=m$.
-We describe the hypothesis test here, but do not advocate for using it.
-We found that this approach was inefficient in some simulation experiments.
-
-Given $B=n$, all samples of size $n$ from the ballots are equally likely, by hypothesis.
-Hence, in particular, all samples of size $n$ for which $B_w + B_\ell = m$ are equally likely.
-There are ${A_{w,s}+A_{\ell,s} \choose m}{N_s - A_{w,s}-A_{\ell,s} \choose n-m}$ such samples.
-Among these samples, $B_w$ may take values $i=0, 1, \dots, m$.
-For a fixed $i$, there are ${A_{w,s} \choose i}{A_{\ell, s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}$
-samples with $B_w=i$ and $B_\ell = m-i$.
-
-The factor ${N_s - A_{w,s} - A_{\ell,s} \choose n-m}$ counts the number of ways to sample $n-m$ of the
-remaining ballots.
-If we divide out this factor, we simply count the number of ways to sample ballots
-from the group of ballots for $w$ or for $\ell$.
-There are ${A_{w,s}+A_{\ell,s} \choose m}$ equally likely samples of size $m$ from
-the ballots with either a vote for $w$ or for $\ell$, but not both, 
-and of these samples, ${A_{w,s} \choose i}{A_{\ell, s} \choose m-i}$ contain $i$ ballots with a vote for $w$ but not $\ell$.
-Therefore, conditional on $B=n$ and $B_w+B_\ell=m$, the probability that $B_w=i$ is
-
-$$\frac{{A_{w,s} \choose i}{A_{\ell, s} \choose m-i}}{{A_{w,s}+A_{\ell,s} \choose m}}.$$
-
-The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
-a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
-and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
-(including undervotes and
-invalid ballots) is the sum of these probabilities for events when $B_w - B_\ell \geq nd$.
-This event occurs for $B_w \geq \frac{m+nd}{2}$.
-Therefore,
-
-\begin{equation}
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n, B_w+B_\ell = m \right \} = 
-   \sum_{i=(m+nd)/2}^{\min\{m, A_{w,s}\}} \frac{{A_{w,s} \choose i}{A_{\ell, s} \choose m-i}}{{A_{w,s}+A_{\ell,s} \choose m}}.
-\end{equation}
-
-
-This conditional $p$-value is thus the tail probability of the hypergeometric distribution
-with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a sample of size $m$.
-This calculation is numerically stable and fast; tail probabilities of the hypergeometric distribution are available
-and well-tested in all standard statistics software.
+%\subsection{Conditional hypergeometric test}
+%Another approach is to condition on both the events $B=n$ and $B_w+B_\ell=m$.
+%We describe the hypothesis test here, but do not advocate for using it.
+%We found that this approach was inefficient in some simulation experiments.
+%
+%Given $B=n$, all samples of size $n$ from the ballots are equally likely, by hypothesis.
+%Hence, in particular, all samples of size $n$ for which $B_w + B_\ell = m$ are equally likely.
+%There are ${A_{w,s}+A_{\ell,s} \choose m}{N_s - A_{w,s}-A_{\ell,s} \choose n-m}$ such samples.
+%Among these samples, $B_w$ may take values $i=0, 1, \dots, m$.
+%For a fixed $i$, there are ${A_{w,s} \choose i}{A_{\ell, s} \choose m-i}{N_s - A_{w,s} - A_{\ell,s} \choose n-m}$
+%samples with $B_w=i$ and $B_\ell = m-i$.
+%
+%The factor ${N_s - A_{w,s} - A_{\ell,s} \choose n-m}$ counts the number of ways to sample $n-m$ of the
+%remaining ballots.
+%If we divide out this factor, we simply count the number of ways to sample ballots
+%from the group of ballots for $w$ or for $\ell$.
+%There are ${A_{w,s}+A_{\ell,s} \choose m}$ equally likely samples of size $m$ from
+%the ballots with either a vote for $w$ or for $\ell$, but not both, 
+%and of these samples, ${A_{w,s} \choose i}{A_{\ell, s} \choose m-i}$ contain $i$ ballots with a vote for $w$ but not $\ell$.
+%Therefore, conditional on $B=n$ and $B_w+B_\ell=m$, the probability that $B_w=i$ is
+%
+%$$\frac{{A_{w,s} \choose i}{A_{\ell, s} \choose m-i}}{{A_{w,s}+A_{\ell,s} \choose m}}.$$
+%
+%The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
+%a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
+%and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
+%(including undervotes and
+%invalid ballots) is the sum of these probabilities for events when $B_w - B_\ell \geq nd$.
+%This event occurs for $B_w \geq \frac{m+nd}{2}$.
+%Therefore,
+%
+%\begin{equation}
+%   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n, B_w+B_\ell = m \right \} = 
+%   \sum_{i=(m+nd)/2}^{\min\{m, A_{w,s}\}} \frac{{A_{w,s} \choose i}{A_{\ell, s} \choose m-i}}{{A_{w,s}+A_{\ell,s} \choose m}}.
+%\end{equation}
+%
+%
+%This conditional $p$-value is thus the tail probability of the hypergeometric distribution
+%with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a sample of size $m$.
+%This calculation is numerically stable and fast; tail probabilities of the hypergeometric distribution are available
+%and well-tested in all standard statistics software.
 
 \subsection{Maximizing the $p$-value over the null set}
 
