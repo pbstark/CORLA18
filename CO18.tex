@@ -171,7 +171,7 @@ California to be (generally) less efficient than ballot-polling audits.%
 The open-source audit software used for Colorado's 2017 audits,
 RLATool (\url{https://github.com/FreeAndFair/ColoradoRLA/}),
 needs additional features to be able to audit
-contests that cross county lines and to audit small contests efficiently.
+contests that cross county lines.
 
 First, the current version (1.1.0) of RLATool
 needs to be modified to recognize and group together contests that cross jurisdictional
@@ -185,15 +185,15 @@ Second, to audit a contest that includes votes in no-CVR counties
 and votes in CVR counties, new statistical methods are needed to
 preserve the efficiency of ballot-level comparison audits in CVR counties.
 
-Third, contests that appear only on a subset of ballots can
-be audited much more efficiently if the sample can be drawn from just those ballots
-that contain the contest.
-While allowing samples to be restricted to ballots reported\footnote{%
- There are methods for conducting RLAs that account for the possibility that the reported ballot style is incorrect;
- see~\cite{banuelosStark12}.
-} or known to contain a particular
-contest is not essential in the short run, it will be necessary
-eventually to make it affordable to audit smaller contests.
+%Third, contests that appear only on a subset of ballots can
+%be audited much more efficiently if the sample can be drawn from just those ballots
+%that contain the contest.
+%While allowing samples to be restricted to ballots reported\footnote{%
+% There are methods for conducting RLAs that account for the possibility that the reported ballot style is incorrect;
+% see~\cite{banuelosStark12}.
+%} or known to contain a particular
+%contest is not essential in the short run, it will be necessary
+%eventually to make it affordable to audit smaller contests.
 
 We focus on near-term requirements for risk-limiting audits in Colorado, incidentally
 developing a new method for using stratified samples in RLAs that is widely applicable.
@@ -213,15 +213,15 @@ We provide example software implementing the risk calculations for
 our recommended approach as a Python Jupyter notebook.\footnote{%
  See \url{https://github.com/pbstark/CORLA18}.
 }
-Section~\ref{sec:subcollections}
-describes how audit efficiency could be improved in CVR counties by combining CVR
-data with data from Colorado's voter registration system, SCORE.\footnote{%
-  SCORE is Colorado's voter registration system, which also tracks who voted.
-  See \url{https://www.sos.state.co.us/pubs/elections/SCORE/SCOREhome.html}.
-  SCORE essentially keeps track of how many ballots of each style were returned by voters,
-  information that can be used to check whether the voting system tabulated the correct number
-  of ballots in each contest.
-} 
+%Section~\ref{sec:subcollections}
+%describes how audit efficiency could be improved in CVR counties by combining CVR
+%data with data from Colorado's voter registration system, SCORE.\footnote{%
+%  SCORE is Colorado's voter registration system, which also tracks who voted.
+%  See \url{https://www.sos.state.co.us/pubs/elections/SCORE/SCOREhome.html}.
+%  SCORE essentially keeps track of how many ballots of each style were returned by voters,
+%  information that can be used to check whether the voting system tabulated the correct number
+%  of ballots in each contest.
+%} 
 Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} explain the recommended
 modifications to ballot-level comparison and ballot-polling audits, respectively. 
 Section~\ref{sec:recommendations} summarizes our recommendations and
@@ -285,7 +285,14 @@ close contests where ballot polling is not efficient. (But it does have the adva
 counties to do additional auditing to compensate for the legacy counties.)
 
 \subsection{Subtract error bounds for the legacy counties from vote totals}
-If ballot accounting and SCORE data can provide good upper bounds on the number of ballots cast in
+If ballot accounting and data from Colorado's voter registration system, SCORE,\footnote{%
+  SCORE is Colorado's voter registration system, which also tracks who voted.
+  See \url{https://www.sos.state.co.us/pubs/elections/SCORE/SCOREhome.html}.
+  SCORE essentially keeps track of how many ballots of each style were returned by voters,
+  information that can be used to check whether the voting system tabulated the correct number
+  of ballots in each contest.
+}
+ can provide good upper bounds on the number of ballots cast in
 each contest in legacy counties, there are simple upper bounds on the total
 possible overstatement error each legacy county could contribute to the overall contest
 results; those can be subtracted from the overall margin (as in the previous subsection) and the
@@ -439,7 +446,7 @@ $w$ or $\ell$.
 
 %\input{stratumRisk}
 \input{totalAcrossStrata}
-\input{subcollections}
+%\input{subcollections}
 \input{comparisonError}
 \input{ballotPollError}
 
