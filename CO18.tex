@@ -1,15 +1,15 @@
 %\documentclass[12pt]{article}
 \documentclass[runningheads]{llncs}
 
-\bibliographystyle{plainnat}
-%\bibliographystyle{splncs04}
+%\bibliographystyle{plainnat}
+\bibliographystyle{splncs04}
 \usepackage{graphicx}
 \usepackage{amssymb,amsmath,color}
 \usepackage[breaklinks=true]{hyperref}
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 
 \usepackage[anythingbreaks]{breakurl}
-\usepackage[round]{natbib}
+%\usepackage[round]{natbib}
 %\usepackage{amsthm}
 %\usepackage{algorithm}
 %\usepackage{algorithmicx}
@@ -98,7 +98,7 @@ RLAs require a durable, voter-verifiable record of voter intent, such as paper b
 and they assume that this audit trail is sufficiently complete and accurate that a full hand
 tally would show the true electoral outcome.
 That assumption is not automatically satisfied: a \emph{compliance audit}
-\citep{starkWagner12} 
+\cite{starkWagner12} 
 is required.
 
 Risk-limiting audits are generally (but not necessarily) incremental: they examine more ballots, or batches of ballots,
@@ -136,7 +136,7 @@ and conversely, make it possible to find the CVR corresponding to any
 particular paper ballot.
 We call counties that have such systems ``CVR'' counties.
 It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
-CVR counties can perform ``ballot-level comparison audits,'' \citep{lindemanStark12} 
+CVR counties can perform ``ballot-level comparison audits,'' \cite{lindemanStark12} 
 which are currently the
 most efficient approach to risk-limiting audits in that they require examining
 fewer ballots than other methods do, when the outcome of the contest under audit 
@@ -150,7 +150,7 @@ create a voter-verifiable paper trail (\emph{e.g.}, voter-marked paper ballots) 
 conserved to ensure that it remains accurate and intact, and organized well enough
 to permit ballots to be selected at random.
 Pilot audits in California suggest that the most efficient way to audit such systems
-is by ``ballot-polling'' \citep{lindemanEtal12,lindemanStark12} 
+is by ``ballot-polling'' \cite{lindemanEtal12,lindemanStark12} 
 (in contrast to ``batch-level comparisons,'' for example).
 
 There is currently no literature on how to perform risk-limiting audits 
@@ -190,7 +190,7 @@ be audited much more efficiently if the sample can be drawn from just those ball
 that contain the contest.
 While allowing samples to be restricted to ballots reported\footnote{%
  There are methods for conducting RLAs that account for the possibility that the reported ballot style is incorrect;
- see~\citet{banuelosStark12}.
+ see~\cite{banuelosStark12}.
 } or known to contain a particular
 contest is not essential in the short run, it will be necessary
 eventually to make it affordable to audit smaller contests.
@@ -253,8 +253,8 @@ considerations for implementation.
 Here and generally throughout the paper, we 
 discuss auditing a single plurality contest at a time, although the same sample can be used to audit
 more than one contest (and super-majority contests), and there are ways of combining audits of different contests into
-a single process \citep{stark09c,stark10d}.
-We use terminology drawn from a number of papers; the key reference is \citet{lindemanStark12}.
+a single process \cite{stark09c,stark10d}.
+We use terminology drawn from a number of papers; the key reference is Lindeman and Stark, 2012~\cite{lindemanStark12}.
 An \emph{overstatement error} is an error that caused the margin between \emph{any} reported
 winner and \emph{any} reported loser to appear larger than it really was.
 An \emph{understatement error} is an error that caused the margin between \emph{every} reported
