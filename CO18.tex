@@ -1,8 +1,8 @@
 %\documentclass[12pt]{article}
 \documentclass[runningheads]{llncs}
 
-%\bibliographystyle{plainnat}
-\bibliographystyle{splncs04}
+\bibliographystyle{plainnat}
+%\bibliographystyle{splncs04}
 \usepackage{graphicx}
 \usepackage{amssymb,amsmath,color}
 \usepackage[breaklinks=true]{hyperref}
@@ -70,7 +70,7 @@ Most Colorado counties (comprising 98.2\% of voters) have voting equipment amena
 are only able to perform ballot-polling audits. 
 Combining ballot-polling and ballot-level comparison audits to audit cross-jurisdictional contests was an unsolved problem.
 Moreover, Colorado's current audit software (RLATool) does not support audits of cross-jurisdictional contests, even contests entirely
-contained in counties that can conduct ballot-level comparison audits.
+contained in counties that can conduct ballot-level comparison audits. \\
 
 This paper addresses both gaps, along the way introducing a simple, efficient method to use stratified sampling in RLAs.
 (Stratification makes it easier to combine ballot-polling and ballot-level comparisons, and also useful to reduce the
@@ -79,10 +79,10 @@ We present simple but inefficient methods, more efficient methods
 that combine ballot polling and ballot-level comparisons using stratified samples,
 and methods that combine ballot-level comparison and
 variable-size batch comparison audits without stratification,
-noting the changes to RLATool that each of these methods would require.
+noting the changes to RLATool that each of these methods would require.\\
 
 We provide open-source reference implementations of the preferred methods in Jupyter notebooks.
-\keywords{First keyword  \and Second keyword \and Another keyword.}
+\keywords{\textbf{\textcolor{red}{Anything to add?}} Risk-limiting audits, elections, auditing, stratified sampling}
 \end{abstract}
 
 \noindent
@@ -387,8 +387,9 @@ exactly one of the two strata.
 We assume that the samples are drawn from the
 two strata independently.
 
-As explained below, these stratified ``hybrid'' audits require the specification of some additional parameters:
-$\lambda_1$ for dividing the tolerable overstatement error up, and the strata risk limits $\{\alpha_s\}$.
+Incidentally, the stratified method we present is applicable to other stratified audits, 
+ not just those with one stratum comprised of CVR counties 
+ and another stratum comprised of no-CVR counties.
 
 \subsection{Partitioning the total permissible overstatement into strata}
 The simplest approach to stratification involves partitioning the risk limit and the tolerable
@@ -413,20 +414,16 @@ of the margin of $w$ over $\ell$ in stratum $s$.
 Reported winner $w$ really beat reported loser 
 $\ell$ if and only if $\omega_{w\ell} \equiv \omega_{w\ell,1} + \omega_{w\ell,2} < V_{w\ell}$.
 
-Pick $\lambda_1 \in \Re$ and define $\lambda_2 = 1-\lambda_1$. These values partition the
+Pick $\lambda_1 \in \Re$ and define $\lambda_2 = 1-\lambda_1$. 
+These values can be used to partition the
 total tolerable overstatement between the two strata:
 If $\omega_{w\ell,1} < \lambda_1 V_{w\ell}$ \emph{and} 
 $\omega_{w\ell,2} < \lambda_2 V_{w\ell}$, candidate $w$ really received more votes
 than candidate $\ell$.
+This condition is sufficient, but not necessary, to confirm that $\omega_{w\ell,1} + \omega_{w\ell,2} < V_{w\ell}$.
 Some $(\lambda_1, \lambda_2)$ pairs 
 can be ruled out \emph{a priori}, because (for instance) $\omega_{w\ell,s} \in [-2N_s, 2N_s]$,
 where $N_s$ is the number of ballots cast in stratum $s$.
-There are other simple, sharper bounds, sketched below.
-
-The choice of $\lambda_1$ (which determines the tolerable overstatement in each
-stratum), the strata risk limits $\{\alpha_s\}$, and details of the
-audit procedures affect the workload and the overall risk limit.
-(See section~\ref{sec:stratumRisk} and section~\ref{sec:recommendations}.)
 
 For ballot-level comparison audits, auditing to ensure that $\omega_{w\ell,s} < \lambda_s V_{w\ell}$
 is discussed in section~\ref{sec:comparisonError}.  It is a minor modification of the method
@@ -440,7 +437,7 @@ difference between the number of votes for $w$ and the number of votes for $\ell
 This introduces an additional unknown nuisance parameter, the number of ballots with votes for either
 $w$ or $\ell$.
 
-\input{stratumRisk}
+%\input{stratumRisk}
 \input{totalAcrossStrata}
 \input{subcollections}
 \input{comparisonError}
@@ -454,6 +451,7 @@ We expect that stratified ``hybrid'' audits will be the most palatable,
 given the constraints on time for software development and the logistics
 of the audit itself, because the workflow for counties would be the same
 as it was in November, 2017.
+Additionally, we expect that using this approach would tend to minimize the workload, compared to the other methods.
 
 What would change is the risk calculation ``behind the scene,'' including the
 algorithms used to decide when the audit can stop.
@@ -466,38 +464,6 @@ The parameter file would be generated by external software that does the
 audit calculations described here based on the detailed
 audit progress and discrepancy data available from RLATools' rla\_export command.
 
-To conduct a hybrid audit by partitioning the permissible overstatement between strata, 
-one must choose two numbers in addition to the risk limit $\alpha$:
-\begin{itemize}
-   \item one stratum-wise risk limit, $\alpha_1$ 
-(the other, $\alpha_2$, is determined from $\alpha_1$ and the overall risk limit, $\alpha$)
-   \item the tradeoff (allocation) of the tolerable overstatement between strata, $\lambda_1$
-(the value of $\lambda_2$ is $1-\lambda_1$)
-\end{itemize}
-Those parameters can be chosen essentially arbitrarily (provided $\alpha_1 \le \alpha$)
-and the audit will still be risk-limiting;
-however, they can be optimized to reduce the expected workload under various
-assumptions about tabulation errors in the two strata.
-(Software that can be used to run scenarios is available at 
-\url{https://www.github.com/pbstark/CORLA18}; see below.)
-
-In either stratum, increasing the risk limit or increasing the tolerable overstatement will decrease
-the required sample size from that stratum (assuming that the actual overstatement in
-that stratum is less than its allowable overstatement).
-The relative change in sample size as the risk limit changes scales similarly in the two strata, 
-because the risk limit 
-enters both ballot-level comparisons and ballot-polling the same way: as the logarithm.
-However, the relative change in sample sizes as the tolerable overstatement changes
-scales quite differently in the two strata: linearly in the ballot-level comparison stratum,
-but quadratically in the ballot-polling stratum.
-Hence, the workload is not as sensitive to how the risk limit is allocated across strata
-as it is to how the tolerable overstatement is allocated.
-
-Alternatively, one can avoid choosing these parameters altogether by conducting a 
-hybrid audit that constrains the total error across strata using Fisher's method.
-This approach considers all possible values of $\lambda_1$ and $\lambda_2$,
-and does not require partitioning the risk limit between the strata.
-Of all the methods proposed, this method seems to minimize the workload.
 
 \subsection{Software and examples}
 Examples of stratified hybrid audits are in Jupyter notebooks available
@@ -506,16 +472,9 @@ The first two examples are contained in a single notebook, ``hybrid-audit-exampl
 The first example is a hypothetical medium-sized election with a total of 
 $110,000$ votes and a diluted margin of $1.8\%$.
 9.1\% of the ballots come from no-CVR counties. The risk limit is 10\%.
-If the audit in the CVR stratum found no errors and the allowable overstatement error was 30\% of the margin, 
-it would terminate after examining 1,213 ballots.
-In over 90\% of 10,000 simulations, an audit of 250 ballots from the no-CVR stratum
-would have sufficed to confirm that the overstatement error in that stratum
-did not exceed its allocation, 70\% of the margin.
-A sample of 450 ballots was sufficient to stop the audit in 99\% of simulations.
-As always, $\lambda_1$ could be adjusted to
-rebalance the expected workload between strata, perhaps taking into account the expected
-workload for audits of countywide or intra-county contests, so as to minimize (or quite possibly
-eliminate) any additional burden imposed by the stratified audit.
+In 93 of 100 simulations, a stratified ``hybrid'' audit with samples of 400 ballots in the CVR stratum and 600 ballots in the no-CVR stratum
+and risk limit 10\% would have sufficed to confirm that the total overstatement error did not exceed the overall margin.
+This combined method would require a total of 1,000 ballots to be examined.
 
 If a CVR were available for all counties and we could have run a ballot-level comparison audit for the entire contest, 
 rather than stratifying, an audit with risk limit 10\% that found no errors would have concluded after examining just 263 ballots.
@@ -524,18 +483,15 @@ First, ballot-level comparison audits are substantially more efficient than ball
 If no CVR were available in any county and we had run a ballot-polling audit for the entire contest,
 the expected sample size needed to confirm the audit with a risk limit of 10\% would have been 13,988.
 The ballot-polling audit would require checking over 10\% of ballots cast, an infeasible number in practice.
-Second, the hybrid audit requires dividing the margin and risk limit between two strata.
-This results in both strata using smaller risk limits.
-In order to keep the workload low, it is necessary to allocate a disproportionately high fraction of the margin
-to the no-CVR stratum;
-the CVR stratum must increase its workload to compensate.
-
-Instead of fixing $\lambda_1$ and $\lambda_2$, we could use Fisher's method to combine the independent audits
-in each stratum over all values of $(\lambda_1, \lambda_2)$.
-In 93 of 100 simulations, an audit with samples of 400 ballots in the CVR stratum and 600 ballots in the no-CVR stratum
-and risk limit 10\% would have sufficed to confirm that the total overstatement error did not exceed the overall margin.
-This combined method would require a total of 1,000 ballots to be examined, rather than 1,513 ballots using the stratified 
-method with fixed allocation of allowable errors to each stratum.
+Second, the hybrid audit divides the margin and risk limit between two strata under the hood.
+To attain a Fisher's combined $p$-value less than the risk limit,
+only one stratum-level risk needs to be small;
+the risk in the other stratum may be large.
+For instance, if the stratum-level risks were $90\%$ and $2\%$,
+then the Fisher's combined $p$-value would be less than 10\%,
+but if the stratum-level risks were $45\%$ and $5\%$, it would not.
+Sample sizes must be increased to ensure that 
+one or both of the stratum-level risks is small enough.
 The workload is more than a pure ballot-comparison audit, but substantially less than a pure ballot-polling audit.
 
 Another method discussed in Section~\ref{sec:two-vote-over} is to perform a ballot-level comparison audit statewide,
@@ -547,15 +503,9 @@ then this method would require checking 430 ballots.
 
 The second example is a hypothetical large statewide election with a total of 
 2~million ballots and a diluted margin of nearly $20\%$.  The risk limit is 5\%.
-If the audit in the CVR stratum found no errors and the allowable overstatement error was 10\% of the margin, 
-it would terminate after examining 50 ballots.
-In over 90\% of 10,000 simulations, an audit of 50 ballots from the no-CVR stratum
-would have sufficed to confirm that the overstatement error in that stratum
-did not exceed its allocation, 90\% of the margin.
-A sample of 100 ballots was sufficient to stop the audit in 99\% of simulations.
 If a CVR were available for all counties and we could have run a ballot-level comparison audit for the entire contest, 
 rather than stratifying, an audit with risk limit 5\% that found no errors would have concluded after examining just 31 ballots.
-Using Fisher's method to combine the audits in each stratum would reduce the workload in the no-CVR stratum:
+Using Fisher's method to conduct a hybrid audit does not increase the workload substantially:
 In 100\% of 10,000 simulations, an audit with samples of 50 ballots in the CVR stratum and 20 ballots in the no-CVR stratum
 would have sufficed to confirm that the total overstatement error did not exceed the overall margin at the 5\% risk limit.
 
@@ -563,20 +513,12 @@ A second notebook, ``hybrid-audit-example-2,'' illustrates the workflow for cond
 The example election has a total of 2~million ballots.
 The reported margin is just over $1\%$, but in reality the vote totals for the reported winner
 and reported loser are identical in both strata.  The risk limit is 5\%.
-The example illustrates three scenarios.
-In the first scenario, the audit in the CVR stratum escalates to a full hand count and the allowable overstatement
-in the no-CVR stratum must be adjusted.
-Using the new allowable overstatement in the no-CVR stratum makes it impossible to terminate the audit,
-even for samples as large as 5\% of the ballots.
-In the second scenario, the audit in the no-CVR stratum terminates with a sample of 500 ballots.
-However, the audit in the CVR stratum will still lead to a full hand count and the audit in the no-CVR
-stratum must be redone using the adjusted allowable overstatement, putting us back in the first scenario.
-In the third scenario, we use Fisher's method to combine the audits in the CVR stratum and no-CVR stratum.
+We use Fisher's method to combine the audits in the CVR stratum and no-CVR stratum.
 The sample sizes in each stratum are large, but the maximum Fisher's combined $p$-value is over 20\%,
 so the audit cannot be terminated.
 In each case, the audit leads to a full recount of all the ballots.
 
-These notebooks can be modified and run with different contest sizes, margins, risk limits, and allocations of allowable error, in order to
+These notebooks can be modified and run with different contest sizes, margins, and risk limits, in order to
 estimate the workload of different scenarios.
 
 \bibliography{./pbsBib}
