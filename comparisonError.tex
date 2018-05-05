@@ -3,7 +3,7 @@
 
 In this section we expand previous comparison auditing work (already embodied in RLATool) to handle two new requirements.  The first allows the specification of the $\lambda$ parameters discussed in section~\ref{sec:hybrid}. The second handles batch-level auditing.
 
-The first requirement requires that we consider auditing in a single stratum to test whether the overstatement of any margin
+The first requirement is to test whether the overstatement of any margin
 (in votes) exceeds some fraction $\lambda$ of the overall margin $V_{w\ell}$ between
 reported winner $w$ and reported loser $\ell$.
 If the stratum contains all the ballots cast in the contest, then for $\lambda = 1$, this 
@@ -85,7 +85,7 @@ is still conservative (i.e., the risk is not larger than its nominal value).
 For every winner, loser pair $(w, \ell)$, we want to test
 whether the overstatement error exceeds some threshold, generally
 one tied to the reported margin between $w$ and $\ell$.
-For instance, for a simple stratified audit, we might take the threshold to be
+For instance, for stratified hybrid audit, we set the threshold to be
 $\lambda_s V_{w\ell}$.
 
 We want to test whether
@@ -153,7 +153,6 @@ $$
   \frac{1}{U} \sum_{p=1}^P e_p = E/U.
 $$
 Thus $E = U \mathbb{E} T_1$. 
-
 So, if we have strong evidence that
 $\mathbb{E} T_1 < \lambda_s/U$, we have
 strong evidence that $E < \lambda_s$.
@@ -195,7 +194,7 @@ To test whether $\mathbb{E} T_1 < \lambda_s/U$, there are a variety of methods a
 One particularly ``clean'' sequential method is based on Wald's Sequential Probability
 Ratio Test (SPRT) (\cite{wald45}).
 Harold Kaplan pointed out this method on a website that no longer exists.
-A derivation of this ``Kaplan-Wald'' method is given in~\cite[Appendix A]{starkTeague14};
+A derivation of this ``Kaplan-Wald'' method is given in Appendix A of~\cite{starkTeague14};
 to apply the method here, take $t = \lambda_s$ in their equation~18.
 
 A different sequential method, the Kaplan-Markov method (also due to Harold Kaplan), 

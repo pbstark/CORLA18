@@ -1,10 +1,24 @@
 \section{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
+In this section we develop a new method to conduct ballot-polling audits in legacy counties.  
+This is a substantial change from existing ballot-polling methods~\cite{lindemanEtal12}, because specifying the $\lambda$ parameters discussed in section~\ref{sec:hybrid}complicates the statistical problem.
+
+Existing ballot-polling methods consider only the fraction of ballots with a vote for either 
+$w$ or $\ell$ that contain a vote for $w$,
+making the statistical test one for a proportion.
+In this case, we need to make an inference about the 
+\emph{difference} between the number of votes for $w$ and the number of votes for $\ell$.
+This requires dealing with an unknown nuisance parameter not needed in the existing methods, the number of ballots with votes for either $w$ or $\ell$.
+
+We address this nuisance parameter in two ways.
+First, our proposal explicitly takes into account ballots with no vote for $w$ or for $\ell$, including ballots for other candidates and invalid ballots,
+Second, the risk is maximized over all possible values of the nuisance parameter,
+ensuring that the test is conservative.
+
 \subsection{Conditional tri-hypergeometric test}
 
 We consider a single stratum $s$, containing $N_s$ ballots.
-We will sample individual ballots without replacement from stratum $s$.
 Of the $N_s$ ballots,
 $A_{w,s}$ have a vote for $w$ but not for $\ell$, $A_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $A_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
 We might draw a simple random sample of $n$ ballots ($n$ fixed ahead of time), or we might draw 
@@ -15,17 +29,15 @@ For instance, the rule for determining $B$ could depend on the data.\footnote{%
 
 Regardless, we assume that, conditional on the attained sample size $n$, the ballots are a simple random sample of size $n$ from the $N_s$ ballots in the population.
 In the sample, $B_w$ ballots contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ defined analogously.
-Then, conditional on $B=n$, the joint distribution of
-$(B_w, B_\ell, B_u)$ is tri-hypergeometric:
+The conditional joint distribution of
+$(B_w, B_\ell, B_u)$ is tri-hypergeometric: 
 
 \begin{equation}
     \mathbb{P}_{A_{w,s}, A_{\ell,s}} \{ B_w = i, B_\ell = j \vert B=n \} = 
      \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
 \end{equation}
 
-The test statistic will be the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
-This is the sample difference in the number of ballots for the winner and for the loser, divided by the 
-total number of ballots in the sample.
+Define the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
 We want to test the compound hypothesis $A_{w,s} - A_{\ell,s} \le c$.
 The value of $c$ is inferred from the definition
 $\omega_{w\ell,s} \equiv V_{w\ell,s} - A_{w\ell,s} = V_{w,s} - V_{\ell,s} - (A_{w,s} -A_{\ell,s})$.
@@ -40,19 +52,18 @@ $A_{w,s} - A_{\ell,s} > c$.\footnote{%
    $V_{w,s} - V_{\ell,s} > c$.
 }
 Hence, we will reject for large values of $D$.
-Conditional on $B=n$, the event $D = (B_w - B_\ell)/B = d$ is the event $B_w - B_\ell = nd$.
-
-Suppose we observe $D=d$.
-The test will condition on the event $B=n$. 
-(In contrast, the BRAVO ballot-polling
+Conditional on $B=n$, the event $D = (B_w - B_\ell)/B = d$ is the same as $B_w - B_\ell = nd$.\footnote{%
+In contrast, the BRAVO ballot-polling
 method~\cite{lindemanEtal12}
-conditions only on $B_w+B_\ell = m$.)
+conditions only on $B_w+B_\ell = m$.
+}
+
 
 The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
 a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
 and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
 (including undervotes and
-invalid ballots) is the sum of these probabilities for events when $B_w - B_\ell \geq nd$.
+invalid ballots) is the probability that $B_w - B_\ell \geq nd$.
 Therefore,
 
 \begin{equation}
@@ -108,11 +119,12 @@ Therefore,
 The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
 that $A_{w,s} - A_{\ell,s} \le c$ for
 some fixed, known $c$.
+Define $\mathcal{S}$ to be the set of pairs $(i, j)$ such that $i, j\ge 0, i-j \ge nd,$ and $ i+j \leq n$.
 The (conditional) $p$-value of this composite hypothesis for $D=d$ is the maximum $p$-value for all
 values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
 \begin{equation}
   \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
-   \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
+   \sum_{\substack{(i, j)\in \mathcal{S}}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
 \end{equation}
 wherever the summand is defined. 
 (Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
@@ -132,16 +144,16 @@ Let $N_{w\ell, s} \equiv A_{w,s}+A_{\ell,s}$ be the fixed, unknown number of bal
 The $p$-value $p_0$ for the simple hypothesis that $c=0$ is
 
 \begin{equation}
-  p_0 = \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} \frac{ {N_{w\ell, s}/2 \choose i}{N_{w\ell, s}/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}} =  \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}}T_{ij},
+  p_0 = \sum_{\substack{(i, j) \in \mathcal{S}}} \frac{ {N_{w\ell, s}/2 \choose i}{N_{w\ell, s}/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}} =  \sum_{\substack{(i, j) \in \mathcal{S}}}T_{ij},
 \end{equation}
 
-where $T_{ij}$ is defined as the $(i, j)$ term in the summand and $T_{ij} \equiv 0$ for pairs $(i, j)$ that don't appear in the summation.
+\noindent where $T_{ij}$ is defined as the $(i, j)$ term in the summand and $T_{ij} \equiv 0$ for pairs $(i, j)$ that don't appear in the summation.
 
 Assume that $c>0$ is given.
 The $p$-value $p_c$ for this simple hypothesis is
 \begin{align*}
-p_c &=   \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} \frac{ {(N_{w\ell, s}+c)/2 \choose i}{(N_{w\ell, s}-c)/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}}  \\
-   &= \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}}T_{ij} \frac{ \frac{N_{w\ell, s}+c}{2}(\frac{N_{w\ell, s}+c}{2}-1)\cdots(\frac{N_{w\ell, s}}{2}+1) (\frac{N_{w\ell, s}-c}{2} -j)\cdots(\frac{N_{w\ell, s}}{2}-1-j) }
+p_c &=   \sum_{\substack{(i, j) \in \mathcal{S}}}  \frac{ {(N_{w\ell, s}+c)/2 \choose i}{(N_{w\ell, s}-c)/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}}  \\
+   &=\sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \frac{ \frac{N_{w\ell, s}+c}{2}(\frac{N_{w\ell, s}+c}{2}-1)\cdots(\frac{N_{w\ell, s}}{2}+1) (\frac{N_{w\ell, s}-c}{2} -j)\cdots(\frac{N_{w\ell, s}}{2}-1-j) }
    {(\frac{N_{w\ell, s}+c}{2} -i)\cdots(\frac{N_{w\ell, s}}{2}+1-i)(\frac{N_{w\ell, s}-c}{2})\cdots(\frac{N_{w\ell, s}}{2}-1)}.
 \end{align*}
 
@@ -151,10 +163,10 @@ Fractions of the form $\frac{\frac{N_{w\ell, s}}{2}  - a - j}{\frac{N_{w\ell, s}
 Thus, the $p$-value can be written as 
 
 \begin{align*}
-p_c &= \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}}T_{ij} \prod_{a=1}^{c/2} \left(1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2} - a}\right) \\
-&> \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} T_{ij} \left[ \left(1 + \frac{i}{\frac{N_{w\ell,s}+c}{2} -i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2}+1}\right) \right]^{c/2} \\
-&= \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} T_{ij} \left[ 1 + \frac{\frac{N_{w\ell,s}+c}{2}j + \frac{N_{w\ell,s}}{2}i + i}{(\frac{N_{w\ell,s}+c}{2}-i)(\frac{N_{w\ell,s}}{2}+1)}\right]^{c/2} \\
-&> \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} T_{ij}\\
+p_c &= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \prod_{a=1}^{c/2} \left(1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2} - a}\right) \\
+&> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij} \left[ \left(1 + \frac{i}{\frac{N_{w\ell,s}+c}{2} -i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2}+1}\right) \right]^{c/2} \\
+&= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \left[ 1 + \frac{\frac{N_{w\ell,s}+c}{2}j + \frac{N_{w\ell,s}}{2}i + i}{(\frac{N_{w\ell,s}+c}{2}-i)(\frac{N_{w\ell,s}}{2}+1)}\right]^{c/2} \\
+&> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij}\\
 &= p_0
 \end{align*}
 
