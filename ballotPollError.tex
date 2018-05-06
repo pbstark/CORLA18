@@ -1,20 +1,19 @@
 \section{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
-In this section we develop a new method to conduct ballot-polling audits in legacy counties.  
-This is a substantial change from existing ballot-polling methods~\cite{lindemanEtal12}, because specifying the $\lambda$ parameters discussed in section~\ref{sec:hybrid}complicates the statistical problem.
+In this section we develop a new method for ballot polling that can test numerical margins,
+rather than just test whether a candidate won.
+This requires a different approach than that taken by \cite{lindemanEtal12}.
 
 Existing ballot-polling methods consider only the fraction of ballots with a vote for either 
 $w$ or $\ell$ that contain a vote for $w$,
 making the statistical test one for a proportion.
-In this case, we need to make an inference about the 
+To allow the error to be partitioned across the strata via $\lambda_s$,
+we need to make an inference about the 
 \emph{difference} between the number of votes for $w$ and the number of votes for $\ell$.
-This requires dealing with an unknown nuisance parameter not needed in the existing methods, the number of ballots with votes for either $w$ or $\ell$.
-
-We address this nuisance parameter in two ways.
-First, our proposal explicitly takes into account ballots with no vote for $w$ or for $\ell$, including ballots for other candidates and invalid ballots,
-Second, the risk is maximized over all possible values of the nuisance parameter,
-ensuring that the test is conservative.
+This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
+We deal with the nuisance parameter by maximizing the $P$-value 
+over all possible values of the nuisance parameter, which ensures that the test is conservative.
 
 \subsection{Conditional tri-hypergeometric test}
 
@@ -114,7 +113,7 @@ Therefore,
 %This calculation is numerically stable and fast; tail probabilities of the hypergeometric distribution are available
 %and well-tested in all standard statistics software.
 
-\subsection{Maximizing the $p$-value over the null set}
+\subsection{Maximizing the $P$-value over the nuisance parameter}
 
 The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
 that $A_{w,s} - A_{\ell,s} \le c$ for
@@ -129,7 +128,7 @@ values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
 wherever the summand is defined. 
 (Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
 
-\subsubsection{Optimizing over the parameter $c$}
+\subsubsection{Characterizing the optimal solution}
 The following result enables us to only test hypotheses along the boundary of the null set.
 
 \begin{thm}
@@ -174,12 +173,9 @@ The last inequality follows from the fact that $i$ and $j$ are nonnegative, and
 that $i < \frac{N_{w\ell,s}+c}{2}$ -- it is a possible outcome under the null hypothesis.
 
 
-
-
 \end{proof}
 
-
-\subsubsection{Optimizing over the parameter $A_{w,s}$}
+\subsubsection{Solving the optimization problem}
 
 We have shown empirically (but do not prove) that this tail probability, as a function of $A_{w,s}$,
 has a unique maximum at one of the endpoints when $A_{w,s}$ is either as small or as large as possible,
@@ -188,7 +184,7 @@ If the empirical result is true, then finding the maximum is trivial;
 otherwise, it is a trivial one-dimensional optimization problem to compute the unconditional $p$-value.
 
 \subsection{Conditional testing}
-If the conditional tests are always conducted at significance level $\alpha$ or less, i.e., so that
+If the conditional tests are always conducted at significance level $\alpha$ or less, so that
 $\mathbb{P} \{\mbox{Type I error} | B = n\} \le \alpha$, then the
 overall procedure has significance level $\alpha$ or less:
 \begin{eqnarray}
@@ -196,4 +192,4 @@ overall procedure has significance level $\alpha$ or less:
        & \le & \sum_{n=0}^N \alpha \mathbb{P} \{  B = n \}  =  \alpha.
 \end{eqnarray}
 
-In particular, this implies that our conditional hypergeometric test will have the correct risk limit unconditionally.
+In particular, this implies that our conditional hypergeometric test will have a conservative $P$-value  unconditionally.
