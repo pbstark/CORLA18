@@ -177,11 +177,11 @@ that $i < \frac{N_{w\ell,s}+c}{2}$ -- it is a possible outcome under the null hy
 
 \subsubsection{Solving the optimization problem}
 
-We have shown empirically (but do not prove) that this tail probability, as a function of $A_{w,s}$,
-has a unique maximum at one of the endpoints when $A_{w,s}$ is either as small or as large as possible,
-given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$.
-If the empirical result is true, then finding the maximum is trivial;
-otherwise, it is a trivial one-dimensional optimization problem to compute the unconditional $p$-value.
+We have found empirically (but have not proven) that given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$, the tail probability $p_c$, as a function of $A_{w,s}$,
+has a unique maximum at one of the endpoints, where $A_{w,s}$ is either as small or as large as possible.
+If this empirical result is true in general, then finding the maximum is trivial;
+otherwise, computing the unconditional $p$-value is a simple 1-dimensional optimization problem
+on a bounded interval.
 
 \subsection{Conditional testing}
 If the conditional tests are always conducted at significance level $\alpha$ or less, so that
