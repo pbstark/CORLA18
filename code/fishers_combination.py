@@ -79,7 +79,6 @@ def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs, precise=True
         else:
             pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
             fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
-        print(lam, fisher_pvalues[-1])
         
     pvalue = np.max(fisher_pvalues)
     alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
@@ -93,7 +92,6 @@ def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs, precise=True
             pvalue1 = np.min([1, pvalue_funs[0](lam)])
             pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
             fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
-            print(lam, fisher_pvalues[-1])
             
         if np.max(fisher_pvalues) > pvalue:
             pvalue = np.max(fisher_pvalues)
