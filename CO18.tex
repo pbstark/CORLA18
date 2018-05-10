@@ -459,6 +459,50 @@ In general, $p_s(\lambda)$ could be a $P$-value for the hypothesis
 $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ from any test procedure (although
 if the audit is to be sequential, the tests in the two strata must be sequential tests). 
 
+\subsection{Maximizing Fisher's combined $P$-value}
+
+It is impossible to actually test all combinations of $\lambda_1$ and $\lambda_2$.
+Instead, we offer several computational approaches to check whether the conjunction hypothesis can be rejected at level $\alpha$ for all $\lambda_1, \lambda_2$.
+
+The first method is to use an optimization package to maximize the 
+Fisher combined $P$-value, or equivalently,
+minimize Fisher's combination function.
+In simulations, this approach was computationally inefficient and numerically unstable.
+
+A second, crude approach is to search for the maximum Fisher combined $P$-value along a grid of $(\lambda_1, \lambda_2)$ values.
+After a maximum is found, the search can be refined by creating a finer grid around the maximizer and repeating the search.
+This is what our software does;
+ the result is only an approximate maximum. 
+
+The third approach is to compute Fisher's combining function on a grid of possible parameter values and use these points to construct a lower bound on the Fisher's combination function.
+If the lower bound is above the upper $\alpha$ quantile of the chi-squared distribution with 4~degrees of freedom,
+then we can reject the conjunction hypothesis for all $\lambda_1$ and $\lambda_2$.
+
+We construct a piecewise constant lower bound.
+We will reparameterize $(\lambda_1, \lambda_2)$ and write $(\lambda, 1-\lambda)$ instead.
+Let $\{\lambda_0, \lambda_1, \dots, \lambda_n\}$ be values of the parameter at which we evaluate $p_1(\lambda)$ and $p_2(1-\lambda)$.
+Decompose $-2 = \nu^- - \nu^+$, where $\nu^-, \nu^+ \ge 0$.
+Then we can write
+
+\beq
+   \chi(\lambda) = -2\ln p_1(\lambda)-2\ln p_2(1-\lambda) = (\nu^- - \nu^+)\left(\ln p_1(\lambda) + \ln p_2(1-\lambda)\right)
+\eeq
+
+We use the fact that $p_1(\lambda)$ is monotonically increasing and $p_2(1-\lambda)$ is monotonically decreasing to find a constant lower bound on the interval $[\lambda_i, \lambda_{i+1})$: \textbf{\textcolor{red}{{I think these are the only conditions needed.}}}
+
+\begin{align*}
+ \chi(\lambda) &= \nu^- \left(\ln p_1(\lambda) + \ln p_2(1-\lambda)\right) - \nu^+\left(\ln p_1(\lambda) + \ln p_2(1-\lambda)\right) \\
+ &\ge \nu^-   \left(\inf_{\xi \in [\lambda_i, \lambda_{i+1})}  \ln p_1(\xi) + \inf_{\xi \in [\lambda_i, \lambda_{i+1})} \ln p_2(1-\xi)\right) - \\
+ &  \nu^+ \left(\sup_{\xi \in [\lambda_i, \lambda_{i+1})} \ln p_1(\xi) + \sup_{\xi \in [\lambda_i, \lambda_{i+1})} \ln p_2(1-\xi)\right) \\
+ &= \nu^-   \left( \ln p_1(\lambda_i) + \ln p_2(1-\lambda_{i+1})\right) - \nu^+ \left( \ln p_1(\lambda_{i+1}) + \ln p_2(1-\lambda_i)\right) \\
+\end{align*}
+
+Letting $\nu^- = 0$ and $\nu^+ = -2$ simplifies the upper bound:
+
+\beq
+   \chi(\lambda) \ge -2 \ln p_1(\lambda_{i+1}) -2 \ln p_2(1-\lambda_i)
+\eeq
+  
 
 %\input{subcollections}
 \input{comparisonError}
