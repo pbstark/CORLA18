@@ -49,7 +49,7 @@
 }
 \authorrunning{M. Lindeman et al.}
 
-\institute{Mark's affiliation \and
+\institute{Columbia University, NY, USA \and
 Neal's affiliation \and
 Department of Statistics, University of California, Berkeley, CA, USA}
 %\email{lncs@springer.com}\\
@@ -73,7 +73,7 @@ Moreover, Colorado's current audit software (RLATool) does not support audits of
 contained in counties that can conduct ballot-level comparison audits. 
 This paper addresses both gaps, along the way introducing a simple, efficient way to use 
 stratified sampling in RLAs.
-(Stratification makes it easier to combine ballot-polling and ballot-level comparisons, and also useful to reduce the
+(Stratification makes it easier to combine ballot-polling and ballot-level comparisons, and also is useful to reduce the
 required level of coordination among jurisdictions to audit cross-jurisdictional contests.)
 We present simple but inefficient methods, more efficient methods
 that combine ballot polling and ballot-level comparisons using stratified samples,
@@ -459,6 +459,7 @@ In general, $p_s(\lambda)$ could be a $P$-value for the hypothesis
 $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ from any test procedure (although
 if the audit is to be sequential, the tests in the two strata must be sequential tests). 
 
+
 %\input{subcollections}
 \input{comparisonError}
 \input{ballotPollError}
@@ -510,9 +511,12 @@ is not nearly as large as giving up the CVRs in CVR counties.
 For the maximum Fisher's combined $P$-value to be less than the risk limit,
 it suffices for the $P$-value in one stratum to be sufficiently small, even if 
 the $P$-value in the other is large. 
-For instance, if the stratum $P$-values are $90\%$ and $2\%$,
-then Fisher's combined $P$-value are less than 10\%,
-but if the stratum $P$-values were $45\%$ and $5\%$, it would not.
+For instance, if the stratum $P$-value in one stratum is $2\%$,
+then even if the other stratum $P$-value is as high as $90\%$
+the Fisher's combined $P$-value is less than $10\%$.
+However if one stratum $P$-value is just slightly higher at $5\%$,
+then even moderate $P$-values in the other stratum would push 
+the Fisher's combined $P$-value above $10\%$.
 
 Another conservative method, discussed in Section~\ref{sec:two-vote-over},
 involves conducting a ballot-level comparison audit statewide,
@@ -527,10 +531,9 @@ If it were possible to conduct a ballot-level comparison audit for the entire co
 an audit at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
 
 The workload for a hybrid stratified audit is not substantially higher:
-In 100\% of 10,000 simulations, an audit with samples of 50 ballots in the 
+In 98\% of 10,000 simulations, an audit with samples of 43 ballots in the 
 CVR stratum and 20 ballots in the no-CVR stratum
 would have sufficed to confirm the outcome at a 5\% risk limit.
-\comment{Maybe reduce the sample size until there are some failures? It looks like there's a lot of slack...}
 
 A second notebook, \texttt{hybrid-audit-example-2}, illustrates the workflow for conducting a hybrid 
 stratified audit.

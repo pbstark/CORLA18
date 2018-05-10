@@ -28,10 +28,12 @@
 *.fls
 *.blg
 *.bbl
+*.dvi
 
 # Jupyter notebook checkpoints #
 ######################
 *-checkpoint.ipynb
+*.pyc
 
 # OS generated files #
 ######################
