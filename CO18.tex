@@ -34,24 +34,25 @@
 \newcommand{\bpi}{\bar{\pi}}
 \newcommand{\bp}{\bar{p}}
 
-\newcommand{\comment}[1]{}
-%\newcommand{\note}[1]{\textcolor{red}{\sc #1}}
+% \newcommand{\comment}[1]{}
+\newcommand{\comment}[1]{\textcolor{red}{\sc #1}}
 
 
 
-\title{Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program}
+\title{Stratified Risk-Limiting Audits: A Path Forward for Colorado}
 
 \author{
-   Mark Lindeman\inst{1}\orcidID{0000-0001-8815-815X} \and
-   Neal McBurnett\inst{2}\orcidID{0000-0001-8667-1830} \and
-   Kellie Ottoboni\inst{3}\orcidID{0000-0002-9107-3402} \and
-   Philip B.~Stark\inst{3}\orcidID{0000-0002-3771-9604}
+   Kellie Ottoboni\inst{1}\orcidID{0000-0002-9107-3402} \and
+   Philip B.~Stark\inst{1}\orcidID{0000-0002-3771-9604} \and
+   Mark Lindeman\inst{2}\orcidID{0000-0001-8815-815X} \and
+   Neal McBurnett\inst{3}\orcidID{0000-0001-8667-1830} 
 }
-\authorrunning{M. Lindeman et al.}
+\authorrunning{K. Ottoboni et al.}
 
-\institute{Department of Political Science, Columbia University, NY, USA \and
-Neal's affiliation \and
-Department of Statistics, University of California, Berkeley, CA, USA}
+\institute{
+Department of Statistics, University of California, Berkeley, CA, USA \and
+Department of Political Science, Columbia University, NY, USA \and
+Neal's affiliation }
 %\email{lncs@springer.com}\\
 %\url{http://www.springer.com/gp/computer-science/lncs} \and
 %ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
@@ -69,19 +70,17 @@ Colorado CRS~1-7-515 requires risk-limiting tabulation audits (RLAs) starting in
 Most Colorado counties (comprising 98.2\% of voters) have voting equipment amenable to ballot-level comparison audits, but some
 are only able to perform ballot-polling audits. 
 How to combine ballot-polling and ballot-level comparison audits to check outcomes of contests that cross jurisdictional lines has not been addressed.
-Moreover, Colorado's current audit software (RLATool) does not support audits of cross-jurisdictional contests, even contests entirely
-contained in counties that can conduct ballot-level comparison audits. 
+Moreover, Colorado's current audit software (RLATool) does not support audits of cross-jurisdictional contests at all. 
 This paper addresses both gaps, along the way introducing a simple, efficient way to use 
 stratified sampling in RLAs.
-(Stratification makes it easier to combine ballot-polling and ballot-level comparisons, and also is useful to reduce the
-required level of coordination among jurisdictions to audit cross-jurisdictional contests.)
+(Stratification makes it easier to combine ballot-polling and ballot-level comparison, and also is useful to reduce coordination among jurisdictions required to audit cross-jurisdictional contests.)
 We present simple but inefficient methods, more efficient methods
 that combine ballot polling and ballot-level comparisons using stratified samples,
 and methods that combine ballot-level comparison and
 variable-size batch comparison audits without stratification,
 noting the changes to RLATool that each of these methods would require.
 We provide open-source reference implementations of the preferred methods in Jupyter notebooks.
-\keywords{\textbf{\textcolor{red}{Anything to add?}} elections, auditing, stratified sampling, Fisher's combining function, sequential hypothesis tests}
+\keywords{stratified sampling, Fisher's combining function, sequential hypothesis tests}
 \end{abstract}
 
 \noindent
@@ -374,7 +373,7 @@ from RLATool or directly from legacy counties.
 \end{enumerate}
 
 None of these changes is enormous; the mathematics and statistics are already worked out
-in published papers \textbf{\textcolor{red}{PROVIDE CITES}} that include exemplar code for calculating the
+in published papers \cite{stark09b,stark09c,stark10d} including calculating
 batch-level error bounds, drawing the samples with probability proportional to an
 error bound, and calculating the attained risk from the sample results.
 Indeed, this is the method that was used in several of California's pilot audits,
@@ -433,7 +432,7 @@ $\omega_{w\ell,2} \ge \lambda_2 V_{w\ell}$ is true, then the combination
 has a probability distribution that is dominated by the chi-square distribution with 4~degrees
 of freedom.\footnote{%
    If the two tests had continuously distributed $P$-values, the distribution would be exactly
-   chi-square with four degrees of freedom, but if either $P$-value has atoms when
+   chi-square with 4~degrees of freedom, but if either $P$-value has atoms when
    the null hypothesis is true, it is in general stochastically smaller.
    This follows from a coupling argument along the lines of Theorem~4.12.3 in \cite{grimmett01}.
 }
@@ -443,12 +442,13 @@ If either is false, then as the sample size increases, Fisher's combined statist
 If, for all $\lambda_1$ and $\lambda_2 = 1- \lambda_1$, we can reject the conjunction
 hypothesis at level $\alpha$, the audit can stop.
 The stratified audit thus involves examining more randomly selected ballots from the two strata until 
-either the minimum value Fisher's combined statistic over all pairs $(\lambda_1, \lambda_2)$ is larger than the $1-\alpha$ quantile of the chi-square
-distribution with 4 degrees of freedom, or until both strata have been fully hand tabulated.
+either the minimum value Fisher's combined statistic over all pairs $(\lambda_1, \lambda_2)$ 
+is larger than the $1-\alpha$ quantile of the chi-square
+distribution with 4~degrees of freedom, or until both strata have been fully hand tabulated.
 
 For Colorado's audits, $p_s(\lambda)$ can be calculated using the methods in 
 sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError}.
-Finding $p_s$ using ballot polling requires modifying standard ballot-polling calculations,
+Finding $p_s$ for ballot polling requires modifying standard ballot-polling calculations,
 because the standard method considers only the fraction of ballots with a vote for either 
 $w$ or $\ell$ that contain a vote for $w$, while we need to make an inference about the 
 difference between the \emph{number} of votes for $w$ and the number of votes for $\ell$.
@@ -458,51 +458,54 @@ $w$ or $\ell$.
 In general, $p_s(\lambda)$ could be a $P$-value for the hypothesis
 $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ from any test procedure (although
 if the audit is to be sequential, the tests in the two strata must be sequential tests). 
+We assume, however, that $p_s$ is based on a one-sided test, and that the tests
+for different values of $\lambda$ ``nest'' in the sense that if $a > b$,
+then $p_s(a) > p_s(b)$.
+This monotonicity is a reasonable requirement because the evidence that the overstatement
+is greater than $a$ should be weaker than the evidence that the overstatement is greater than
+$b$, if $a > b$.
+In particular, this monotonicity holds for the tests proposed in sections~\ref{sec:comparisonError}
+and \ref{sec:ballotPollError}.
 
 \subsection{Maximizing Fisher's combined $P$-value}
+The audit can stop if the maximum of Fisher's combined $P$-value over all pairs
+$(\lambda, 1-\lambda)$ is not larger than $\alpha$, the risk limit.
+For a given set of audit data, 
+finding the maximum $P$-value over all $(\lambda_1, \lambda_2 = 1-\lambda_1)$
+is a one-dimensional optimization problem.
+We need a computational strategy to ensure that the maximum is small
+without evaluating the $P$-value for all $\lambda$.
 
-It is impossible to actually test all combinations of $\lambda_1$ and $\lambda_2$.
-Instead, we offer several computational approaches to check whether the conjunction hypothesis can be rejected at level $\alpha$ for all $\lambda_1, \lambda_2$.
+The approach embodied in the software we provide uses a grid search, refining the
+grid once the maximum has been bracketed.
+This is not guaranteed to find the global maximum exactly, although it can approximate 
+the maximum as closely as one desires, by refining the mesh.
 
-The first method is to use an optimization package to maximize the 
-Fisher combined $P$-value, or equivalently,
-minimize Fisher's combination function.
-In simulations, this approach was computationally inefficient and numerically unstable.
-
-A second, crude approach is to search for the maximum Fisher combined $P$-value along a grid of $(\lambda_1, \lambda_2)$ values.
-After a maximum is found, the search can be refined by creating a finer grid around the maximizer and repeating the search.
-This is what our software does;
- the result is only an approximate maximum. 
-
-The third approach is to compute Fisher's combining function on a grid of possible parameter values and use these points to construct a lower bound on the Fisher's combination function.
-If the lower bound is above the upper $\alpha$ quantile of the chi-squared distribution with 4~degrees of freedom,
-then we can reject the conjunction hypothesis for all $\lambda_1$ and $\lambda_2$.
-
-We construct a piecewise constant lower bound.
-We will reparameterize $(\lambda_1, \lambda_2)$ and write $(\lambda, 1-\lambda)$ instead.
-Let $\{\lambda_0, \lambda_1, \dots, \lambda_n\}$ be values of the parameter at which we evaluate $p_1(\lambda)$ and $p_2(1-\lambda)$.
-Decompose $-2 = \nu^- - \nu^+$, where $\nu^-, \nu^+ \ge 0$.
-Then we can write
-
+A more rigorous approach is to find a lower bound on Fisher's combining function for all
+$\lambda$. 
+(The lower bound translates directly into an upper bound on the $P$-value as a function of
+$\lambda$: if the lower bound is 
+everywhere larger than the $1-\alpha$ quantile of the chi-squared distribution with 4~degrees of freedom, the maximum $P$-value is no larger than $\alpha$.)
+Let $\lambda_-$ be the smallest possible value of $\lambda$ and $\lambda_+$ be the largest
+possible value of $\lambda$ (\comment{add cross reference!} see \eqref{????} for \emph{a priori} bounds on $\lambda$).
+Recall that $p_s(\cdot)$ increases monotonically in its argument, so $p_1(\lambda)$ is
+monotonically increasing in $\lambda$ and $p_2(1-\lambda)$ is monotonically decreasing in $\lambda$.
+Suppose $[a, b) \subset [\lambda_-, \lambda_+]$.
+Then for all $\lambda \in [a, b)$, $-2\ln p_1(\lambda) \ge -2\ln p_1(b)$ and
+$-2\ln p_2(1-\lambda) \ge -2\ln p_2(1-a)$.
+Thus
 \beq
-   \chi(\lambda) = -2\ln p_1(\lambda)-2\ln p_2(1-\lambda) = (\nu^- - \nu^+)\left(\ln p_1(\lambda) + \ln p_2(1-\lambda)\right)
+   \chi(\lambda) = -2(\ln p_1(\lambda)+ \ln p_2(1-\lambda))
+          \ge -2(p_1(b) + p_2(1-a)) \equiv \chi_-[a,b).
 \eeq
-
-We use the fact that $p_1(\lambda)$ is monotonically increasing and $p_2(1-\lambda)$ is monotonically decreasing to find a constant lower bound on the interval $[\lambda_i, \lambda_{i+1})$: \textbf{\textcolor{red}{{I think these are the only conditions needed.}}}
-
-\begin{align*}
- \chi(\lambda) &= \nu^- \left(\ln p_1(\lambda) + \ln p_2(1-\lambda)\right) - \nu^+\left(\ln p_1(\lambda) + \ln p_2(1-\lambda)\right) \\
- &\ge \nu^-   \left(\inf_{\xi \in [\lambda_i, \lambda_{i+1})}  \ln p_1(\xi) + \inf_{\xi \in [\lambda_i, \lambda_{i+1})} \ln p_2(1-\xi)\right) - \\
- &  \nu^+ \left(\sup_{\xi \in [\lambda_i, \lambda_{i+1})} \ln p_1(\xi) + \sup_{\xi \in [\lambda_i, \lambda_{i+1})} \ln p_2(1-\xi)\right) \\
- &= \nu^-   \left( \ln p_1(\lambda_i) + \ln p_2(1-\lambda_{i+1})\right) - \nu^+ \left( \ln p_1(\lambda_{i+1}) + \ln p_2(1-\lambda_i)\right) \\
-\end{align*}
-
-Letting $\nu^- = 0$ and $\nu^+ = -2$ simplifies the upper bound:
-
-\beq
-   \chi(\lambda) \ge -2 \ln p_1(\lambda_{i+1}) -2 \ln p_2(1-\lambda_i)
-\eeq
-  
+\comment{@Kellie: please double check for sign errors...I might have the endpoints reversed.}
+This gives a (constant) lower bound for $\chi$ on the interval $[a, b)$.
+Partitioning $[\lambda_-, \lambda_+]$ into a collection of intervals $[a_k, a_{k+1})$
+and finding $\chi_-[a_k, a_{k+1})$ for each
+yields a piecewise constant lower bound for $\chi(\lambda)$; if,
+ for all $\lambda \in [\lambda_-, \lambda_+]$, the lower bound
+is larger than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom,
+the audit can stop.
 
 %\input{subcollections}
 \input{comparisonError}
