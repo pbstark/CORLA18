@@ -373,7 +373,7 @@ from RLATool or directly from legacy counties.
 \end{enumerate}
 
 None of these changes is enormous; the mathematics and statistics are already worked out
-in published papers \cite{stark09b,stark09c,stark10d} including calculating
+in published papers \cite{stark09c,stark09b,stark10d} including calculating
 batch-level error bounds, drawing the samples with probability proportional to an
 error bound, and calculating the attained risk from the sample results.
 Indeed, this is the method that was used in several of California's pilot audits,
@@ -487,7 +487,9 @@ $\lambda$.
 $\lambda$: if the lower bound is 
 everywhere larger than the $1-\alpha$ quantile of the chi-squared distribution with 4~degrees of freedom, the maximum $P$-value is no larger than $\alpha$.)
 Let $\lambda_-$ be the smallest possible value of $\lambda$ and $\lambda_+$ be the largest
-possible value of $\lambda$ (\comment{add cross reference!} see \eqref{????} for \emph{a priori} bounds on $\lambda$).
+possible value of $\lambda$.
+Some values of $\lambda$ can be ruled out \emph{a priori}, because (for instance) $\omega_{w\ell,s} \in [-2N_s, 2N_s]$,
+where $N_s$ is the number of ballots cast in stratum $s$.
 Recall that $p_s(\cdot)$ increases monotonically in its argument, so $p_1(\lambda)$ is
 monotonically increasing in $\lambda$ and $p_2(1-\lambda)$ is monotonically decreasing in $\lambda$.
 Suppose $[a, b) \subset [\lambda_-, \lambda_+]$.
@@ -496,9 +498,8 @@ $-2\ln p_2(1-\lambda) \ge -2\ln p_2(1-a)$.
 Thus
 \beq
    \chi(\lambda) = -2(\ln p_1(\lambda)+ \ln p_2(1-\lambda))
-          \ge -2(p_1(b) + p_2(1-a)) \equiv \chi_-[a,b).
+          \ge -2(\ln p_1(b) + \ln p_2(1-a)) \equiv \chi_-[a,b).
 \eeq
-\comment{@Kellie: please double check for sign errors...I might have the endpoints reversed.}
 This gives a (constant) lower bound for $\chi$ on the interval $[a, b)$.
 Partitioning $[\lambda_-, \lambda_+]$ into a collection of intervals $[a_k, a_{k+1})$
 and finding $\chi_-[a_k, a_{k+1})$ for each
@@ -540,8 +541,9 @@ at \url{https://www.github.com/pbstark/CORLA18}.
 The first two examples are contained in a single notebook, \texttt{hybrid-audit-example-1}.
 
 The first example is a hypothetical medium-sized election with 
-$110,000$ ballots cast and a diluted margin of $1.8\%$, of which 
+$110,000$ ballots cast, of which 
 9.1\% were cast in no-CVR counties. 
+The diluted margin is $1.8\%$.
 In 93 of 100 simulations, a stratified ``hybrid'' audit at risk limit 10\% with sample sizes of 400 ballots 
 in the CVR stratum and 600 ballots in the no-CVR stratum
 (1,000 ballots in all)
@@ -571,9 +573,8 @@ treating any ballot selected from the no-CVR county as if it had a two-vote over
 In this numerical example, that method would lead to a full hand count.
 
 The second numerical example is a hypothetical large statewide election with a total of 
-2~million ballots cast and a diluted margin of nearly $20\%$.  
-The risk limit is 5\%.
-\comment{How many ballots in each stratum?}
+2~million ballots cast, of which 5\% were cast in no-CVR counties.
+The contest has a diluted margin of nearly $20\%$ and the risk limit is 5\%.
 If it were possible to conduct a ballot-level comparison audit for the entire contest, 
 an audit at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
 
