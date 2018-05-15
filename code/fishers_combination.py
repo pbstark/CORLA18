@@ -153,7 +153,7 @@ def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
     plt.show()
     
     
-def simulate_fisher_combined_audit(N_w1, N_l1, N_w2, N_l2, n1, n2, alpha,
+def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha,
     reps=10000, verbose=False, plausible_lambda_range=None):
     """
     Simulate the Fisher method of combining a ballot comparison audit
@@ -167,10 +167,14 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N_w2, N_l2, n1, n2, alpha,
         votes for the reported winner in the ballot comparison stratum
     N_l1 : int
         votes for the reported loser in the ballot comparison stratum
+    N1 : int
+        total number of votes in the ballot comparison stratum
     N_w2 : int
         votes for the reported winner in the ballot polling stratum
     N_l2 : int
         votes for the reported loser in the ballot polling stratum
+    N2 : int
+        total number of votes in the ballot polling stratum
     n1 : int
         sample size in the ballot comparison stratum
     n2 : int
