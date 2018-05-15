@@ -90,7 +90,7 @@ is still conservative (i.e., the risk is not larger than its nominal value).
 For every winner, loser pair $(w, \ell)$, we want to test
 whether the overstatement error exceeds some threshold, generally
 one tied to the reported margin between $w$ and $\ell$.
-For instance, for stratified hybrid audit, we set the threshold to be
+For instance, for a stratified hybrid audit, we set the threshold to be
 $\lambda_s V_{w\ell}$.
 
 We want to test whether
@@ -168,7 +168,7 @@ At worst, the reported result for batch $p$ shows $n_p$ votes for the
 ``least-winning'' apparent winner of the contest with the smallest margin, 
 but a hand interpretation would show that all $n_p$ ballots in the batch 
 had votes for the runner-up in that contest.
-Since $V_{w\ell} \ge V$ and $0 \le v_{pi} \le n_p$,
+Since $V_{w\ell} \ge V\equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$ and $0 \le v_{pi} \le n_p$,
 $$ 
     u_p =  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
     \frac{v_{pw} - v_{p\ell} + n_p}{V_{w\ell}}

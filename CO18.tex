@@ -565,13 +565,14 @@ The second example, also in \texttt{hybrid-audit-example-1},
 is a hypothetical large statewide election with 
 2~million ballots cast, of which 5\% were cast in no-CVR counties.
 The contest has a diluted margin of nearly $20\%$ and the risk limit is 5\%.
-If it were possible to conduct a ballot-level comparison audit for the entire contest, 
-an audit at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
-
-The workload for a hybrid stratified audit is modestly higher, but still quite low:
+The workload for a hybrid stratified audit is quite low:
 In 98\% of 10,000 simulations, auditing 43 ballots from the 
 CVR stratum and 20 ballots from the no-CVR stratum
 would have sufficed to confirm the outcome at a 5\% risk limit.
+
+If it were possible to conduct a ballot-level comparison audit for the entire contest, 
+an audit at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
+The additional work needed to do the hybrid stratified audit falls mainly in the no-CVR stratum.
 
 A second notebook, \texttt{hybrid-audit-example-2}, illustrates the 
 workflow for conducting a hybrid stratified audit of an election with 2~million ballots cast.
