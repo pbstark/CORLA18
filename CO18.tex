@@ -45,19 +45,13 @@
    Kellie Ottoboni\inst{1}\orcidID{0000-0002-9107-3402} \and
    Philip B.~Stark\inst{1}\orcidID{0000-0002-3771-9604} \and
    Mark Lindeman\inst{2}\orcidID{0000-0001-8815-815X} \and
-   Neal McBurnett\inst{3}\orcidID{0000-0001-8667-1830} 
+   Neal McBurnett\orcidID{0000-0001-8667-1830} 
 }
 \authorrunning{K. Ottoboni et al.}
 
 \institute{
 Department of Statistics, University of California, Berkeley, CA, USA \and
-Department of Political Science, Columbia University, NY, USA \and
-Neal's affiliation }
-%\email{lncs@springer.com}\\
-%\url{http://www.springer.com/gp/computer-science/lncs} \and
-%ABC Institute, Rupert-Karls-University Heidelberg, Heidelberg, Germany\\
-%\email{\{abc,lncs\}@uni-heidelberg.de}}
-
+Department of Political Science, Columbia University, NY, USA}
 
 \date{Version: \today}
 
@@ -159,7 +153,7 @@ Existing methods would either require all counties to use the lowest
 common denominator (ballot-polling, which does not take advantage of the CVRs,
 and thus is expected to require more auditing than a method that uses the available CVRs),
  or would require no-CVR counties to perform batch-level comparisons, which were found in
-California to be rather less efficient than ballot-polling audits.%
+California to be less efficient than ballot-polling audits.%
 \footnote{%
   See~\cite{Rivest-2018-bayesian-tabulation-audits}
   for a different (Bayesian) approach to auditing contests that include both CVR counties
@@ -167,15 +161,15 @@ California to be rather less efficient than ballot-polling audits.%
 }
 
 The audit software RLATool needs additional features to be able to audit
-contests that cross county lines:
+contests that cross county lines.
 First, the current version (1.1.0) of RLATool
 needs to be modified to account for contests that cross jurisdictional
 boundaries; currently, it treats every contest as if it were entirely
 contained in a single county.
 % Margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
-Second, to audit a contest that includes votes in no-CVR counties
-and votes in CVR counties, new statistical methods are needed to
-preserve the efficiency of ballot-level comparison audits in CVR counties.
+Second, to audit a contest that includes votes in CVR counties
+and votes in no-CVR counties, new statistical methods are needed to
+preserve the efficiency of ballot-level comparison audits in the CVR counties.
 
 %Third, contests that appear only on a subset of ballots can
 %be audited much more efficiently if the sample can be drawn from just those ballots
