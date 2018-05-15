@@ -469,9 +469,9 @@ grid once the maximum has been bracketed.
 This is not guaranteed to find the global maximum exactly, although it can approximate 
 the maximum as closely as one desires, by refining the mesh.
 
-A more rigorous approach is to find a lower bound on Fisher's combining function for all
+A more rigorous approach is to find bounds on Fisher's combining function for all
 $\lambda$. 
-(The lower bound translates directly into an upper bound on the $P$-value as a function of
+(Lower bounds translate directly into an upper bound on the $P$-value as a function of
 $\lambda$: if the lower bound is 
 everywhere larger than the $1-\alpha$ quantile of the chi-squared distribution with 4~degrees of freedom, the maximum $P$-value is no larger than $\alpha$.)
 Let $\lambda_-$ be the smallest possible value of $\lambda$ and $\lambda_+$ be the largest
@@ -492,13 +492,14 @@ Thus
    \chi(\lambda) = -2(\ln p_1(\lambda)+ \ln p_2(1-\lambda))
           \ge -2(\ln p_1(b) + \ln p_2(1-a)) \equiv \chi_-[a,b).
 \eeq
-This gives a (constant) lower bound for $\chi$ on the interval $[a, b)$.
+This gives a (constant) lower bound for $\chi$ on the interval $[a, b)$; the corresponding 
+upper bound is $\chi(\lambda) \le -2(\ln p_1(a) + \ln p_2(1-b)) \equiv \chi_+[a,b)$.
 Partitioning $[\lambda_-, \lambda_+]$ into a collection of intervals $[a_k, a_{k+1})$
 and finding $\chi_-[a_k, a_{k+1})$ for each
-yields a piecewise constant lower bound for $\chi(\lambda)$; if,
+yields a piecewise-constant lower and upper bounds for $\chi(\lambda)$; if,
  for all $\lambda \in [\lambda_-, \lambda_+]$, the lower bound
 is larger than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom,
-the audit can stop.
+the audit can stop; if the upper bound is anywhere less than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom, the sample size in one or both strata needs to be larger.
 
 %\input{subcollections}
 \input{comparisonError}
