@@ -217,3 +217,13 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha
                                precise=True,
                                plausible_lambda_range=plausible_lambda_range)['max_pvalue']
     return np.mean(fisher_pvalues <= alpha)
+
+
+def calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2):
+    V1 = N_w1 - N_l1
+    V2 = N_w2 - N_l2
+    V = V1+V2
+    lb = 1 - (V2 + N2)/V
+    ub = (V1 + N1)/V
+    return (lb, ub)
+    
