@@ -134,6 +134,7 @@ def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
     assert len(pvalue_funs)==2
         
     # find range of possible lambda
+#    (lambda_lower, lambda_upper) = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
     lambda_upper = int(np.min([2*N[0]/overall_margin, 1+2*N[1]/overall_margin]))+1
     lambda_lower = int(np.max([-2*N[0]/overall_margin, 1-2*N[1]/overall_margin]))
 
@@ -227,3 +228,48 @@ def calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2):
     ub = (V1 + N1)/V
     return (lb, ub)
     
+    
+def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
+                     n_w1, n_l1, n1, n_w2, n_l2, n2):
+        """
+        Create piecewise constant upper and lower bounds for the Fisher's 
+        combination function for varying error allocations
+
+        Parameters
+        ----------
+        N_w1 : int
+            votes for the reported winner in the ballot comparison stratum
+        N_l1 : int
+            votes for the reported loser in the ballot comparison stratum
+        N1 : int
+            total number of votes in the ballot comparison stratum
+        N_w2 : int
+            votes for the reported winner in the ballot polling stratum
+        N_l2 : int
+            votes for the reported loser in the ballot polling stratum
+        N2 : int
+            total number of votes in the ballot polling stratum
+        n_w1 : int
+            votes for the reported winner in the ballot comparison sample
+        n_l1 : int
+            votes for the reported loser in the ballot comparison sample
+        n1 : int
+            sample size in the ballot comparison stratum
+        n_w2 : int
+            votes for the reported winner in the ballot polling sample
+        n_l2 : int
+            votes for the reported loser in the ballot polling sample
+        n2 : int
+            sample size in the ballot polling stratum
+    
+        Returns
+        -------
+        dict with 
+    
+        float
+            maximum combined p-value
+        float
+            minimum value of Fisher's combined test statistic
+        float
+            lambda, the parameter that minimizes the Fisher's combined statistic/maximizes the combined p-value
+        """
