@@ -1,7 +1,7 @@
 \section{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
-In this section we develop a new method for ballot polling that can test numerical margins,
+In this section we develop a new method for ballot-polling audits that can test numerical margins,
 rather than just test whether a candidate won.
 This requires a different approach than that taken by \cite{lindemanEtal12}.
 
@@ -9,7 +9,7 @@ Existing ballot-polling methods consider only the fraction of ballots with a vot
 $w$ or $\ell$ that contain a vote for $w$,
 making the statistical test one for a proportion.
 To allow the error to be partitioned across the strata via $\lambda_s$,
-we need to make an inference about the 
+the necessary inference is about the 
 \emph{difference} between the number of votes for $w$ and the number of votes for $\ell$.
 This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
 We deal with the nuisance parameter by maximizing the $P$-value 
@@ -41,9 +41,11 @@ We want to test the compound hypothesis $A_{w,s} - A_{\ell,s} \le c$.
 The value of $c$ is inferred from the definition
 $\omega_{w\ell,s} \equiv V_{w\ell,s} - A_{w\ell,s} = V_{w,s} - V_{\ell,s} - (A_{w,s} -A_{\ell,s})$.
 Thus,
-$$
+
+\beq
     c = V_{w,s} - V_{\ell,s} - \omega_{w\ell,s} = V_{w\ell,s} - \lambda_s V_{w\ell}.
-$$
+\eeq
+
 The alternative is the compound hypothesis 
 $A_{w,s} - A_{\ell,s} > c$.\footnote{%
     To use Wald's Sequential Probability Ratio Test, we might pick a simple alternative instead, e.g.,
@@ -58,7 +60,7 @@ conditions only on $B_w+B_\ell = m$.
 }
 
 
-The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
+The $P$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
 a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
 and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
 (including undervotes and
@@ -94,7 +96,7 @@ Therefore,
 %
 %$$\frac{{A_{w,s} \choose i}{A_{\ell, s} \choose m-i}}{{A_{w,s}+A_{\ell,s} \choose m}}.$$
 %
-%The $p$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
+%The $P$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
 %a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
 %and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
 %(including undervotes and
@@ -108,7 +110,7 @@ Therefore,
 %\end{equation}
 %
 %
-%This conditional $p$-value is thus the tail probability of the hypergeometric distribution
+%This conditional $P$-value is thus the tail probability of the hypergeometric distribution
 %with parameters $A_{w,s}$ ``good'' items, $A_{\ell,s}$ ``bad'' items, and a sample of size $m$.
 %This calculation is numerically stable and fast; tail probabilities of the hypergeometric distribution are available
 %and well-tested in all standard statistics software.
@@ -119,7 +121,7 @@ The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separat
 that $A_{w,s} - A_{\ell,s} \le c$ for
 some fixed, known $c$.
 Define $\mathcal{S}$ to be the set of pairs $(i, j)$ such that $i, j\ge 0, i-j \ge nd,$ and $ i+j \leq n$.
-The (conditional) $p$-value of this composite hypothesis for $D=d$ is the maximum $p$-value for all
+The (conditional) $P$-value of this composite hypothesis for $D=d$ is the maximum $P$-value for all
 values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
 \begin{equation}
   \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
@@ -134,13 +136,13 @@ The following result enables us to only test hypotheses along the boundary of th
 \begin{thm}
 Assume that $n < A_{w,s}+A_{\ell,s}$.
 Suppose the composite null hypothesis is $N_w - N_\ell \leq c$.
-The $p$-value is maximized on the boundary of the null region, i.e. when $N_w - N_\ell = c$.
+The $P$-value is maximized on the boundary of the null region, i.e. when $N_w - N_\ell = c$.
 \end{thm}
 
 \begin{proof}
 Without loss of generality, let $c=0$ and assume that $A_{u,s}=N_s - A_{w,s} - A_{\ell,s}$ is fixed.
 Let $N_{w\ell, s} \equiv A_{w,s}+A_{\ell,s}$ be the fixed, unknown number of ballots for $w$ or for $\ell$ in stratum $s$.
-The $p$-value $p_0$ for the simple hypothesis that $c=0$ is
+The $P$-value $p_0$ for the simple hypothesis that $c=0$ is
 
 \begin{equation}
   p_0 = \sum_{\substack{(i, j) \in \mathcal{S}}} \frac{ {N_{w\ell, s}/2 \choose i}{N_{w\ell, s}/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}} =  \sum_{\substack{(i, j) \in \mathcal{S}}}T_{ij},
@@ -149,7 +151,7 @@ The $p$-value $p_0$ for the simple hypothesis that $c=0$ is
 \noindent where $T_{ij}$ is defined as the $(i, j)$ term in the summand and $T_{ij} \equiv 0$ for pairs $(i, j)$ that don't appear in the summation.
 
 Assume that $c>0$ is given.
-The $p$-value $p_c$ for this simple hypothesis is
+The $P$-value $p_c$ for this simple hypothesis is
 \begin{align*}
 p_c &=   \sum_{\substack{(i, j) \in \mathcal{S}}}  \frac{ {(N_{w\ell, s}+c)/2 \choose i}{(N_{w\ell, s}-c)/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}}  \\
    &=\sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \frac{ \frac{N_{w\ell, s}+c}{2}(\frac{N_{w\ell, s}+c}{2}-1)\cdots(\frac{N_{w\ell, s}}{2}+1) (\frac{N_{w\ell, s}-c}{2} -j)\cdots(\frac{N_{w\ell, s}}{2}-1-j) }
@@ -159,7 +161,7 @@ p_c &=   \sum_{\substack{(i, j) \in \mathcal{S}}}  \frac{ {(N_{w\ell, s}+c)/2 \c
 Terms in the fraction can be simplified: choose the corresponding pairs in the numerator and denominator.
 Fractions of the form $\frac{\frac{N_{w\ell, s}}{2} + a}{\frac{N_{w\ell,s}}{2} + a - i}$ can be expressed as $1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}$.
 Fractions of the form $\frac{\frac{N_{w\ell, s}}{2}  - a - j}{\frac{N_{w\ell, s}}{2}  - a}$ can be expressed as $1 - \frac{j}{\frac{N_{w\ell, s}}{2} -a}$.
-Thus, the $p$-value can be written as 
+Thus, the $P$-value can be written as 
 
 \begin{align*}
 p_c &= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \prod_{a=1}^{c/2} \left(1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2} - a}\right) \\
@@ -170,25 +172,25 @@ p_c &= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \prod_{a=1}^{c/2} \left(1
 \end{align*}
 
 The last inequality follows from the fact that $i$ and $j$ are nonnegative, and 
-that $i < \frac{N_{w\ell,s}+c}{2}$ -- it is a possible outcome under the null hypothesis.
+that $i < \frac{N_{w\ell,s}+c}{2}$ (it is a possible outcome under the null hypothesis).
 
 
 \end{proof}
 
 \subsubsection{Solving the optimization problem}
 
-We have shown empirically (but do not prove) that this tail probability, as a function of $A_{w,s}$,
-has a unique maximum at one of the endpoints when $A_{w,s}$ is either as small or as large as possible,
-given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$.
-If the empirical result is true, then finding the maximum is trivial;
-otherwise, it is a trivial one-dimensional optimization problem to compute the unconditional $p$-value.
+We have found empirically (but have not proven) that given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$, the tail probability $p_c$, as a function of $A_{w,s}$,
+has a unique maximum at one of the endpoints, where $A_{w,s}$ is either as small or as large as possible.
+If this empirical result is true in general, then finding the maximum is trivial;
+otherwise, computing the unconditional $P$-value is a simple 1-dimensional optimization problem
+on a bounded interval.
 
 \subsection{Conditional testing}
 If the conditional tests are always conducted at significance level $\alpha$ or less, so that
 $\mathbb{P} \{\mbox{Type I error} | B = n\} \le \alpha$, then the
 overall procedure has significance level $\alpha$ or less:
 \begin{eqnarray}
-    \mathbb{P} \{\mbox{Type I error}\} &=& \sum_{n=0}^N \{\mbox{Type I error} |  B = n\} \mathbb{P} \{ B = n \} \nonumber \\
+    \mathbb{P} \{\mbox{Type I error}\} &=& \sum_{n=0}^N  \mathbb{P}\{\mbox{Type I error} |  B = n\} \mathbb{P} \{ B = n \} \nonumber \\
        & \le & \sum_{n=0}^N \alpha \mathbb{P} \{  B = n \}  =  \alpha.
 \end{eqnarray}
 

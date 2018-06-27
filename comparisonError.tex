@@ -14,7 +14,7 @@ would confirm the election outcome.
 For stratified audits, we might want to test other values of $\lambda$, as described above.
 
 In Colorado, comparison audits so far have been ballot-level comparisons
-(\emph{i.e.}, batches consisting of a single ballot). 
+(i.e., batches consisting of a single ballot). 
 This section also addresses the second requirement by deriving a method for batches of arbitrary size, which might be useful
 for Colorado to audit contests that include CVR counties and legacy counties.
 We keep the \emph{a priori} error bounds tighter than the ``super-simple'' 
@@ -27,6 +27,8 @@ Majority and super-majority contests are a minor
 modification~\cite{stark08a}.\footnote{%
   So are some forms of preferential and approval voting, such as Borda count, and
   proportional representation contests, such as D'Hondt~\cite{starkTeague14}.
+  See \url{https://github.com/pbstark/S157F17/blob/master/audit.ipynb} for a derivation
+  of ballot-level comparison risk-limiting audits for super-majority contests. (Last visited 14 May 2018.)
   Changes for IRV/STV are more complicated.
 }
 
@@ -88,7 +90,7 @@ is still conservative (i.e., the risk is not larger than its nominal value).
 For every winner, loser pair $(w, \ell)$, we want to test
 whether the overstatement error exceeds some threshold, generally
 one tied to the reported margin between $w$ and $\ell$.
-For instance, for stratified hybrid audit, we set the threshold to be
+For instance, for a stratified hybrid audit, we set the threshold to be
 $\lambda_s V_{w\ell}$.
 
 We want to test whether
@@ -166,7 +168,7 @@ At worst, the reported result for batch $p$ shows $n_p$ votes for the
 ``least-winning'' apparent winner of the contest with the smallest margin, 
 but a hand interpretation would show that all $n_p$ ballots in the batch 
 had votes for the runner-up in that contest.
-Since $V_{w\ell} \ge V$ and $0 \le v_{pi} \le n_p$,
+Since $V_{w\ell} \ge V\equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$ and $0 \le v_{pi} \le n_p$,
 $$ 
     u_p =  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
     \frac{v_{pw} - v_{p\ell} + n_p}{V_{w\ell}}
@@ -193,7 +195,7 @@ $E < \lambda_s$.
 
 \subsection{Testing $\mathbb{E} T_1 \ge \lambda_s/U$}
 
-To test whether $\mathbb{E} T_1 < \lambda_s/U$, there are a variety of methods available.
+A variety of methods are available to test whether $\mathbb{E} T_1 < \lambda_s/U$.
 One particularly ``clean'' sequential method is based on Wald's Sequential Probability
 Ratio Test (SPRT) (\cite{wald45}).
 Harold Kaplan pointed out this method on a website that no longer exists.
