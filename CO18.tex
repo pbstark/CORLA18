@@ -92,61 +92,108 @@ and they assume that this audit trail is sufficiently complete and accurate that
 tally would show the true electoral outcome.
 That assumption is not automatically satisfied: a \emph{compliance audit}
 \cite{starkWagner12} 
-is required.
+is required to check whether election accounting and security procedures were followed.
 
 Risk-limiting audits are generally (but not necessarily) incremental: they examine more ballots, or batches of ballots,
 until either (i)~there is strong statistical evidence that a full hand tabulation would confirm the outcome,
 or (ii)~the audit has led to a full hand tabulation, the result of which should become the official
 result.
 
-RLAs have been piloted in California, Colorado, and Ohio, and a test of
-RLA procedures has been conducted in Arizona.
-RLA bills are being drafted or are already under consideration in California,
-Virginia, Washington, and other states.
-A number of laws have either allowed or mandated risk-limiting audits,
-including California AB~2023 (Salda\~{n}a), SB~360 (Padilla), and AB~44 (Mullin);
-Rhode Island SB~413A and HB~5704A; and Colorado Revised Statutes (CRS)~1-7-515.
-At the time of writing, California is considering another RLA bill, AB~2125.
+%RLAs have been piloted in California, Colorado, and Ohio, and a test of
+%RLA procedures has been conducted in Arizona.
+%RLA bills are being drafted or are already under consideration in California,
+%Virginia, Washington, and other states.
+%A number of laws have either allowed or mandated risk-limiting audits,
+%including California AB~2023 (Salda\~{n}a), SB~360 (Padilla), and AB~44 (Mullin);
+%Rhode Island SB~413A and HB~5704A; and Colorado Revised Statutes (CRS)~1-7-515.
+%At the time of writing, California is considering another RLA bill, AB~2125.
 
-CRS~1-7-515 requires 
-Colorado to conduct risk-limiting audits beginning in 2017.
-(There are provisions to allow the Secretary of State to exempt some counties.)
-The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
- See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
-}
-Those audits only covered contests restricted to a single county:
-counties could audit independently.
-To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
-and modify RLATool\footnote{%
-  \url{https://github.com/FreeAndFair/ColoradoRLA/}
-}, 
-the open-source audit software used for their 2017 audits. 
+%CRS~1-7-515 requires 
+%Colorado to conduct risk-limiting audits beginning in 2017.
+%(There are provisions to allow the Secretary of State to exempt some counties.)
+%The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
+% See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
+%}
+%Those audits only covered contests restricted to a single county:
+%counties could audit independently.
+%To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
+%and modify RLATool\footnote{%
+%  \url{https://github.com/FreeAndFair/ColoradoRLA/}
+%}, 
+%the open-source audit software used for their 2017 audits. 
 
-Colorado's ``uniform voting system'' program\footnote{%
-  \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
-} 
-led many Colorado counties to purchase (or to plan to purchase) voting systems
-that are auditable at the ballot level: those systems export cast vote records (CVRs)
-for individual ballots in a manner that allows the corresponding paper ballot to be identified,
+\comment{confirm or correct these assertions}
+State laws mandating risk-limiting audits generally require a simple random sample of ballots from each contest to be audited.
+This is feasible when contests are contained within a single jurisdiction, where elections officials can deal with ballots locally.
+However, the logistics of drawing a simple random sample of ballots that cross jurisdiction lines are more difficult.
+This would require a central agency to determine which ballots each jurisdiction should draw, and then each jurisdiction must report the results of their audit back to the central agency to be combined.
+
+\textit{Stratified random sampling} may be simpler for contests that cross jurisdictional lines:
+jurisdictions (strata) draw a simple random sample of ballots, independently of the other jurisdictions.
+There are other use cases where stratified random sampling may facilitate an audit.
+For instance, it may be easier to separately sample ballots cast in-person, vote-by-mail ballots, and provisional ballots.
+Ballots may also be stratified by the type of machine used to cast or count votes.
+\comment{reviewer wants us to explain cross jurisdictional contests}
+
+This paper introduces a method for stratified audits using Fisher's combining method.
+Our proposal for conducting stratified audits allows each stratum to audit independently.
+Conceptually, the procedure involves partitioning the allowable error across strata.
+Each stratum is audited separately to test whether the error in that stratum exceeds the allowable error.
+Then, the $P$-values of the audits are combined to get a single $P$-value for that partition of allowable error.
+If the largest combined $P$-value does not exceed the risk limit, then the audit can confirm the reported outcome.
+The method does not require elections officials to actually partition the allowable error across strata;
+all possible partitions are considered mathematically in the maximization step.
+
+%Colorado's ``uniform voting system'' program\footnote{%
+%  \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
+%} 
+%led many Colorado counties to purchase (or to plan to purchase) voting systems
+%that are auditable at the ballot level: those systems export cast vote records (CVRs)
+%for individual ballots in a manner that allows the corresponding paper ballot to be identified,
+%and conversely, make it possible to find the CVR corresponding to any
+%particular paper ballot.
+%We call counties that have such systems ``CVR'' counties.
+%It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
+%CVR counties can perform ``ballot-level comparison audits,'' \cite{lindemanStark12} 
+%which are currently the
+%most efficient approach to risk-limiting audits in that they require examining fewer
+%ballots than other methods do, when the outcome of the contest under audit 
+%is in fact correct.
+%
+%Voting systems in other counties (``legacy'' or ``no-CVR'' counties) 
+%do not allow auditors to check how the system
+%interpreted voter intent for individual ballots.
+%Election results involving those counties can still be audited, provided the voting systems
+%create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is
+%conserved to ensure that it remains accurate and intact, and organized well enough
+%to permit ballots to be selected at random.
+%Pilot audits in California \cite{CA_SOS_EAC} suggest it is more efficient to audit such systems
+%using``ballot-polling'' \cite{lindemanEtal12,lindemanStark12} than using ``batch-level comparisons.''
+
+We develop a special case of this stratified audit method for cross-jurisdictional contests where 
+jurisdictions use different types of voting machines.
+Voting systems that export cast vote records (CVRs) are auditable at the ballot level: 
+those systems record votes in a manner that allows the corresponding paper ballot to be identified,
 and conversely, make it possible to find the CVR corresponding to any
 particular paper ballot.
 We call counties that have such systems ``CVR'' counties.
-It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
+%It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
 CVR counties can perform ``ballot-level comparison audits,'' \cite{lindemanStark12} 
-which are currently the
-most efficient approach to risk-limiting audits in that they require examining fewer
+which are currently the most efficient approach to risk-limiting audits in that they require examining fewer
 ballots than other methods do, when the outcome of the contest under audit 
 is in fact correct.
+\comment{two sentences about ballot-comarison audits}
 
 Voting systems in other counties (``legacy'' or ``no-CVR'' counties) 
-do not allow auditors to check how the system
-interpreted voter intent for individual ballots.
+do not allow auditors to check how the system interpreted voter intent for individual ballots.
 Election results involving those counties can still be audited, provided the voting systems
 create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is
 conserved to ensure that it remains accurate and intact, and organized well enough
 to permit ballots to be selected at random.
-Pilot audits in California \cite{CA_SOS_EAC} suggest it is more efficient to audit such systems
-using``ballot-polling'' \cite{lindemanEtal12,lindemanStark12} than using ``batch-level comparisons.''
+``Ballot-polling'' audits \cite{lindemanEtal12,lindemanStark12} can be used to test whether the vote proportions 
+found by hand-counting a simple random sample of ballots differ significantly enough from what was reported
+to change the election outcome. 
+Ballot-polling audits require examining more ballots than comparison audits.
 
 There is currently no literature on how to combine
 ballot polling and ballot-level comparisons in a single risk-limiting audit.
@@ -154,23 +201,46 @@ Existing methods either would require all counties to use the lowest
 common denominator (ballot-polling, which does not take advantage of the CVRs,
 and thus is expected to require more auditing than a method that uses the available CVRs),
  or would require no-CVR counties to perform batch-level comparisons, which were found in
-California to be less efficient than ballot-polling audits.%
+California to be less efficient than ballot-polling audits\cite{CA_SOS_EAC}.%
 \footnote{%
   See~\cite{Rivest-2018-bayesian-tabulation-audits}
   for a different (Bayesian) approach to auditing contests that include both CVR counties
   and no-CVR counties. In general, Bayesian audits are not risk-limiting.
 }
 
-The audit software RLATool needs additional features to be able to audit
-contests that cross county lines.
-First, the current version (1.1.0) of RLATool
-needs to be modified to account for contests that cross jurisdictional
-boundaries; currently, it treats every contest as if it were entirely
-contained in a single county.
-% Margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
-Second, to audit a contest that includes votes in CVR counties
-and votes in no-CVR counties, new statistical methods are needed to
-preserve the efficiency of ballot-level comparison audits in the CVR counties.
+This solution has an immediate application in Colorado.
+CRS~1-7-515 requires Colorado to conduct risk-limiting audits beginning in 2017.
+%(There are provisions to allow the Secretary of State to exempt some counties.)
+The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
+ See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
+}
+Those audits only covered contests restricted to a single county:
+counties could audit independently.
+Colorado's ``uniform voting system'' program\footnote{%
+  \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
+} 
+led many Colorado counties to purchase (or to plan to purchase) voting systems
+that export CVRs, and thus can be audited using ballot-level comparisons.
+It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
+To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
+that account for heterogeneous voting equipment.
+Our examples will focus on Colorado's needs in upcoming audits.
+%and modify RLATool\footnote{%
+%  \url{https://github.com/FreeAndFair/ColoradoRLA/}
+%}, 
+%the open-source audit software used for their 2017 audits. 
+
+
+%The audit software RLATool needs additional features to be able to audit
+%contests that cross county lines.
+%First, the current version (1.1.0) of RLATool
+%needs to be modified to account for contests that cross jurisdictional
+%boundaries; currently, it treats every contest as if it were entirely
+%contained in a single county.
+%% Margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
+%Second, to audit a contest that includes votes in CVR counties
+%and votes in no-CVR counties, new statistical methods are needed to
+%preserve the efficiency of ballot-level comparison audits in the CVR counties.
 
 %Third, contests that appear only on a subset of ballots can
 %be audited much more efficiently if the sample can be drawn from just those ballots
@@ -182,20 +252,21 @@ preserve the efficiency of ballot-level comparison audits in the CVR counties.
 %contest is not essential in the short run, it will be necessary
 %eventually to make it affordable to audit smaller contests.
 
-We focus on near-term requirements for risk-limiting audits in Colorado,
-developing a new, widely applicable method for using stratified sampling in RLAs.
+%We focus on near-term requirements for risk-limiting audits in Colorado,
+%developing a new, widely applicable method for using stratified sampling in RLAs.
+We develop a general approach to stratified audits, where ballots are divided into disjoint ``strata,"
+sampled independently.
 Section~\ref{sec:crude} presents crude but inefficient approaches
 that could be implemented easily.
 Section~\ref{sec:variable}
 presents an approach based on comparison audits with different batch sizes.
 This approach is statistically simple and relatively efficient, but might require changing how counties
 handle their ballots.
-Section~\ref{sec:hybrid} presents our recommended approach, which combines ballot-level
-comparisons in counties that can perform them with ballot-polling in the no-CVR counties.
+Section~\ref{sec:hybrid} presents our recommended approach, 
 % This approach is generalizable to other stratified audits, where ballots are divided into disjoint
 % ``strata,'' sampled independently; the results are combined using Fisher's method to produce an audit of the
 % overall contest.
-All the approaches require new software, including some changes to RLATool.
+%All the approaches require new software, including some changes to RLATool.
 We provide example software implementing the risk calculations for
 our recommended approach as a Python Jupyter notebook.\footnote{%
  See \url{https://github.com/pbstark/CORLA18}.
@@ -209,8 +280,9 @@ our recommended approach as a Python Jupyter notebook.\footnote{%
 %  information that can be used to check whether the voting system tabulated the correct number
 %  of ballots in each contest.
 %} 
+Next, we specialize the stratified audit approach to handle heterogeneous voting equipment.
 Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} explain
-modifications to ballot-level comparison and ballot-polling audits needed for the stratified audit. 
+the necessary modifications to ballot-level comparison and ballot-polling audits, respectively. 
 Section~\ref{sec:recommendations} gives recommendations and
 considerations for implementation.
 
