@@ -134,10 +134,10 @@ result.
 %This would require a central agency to determine which ballots each jurisdiction should draw, and then each jurisdiction must report the results of their audit back to the central agency to be combined.
 
 The most efficient, transparent, and statistically tractable sampling design for risk-limiting audits is to sample individual ballots uniformly at random from the ballots cast in the contest, with or without replacement.
-However, to audit contests that cross jurisdictional boundaries (\emph{cross-jurisdictional contests}) then requires top-down organization to coordinate sampling in different counties, and may require different counties to use the lowest-common denominator risk calculations. 
+However, to audit contests that cross jurisdictional boundaries (\emph{cross-jurisdictional contests}) then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator risk calculations, e.g. ballot-polling, described below. 
 
 Thus, it may be more tractable logistically to use a stratified sample, selecting ballots independently from different counties or groups of counties. 
-Stratification may also be useful within counties, for instance, to allow auditors to sample independently from ballots cast in person, by mail, and provisionally cast ballots.
+Stratification may also be useful within counties, for instance, to allow auditors to sample independently from ballots cast in person, by mail, and provisionally.
 
 While stratified RLAs have been considered previously \cite{stark08a,higginsEtal11}, the methods addressed only a single approach to auditing, batch-level comparisons, and only a particular test statistic.
 
@@ -179,6 +179,7 @@ The procedure can be generalized to more than two strata.
 %to permit ballots to be selected at random.
 %Pilot audits in California \cite{CA_SOS_EAC} suggest it is more efficient to audit such systems
 %using``ballot-polling'' \cite{lindemanEtal12,lindemanStark12} than using ``batch-level comparisons.''
+\subsection{Voting systems and audit strategies}
 
 Voting systems that export cast vote records (CVRs) are auditable at the ballot level: 
 those systems record votes in a manner that allows the corresponding paper ballot to be identified,
@@ -218,27 +219,23 @@ California to be less efficient than ballot-polling audits\cite{CA_SOS_EAC}.%
 }
 
 We use our new approach to stratification to show
-how contests that cross jurisdictional boundaries (cross-jurisdictional contests, such as gubernatorial contests, statewide ballot measures, and
-many federal contests) can be audited efficiently when some of the jurisdictions an perform ballot-level comparison audits
+how contests that cross jurisdictional boundaries (\textit{cross-jurisdictional contests}, such as gubernatorial contests, statewide ballot measures, and
+many federal contests) can be audited efficiently when some of the jurisdictions can perform ballot-level comparison audits
 and the others can only perform ballot-polling audits.
-This has an immediate application in Colorado, where state laws require
+This has an immediate application in Colorado, where state law requires
 risk-limiting audits.
-For its first mandatory audits, in November 2017, contests were contained entirely within counties.
-Statewide contests pose a problem:
-not every county has voting technology that can export CVRs.
-Our proposed stratified ``hybrid'' audit could dramatically reduce the number of ballots inspected
-compared to cruder auditing strategies to handle heterogeneous voting equipment.
+As of July, 2018, Colorado has not performed a risk-limiting audit of a cross-jurisdictional contest.
 
-Section~\ref{sec:hybrid} presents the new method for stratified audits
+Section~\ref{sec:stratified} presents the new method for stratified audits
 based on combining $P$-values in different strata.
 % This approach is generalizable to other stratified audits, where ballots are divided into disjoint
 % ``strata,'' sampled independently; the results are combined using Fisher's method to produce an audit of the
 % overall contest.
 %All the approaches require new software, including some changes to RLATool.
-We show hos the method allows ballot-polling auditing in one 
+We show how the method allows ballot-polling auditing in one 
 stratum to be combined with ballot-level comparison auditing in another.
 
-\note{This is out of place. We should either drop the crude approaches or wrap them in something else.
+\comment{This is out of place. We should either drop the crude approaches or wrap them in something else.
 We could include the variable batch size stuff for completeness, but if so, we need to explain why we think the hybrid approach is better---which is mostly that it's a smaller change to what CO is doing.}
 Section~\ref{sec:crude} presents crude but inefficient approaches that could be implemented easily, while
 Section~\ref{sec:variable} presents an approach based on comparison audits with different batch sizes.
@@ -253,10 +250,10 @@ handle their ballots.
 %  information that can be used to check whether the voting system tabulated the correct number
 %  of ballots in each contest.
 %} 
-Next \note{section ref?}, we specialize the stratified audit approach to handle heterogeneous voting equipment.
+Next \comment{section ref?}, we specialize the stratified audit approach to handle heterogeneous voting equipment.
 Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} explain
 the necessary modifications to ballot-level comparison and ballot-polling to construct within-stratum hypothesis tests about the amount of overstatement
-error. \note{need to sketch what overstatements are here}, respectively. 
+error. \comment{need to sketch what overstatements are here}, respectively. 
 Section~\ref{sec:colorado} gives numerical examples of these approaches in simulated audits,
 using Colorado as an example use case.
 We provide example software implementing the risk calculations for
@@ -267,7 +264,7 @@ Section~\ref{sec:discussion} gives recommendations and
 considerations for implementation.
 
 %\subsection{Priorities for Colorado}
-%\note{for this particular paper focused on stratification, is the order of paragraphs here right?}
+%\comment{for this particular paper focused on stratification, is the order of paragraphs here right?}
 %Auditing efficiency is controlled in part by how well the audit can limit the sample to ballots that
 %contain the contests under audit.
 %Some contests are on (essentially) every ballot, for instance the governor's race.
@@ -305,15 +302,11 @@ considerations for implementation.
 %$w$ is the reported winner.
 %Additional notation is introduced below as the need arises.
 
-\section{Stratified ``hybrid'' audits} \label{sec:hybrid}
+\section{Stratified audits} \label{sec:stratified}
 
 \emph{Stratified sampling} involves partitioning the cast ballots
 into non-overlapping groups and sampling independently from those groups.
 \cite{stark08a,higginsEtal11} discuss stratified sampling in batch-level comparison audits.
-\note{This is a non sequitur.} One could stratify by county, but in general it is simpler and more efficient
-statistically (i.e., it requires examining fewer ballots) to minimize the number of strata.
-Stratification is useful in other circumstances, too, for instance to ``decouple'' sampling
-in different counties.
 The method we develop here works generally to construct a RLA using stratified sampling.
 
 Here and generally throughout the paper, we 
@@ -363,6 +356,8 @@ we can conclude that the outcome is correct.
 $\sum_s \lambda_s = 1$ and $\omega_s \ge \lambda_s V_{w\ell}$ for all $s$, then
 the outcome is correct.)
 
+\subsection{Fisher's combination method}
+
 To test the conjunction hypothesis that both stratum null hypotheses are true, we use 
 Fisher's combining function.
 Let $p_s(\lambda_s)$ be the $P$-value of the hypothesis $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$.
@@ -402,6 +397,8 @@ $b$, if $a > b$.
 In particular, this monotonicity holds for the tests proposed in sections~\ref{sec:comparisonError}
 and \ref{sec:ballotPollError}.
 
+
+\comment{Other combination methods go here}
 
 \subsection{Maximizing Fisher's combined $P$-value}
 The audit can stop if the maximum of Fisher's combined $P$-value over all
@@ -451,64 +448,15 @@ the audit can stop; if the upper bound is anywhere less than the $1-\alpha$ quan
 
 
 
-\section{Combining ballot-polling and comparison audits}\label{sec:combiningMethods}
+\section{Strategies for auditing heterogeneous voting systems}\label{sec:combiningMethods}
+The stratified auditing method in Section~\ref{sec:stratified} solves the problem of auditing contests
+for which ballots were cast using heterogeneous voting equipment.
+This is the case in Colorado, where most ballots are cast in precincts with equipment that produces CVRs,
+but a small fraction are not.
+Several auditing strategies could be used in Colorado.
 
-In this section, we discuss several approaches that one could take to audit contests that span
-CVR counties and legacy counties.
-First, we present several simple but crude ideas.
-Next, we discuss how batch-level audits could improve efficiency.
-Finally, we specialize the stratified audit method in Section~\ref{sec:hybrid} to this case.
-
-\subsection{Simple approaches} \label{sec:crude}
-
-\subsubsection{Hand count the legacy counties}
-The simplest approach to combining legacy counties with CVR counties is to require every
-legacy county to do a full hand count, and to conduct a 
-ballot-level comparison audit in CVR counties, based on contest margins adjusted for
-the results of the manual tallies in the CVR counties.
-For instance, imagine a contest with two candidates, reported winner $w$ and reported loser $\ell$.
-Suppose that a full manual tally of the votes in the legacy counties shows $V_w'$ votes for $w$ and
-$V_\ell'$ votes for $\ell$.
-Suppose that a total of $N$ ballots were cast in the CVR counties.
-Then the \emph{diluted margin}  for the comparison audit in the CVR counties is defined to be
-$[(V_w-V_w')-(V_\ell-V_\ell')]/N$.
-Requiring a full hand count in the legacy counties has obvious disadvantages,
-but does not force CVR counties to do additional auditing to compensate for the legacy counties.
-
-%\subsection{Subtract error bounds for the legacy counties from vote totals}
-%If ballot accounting and data from Colorado's voter registration system, SCORE,\footnote{%
-%  SCORE is Colorado's voter registration system, which also tracks who voted.
-%  See \url{https://www.sos.state.co.us/pubs/elections/SCORE/SCOREhome.html}.
-%  SCORE essentially keeps track of how many ballots of each style were returned by voters,
-%  information that can be used to check whether the voting system tabulated the correct number
-%  of ballots in each contest.
-%}
-% can provide good upper bounds on the number of ballots cast in
-%each contest in legacy counties, there are simple upper bounds on the total
-%possible overstatement error each legacy county could contribute to the overall contest
-%results; those can be subtracted from the overall margin (as in the previous subsection) and the
-%remainder of the contests can be audited in CVR counties against the adjusted margins.
-%For instance, consider a contest that appears on $N$ ballots in a legacy counties.
-%Suppose that in legacy counties, the overall, statewide contest winner, $w$, is reported to have received $V_w'$ votes, and some loser, $\ell$, is reported to have received $V_\ell'$ votes. 
-%(Note that $V_\ell'$ could be greater than $V_w'$: $w$ is not necessarily the reported winner in the legacy counties.)
-%Then the most overstatement error that the county could possibly have in determining whether
-%$w$ in fact beat $\ell$ is if every reported undervote, invalid vote, or vote for a different candidate, $t$, had 
-%in fact been a vote for $\ell$ (producing a 1-vote overstatement), and every vote reported for 
-%$w$ was in fact a vote for $\ell$ (producing a 2-vote overstatement).
-%The reduction in the margin that would produce is 
-%$N - V_w' - V_\ell' + 2V_w' = N + V_w' - V_\ell'$ votes.
-%
-%Whereas the previous approach places the auditing burden created by obsolescent equipment entirely on 
-%the legacy counties, this approach places it entirely upon the CVR counties. In a close contest, it 
-%could require a full hand count in every county.
-
-\subsubsection{Treat legacy counties as if every ballot selected from them for audit has a two-vote overstatement}\label{sec:two-vote-over}
-Another simple-but-inefficient approach is to sample uniformly from all counties as if one
-were performing a ballot-level comparison audit everywhere,  but to 
-treat any ballot
-selected from a legacy county as a two-vote overstatement, essentially following \cite{banuelosStark12}.
-
-\subsection{Variable batch sizes} \label{sec:variable}
+The first approach is to use ballot-polling audits for all cross-jurisdictional contests.
+This would not take advantage of the gain in efficiency that CVRs provide.
 
 Another approach is to perform a comparison audit across all counties, but to use batches consisting
 of more than one ballot (and to perform batch-level comparisons)
@@ -516,56 +464,11 @@ in legacy counties and batches consisting of a single ballot (and to perform bal
  For majority and plurality elections, including those in which voters can select more than one candidate,
   audits can be based on overstatement and understatement errors at the level of batches.
 }
-This requires that the no-CVR counties report vote subtotals
-for physically identifiable batches.
-If a county's voting system can only report subtotals by precinct but 
-the county does not sort paper ballots by
-precinct, this approach might require revising how the county handles its
-paper.
-
-That said, many California counties that do not sort vote-by-mail (VBM)
-ballots by precinct conduct the statutory 1\% audits by manually retrieving the ballots 
-for just those precincts selected for audit from whatever physical batches they happen to be in.%: 
-%the situation is identical to that in Colorado.
-
-Another tactic is the ``Boulder-style'' batch-level audit,\footnote{%
- See \url{http://bcn.boulder.co.us/~neal/elections/boulder-audit-10-11/}.
-}
-which requires generating 
-vote subtotals after each physical batch is scanned, and exporting those subtotals in machine-readable form.
-That in turn may require using extra memory cards, repeatedly initializing and deleting tabulation databases,
-or other measures that add complexity and opportunity for error.
-
-Those two approaches are labor-intensive but provide a viable short-term solution. %,
-%especially combined with information from SCORE\footnote{%
-% SCORE is Colorado's Statewide Voter Registration System; see
-% \url{https://www.sos.state.co.us/pubs/elections/SCORE/SCOREhome.html} (last visited 5 May 2018).
-%}
-%to check that the reported batch-level results contain the correct number of ballots for each contest under audit.
-Moreover, this approach does not unduly increase the workload in CVR counties
+This approach does not unduly increase the workload in CVR counties
 to compensate for legacy equipment.
 
-%Variable-batch-size comparison audits require modifying or augmenting
-%RLATool in several ways: 
-%\begin{enumerate}
-%
-%  \item The CVR reporting tool would need to be modified to allow no-CVR counties to
-%report batch-level results in a manner analogous to how CVR counties report
-%ballot-level results, or an external tool would need to be provided.
-%
-%  \item The sampling
-%algorithm would have to allow sampling batches with unequal probability.
-%Efficient batch-level audits involve sampling batches with probability proportional
-%to a bound on the possible overstatement error in the batch.
-%It would also need to calculate the appropriate sampling probability for each batch.
-%Again, this could be accommodated using an external tool to draw the sample from legacy counties.
-%
-%  \item The risk calculations would need to be modified. 
-%This, too, could be done with external software, with suitable provisions for capturing audit data
-%from RLATool or directly from legacy counties.
-%\end{enumerate}
-%
-%None of these changes is enormous; 
+However, Colorado's software would need to be modified in order to allow sampling batches with
+unequal probabilities and to calculate risk appropriately.
 The mathematical details for calculating
 batch-level error bounds, drawing the samples with probability proportional to an
 error bound, and calculating the attained risk from the sample results are worked out
@@ -574,18 +477,21 @@ Indeed, this is the method that was used in several of California's pilot audits
 including the audit in Orange County.
 Section~\ref{sec:comparisonError} derives a method for comparison audits with variable batch sizes.
 
-\subsection{Stratified hybrid audit}
-The stratified audit approach from Section~\ref{sec:hybrid} can solve the problem of auditing in CVR and no-CVR counties.
-We use two strata: one comprising the ballots cast in CVR counties and the other comprising the ballots cast in
-no-CVR counties. 
-Every ballot cast in the contest is in exactly one of the two strata. 
+Moreover, this approach requires that the no-CVR counties report vote subtotals
+for physically identifiable batches.
+If a county's voting system can only report subtotals by precinct but 
+the county does not sort paper ballots by
+precinct, this approach might require revising how the county handles its
+paper.
 
-Calculating $p_s(\cdot)$ for Equation~\ref{eq:fisher} is described in
-sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} for the CVR and no-CVR strata,
+Finally, the stratified audit approach from Section~\ref{sec:stratified} can solve the problem of auditing in CVR and no-CVR counties.
+Every ballot cast in the contest is in exactly one of two strata, CVR counties and no-CVR counties. 
+In order to use Equation~\ref{eq:fisher}, we must develop tests for the overstatement error that are appropriate for the
+corresponding voting system.
+Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} describe these tests for overstatement in the CVR and no-CVR strata,
 respectively.
 
 
-%\input{subcollections}
 \input{comparisonError}
 \input{ballotPollError}
 
