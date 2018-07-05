@@ -2,7 +2,7 @@
 
 # Next Steps for the Colorado Risk-Limiting Audit (CORLA) Program
 
-by Mark Lindeman, Neal McBurnett, Kellie Ottoboni, and Philip B. Stark
+by Kellie Ottoboni, Philip B. Stark, Mark Lindeman, and Neal McBurnett
 
 Colorado conducted risk-limiting tabulation audits (RLAs) across the state in 2017,
 including both ballot-level comparison audits and ballot-polling audits.
