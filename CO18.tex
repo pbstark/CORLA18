@@ -453,8 +453,27 @@ The stratified auditing method in Section~\ref{sec:stratified} solves the proble
 for which ballots were cast using heterogeneous voting equipment.
 This is the case in Colorado, where most ballots are cast in precincts with equipment that produces CVRs,
 but a small fraction are not.
-Several auditing strategies could be used in Colorado.
 
+
+CRS~1-7-515 requires Colorado to conduct risk-limiting audits beginning in 2017.
+%(There are provisions to allow the Secretary of State to exempt some counties.)
+The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
+ See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
+}
+Those audits only covered contests restricted to a single county:
+counties could audit independently.
+Colorado's ``uniform voting system'' program\footnote{%
+  \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
+} 
+led many Colorado counties to purchase (or to plan to purchase) voting systems
+that export CVRs, and thus can be audited using ballot-level comparisons.
+It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
+These counties cannot audit ballots independently:
+margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
+To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
+that account for heterogeneous voting equipment.
+
+Several auditing strategies could be used in Colorado.
 The first approach is to use ballot-polling audits for all cross-jurisdictional contests.
 This would not take advantage of the gain in efficiency that CVRs provide.
 
@@ -491,41 +510,102 @@ corresponding voting system.
 Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} describe these tests for overstatement in the CVR and no-CVR strata,
 respectively.
 
+Of these methods, stratified ``hybrid'' audits seem the most palatable,
+given the constraints on time for software development and the logistics
+of the audit itself. 
+The workflow for counties would be the same as it was in November, 2017.
+Simulations suggest that this approach is relatively efficient.
 
-\input{comparisonError}
-\input{ballotPollError}
 
+
+
+%\input{comparisonError}
+\subsection{Batch comparison audits of a tolerable overstatement in votes}
+\label{sec:comparisonError}
+
+In this section we expand previous comparison auditing work to handle two new requirements.  
+The first relates to partitioning the permissible overstatement
+through the parameters $\lambda_s$, as discussed in Section~\ref{sec:stratified}. 
+The second handles batch-level comparison audits.
+
+To test whether the overstatement of any margin
+(in votes) exceeds some fraction $\lambda$ of the overall margin $V_{w\ell}$ between
+reported winner $w$ and reported loser $\ell$.
+If the stratum contains all the ballots cast in the contest, then for $\lambda = 1$, this 
+would confirm the election outcome.
+For stratified audits, we might want to test other values of $\lambda$, as described in Section~\ref{sec:stratified}.
+
+This section also addresses the second requirement by deriving a method for batches of arbitrary size, which might be useful
+ to audit contests that include CVR counties and legacy counties.
+We keep the \emph{a priori} error bounds tighter than the ``super-simple'' 
+method~\cite{stark10d}.
+To keep the notation simpler, we consider only a single contest, but the 
+MACRO test statistic \cite{stark09c,stark10d} automatically extends the result to 
+auditing $C>1$ contests simultaneously.
+The derivation is for plurality contests, including ``vote-for-$k$'' plurality contests.
+Majority and super-majority contests are a minor 
+modification~\cite{stark08a}.\footnote{%
+  So are some forms of preferential and approval voting, such as Borda count, and
+  proportional representation contests, such as D'Hondt~\cite{starkTeague14}.
+  See \url{https://github.com/pbstark/S157F17/blob/master/audit.ipynb} for a derivation
+  of ballot-level comparison risk-limiting audits for super-majority contests. (Last visited 14 May 2018.)
+  Changes for IRV/STV are more complicated.
+}
+
+The mathematical derivations are in Appendix~\ref{sec:appendix-comparison}.
+
+
+
+%\input{ballotPollError}
+\subsection{Ballot-polling audits of a tolerable overstatement in votes}
+\label{sec:ballotPollError}
+
+In this section we develop a new method for ballot-polling audits that can test numerical margins,
+rather than just test whether a candidate won.
+This requires a different approach than that taken by \cite{lindemanEtal12}.
+
+Existing ballot-polling methods consider only the fraction of ballots with a vote for either 
+$w$ or $\ell$ that contain a vote for $w$,
+making the statistical test one for a proportion.
+To allow the error to be partitioned across the strata via $\lambda_s$,
+the necessary inference is about the 
+\emph{difference} between the number of votes for $w$ and the number of votes for $\ell$.
+This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
+We deal with the nuisance parameter by maximizing the $P$-value 
+over all possible values of the nuisance parameter, which ensures that the test is conservative.
+
+The mathematical derivations are in Appendix~\ref{sec:appendix-polling}.
 
 \section{Case study: Colorado}\label{sec:colorado}
 
-
-CRS~1-7-515 requires Colorado to conduct risk-limiting audits beginning in 2017.
-%(There are provisions to allow the Secretary of State to exempt some counties.)
-The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
- See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
-}
-Those audits only covered contests restricted to a single county:
-counties could audit independently.
-Colorado's ``uniform voting system'' program\footnote{%
-  \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
-} 
-led many Colorado counties to purchase (or to plan to purchase) voting systems
-that export CVRs, and thus can be audited using ballot-level comparisons.
-It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
-These counties cannot audit ballots independently:
-margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
-To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
-that account for heterogeneous voting equipment.
-
-
-Of the methods in Section~\ref{sec:combiningMethods} that Colorado might use to audit cross-jurisdictional contests
-that include CVR counties and no-CVR counties,
-stratified ``hybrid'' audits seem the most palatable,
-given the constraints on time for software development and the logistics
-of the audit itself. 
-The workflow for counties would be the same
-as it was in November, 2017.
-Simulations suggest that this approach is relatively efficient.
+%
+%CRS~1-7-515 requires Colorado to conduct risk-limiting audits beginning in 2017.
+%%(There are provisions to allow the Secretary of State to exempt some counties.)
+%The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
+% See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
+%}
+%Those audits only covered contests restricted to a single county:
+%counties could audit independently.
+%Colorado's ``uniform voting system'' program\footnote{%
+%  \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
+%} 
+%led many Colorado counties to purchase (or to plan to purchase) voting systems
+%that export CVRs, and thus can be audited using ballot-level comparisons.
+%It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
+%These counties cannot audit ballots independently:
+%margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
+%To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
+%that account for heterogeneous voting equipment.
+%
+%
+%Of the methods in Section~\ref{sec:combiningMethods} that Colorado might use to audit cross-jurisdictional contests
+%that include CVR counties and no-CVR counties,
+%stratified ``hybrid'' audits seem the most palatable,
+%given the constraints on time for software development and the logistics
+%of the audit itself. 
+%The workflow for counties would be the same
+%as it was in November, 2017.
+%Simulations suggest that this approach is relatively efficient.
 
 
 \subsection{Software and examples}
@@ -546,11 +626,11 @@ after examining 263~ballots if it found no errors, and a ballot-polling audit of
 would have been expected to examine about 14,000 ballots, more than 10\% of ballots cast.
 The hybrid audit is thus not as efficient as a ballot-level comparison audit, but far more efficient than
 a ballot-polling audit.
-
-Another conservative method, discussed in Section~\ref{sec:two-vote-over},
-involves conducting a ballot-level comparison audit statewide,
-treating any ballot selected from the no-CVR county as if it had a two-vote overstatement.
-In this numerical example, that method would lead to a full hand count.
+%
+%Another conservative method, discussed in Section~\ref{sec:two-vote-over},
+%involves conducting a ballot-level comparison audit statewide,
+%treating any ballot selected from the no-CVR county as if it had a two-vote overstatement.
+%In this numerical example, that method would lead to a full hand count.
 
 The second example, also in \texttt{hybrid-audit-example-1}, 
 is a hypothetical large statewide election with 
@@ -595,6 +675,331 @@ The software described below can test the implications of different sampling all
 on the workload in each stratum and the total workload.
 
 
+
+\appendix
+\section{Ballot comparison derivation}\label{sec:appendix-comparison}
+\subsection{Notation}
+\begin{itemize}
+    \item  $\mathcal{W}$: the set of reported winners of the contest
+    \item  $\mathcal{L}$: the set of reported losers of the contest
+    \item  $N_s$ ballots were cast in all in the stratum. (The contest might not appear on all $N_s$ ballots.)
+    \item  $P$ ``batches'' of ballots are in stratum $s$. A batch contains one or more ballots. Every ballot in stratum $s$ is in exactly one batch.
+    \item  $n_p$: number of ballots in batch $p$. $N_s = \sum_{p=1}^P n_p$.
+    \item  $v_{pi} \in \{0, 1\}$: the reported votes for candidate $i$ in batch $p$
+    \item  $a_{pi} \in \{0, 1\}$: actual votes for candidate $i$ in batch $p$. 
+                  If the contest does not appear on any ballot in batch $p$, then $a_{pi} = 0$.
+                  
+    \item  $V_{w\ell,s} \equiv \sum_{p=1}^P (v_{pw} - v_{p\ell})$: 
+Reported margin in stratum $s$ of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$, in votes.
+
+    \item  $V_{w\ell}$: 
+Overall reported margin of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$, in votes, for the entire contest (not just stratum $s$)
+
+% If I'm not punch drunk, we really did manage to keep generalizations across multiple contests out of 
+% the subsequent exposition. However, we still use V
+%
+%    \item  $V_s$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
+%$V_s \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell, s}$
+%
+%  \item  $V$: smallest reported overall margin among all $C$ contests audited using the same sample:
+% $V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
+    \item  $V$: smallest reported overall margin between any reported winner and reported loser:
+$V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
+
+    \item  $A_{w\ell,s} \equiv \sum_{p=1}^P (a_{pw} - a_{p\ell})$: 
+actual margin in the stratum of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$, in votes
+
+    \item  $A_{w\ell}$: 
+actual margin of reported winner $w \in \mathcal{W}$ over reported loser 
+$\ell \in \mathcal{L}$, in votes, for the entire contest (not just in stratum $s$)
+
+\end{itemize}
+
+
+\subsection{Reduction to maximum relative overstatement}
+If the contest is entirely contained in stratum $s$, then
+the reported winners of the contest are the actual winners if
+$$ 
+   \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} A_{w\ell,s} > 0.
+$$
+Here, we address the case that the contest may include a portion outside the stratum.
+To combine independent samples in different strata, it is convenient
+to be able to test whether the net overstatement error in a stratum exceeds a given threshold.
+
+Instead of testing that condition directly, we will test a condition that is sufficient 
+but not necessary for the inequality to hold, to get a computationally simple test that
+is still conservative (i.e., the risk is not larger than its nominal value).
+
+For every winner, loser pair $(w, \ell)$, we want to test
+whether the overstatement error exceeds some threshold, generally
+one tied to the reported margin between $w$ and $\ell$.
+For instance, for a stratified hybrid audit, we set the threshold to be
+$\lambda_s V_{w\ell}$.
+
+We want to test whether
+$$
+   \sum_{p=1}^P (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell} \ge \lambda_s.
+$$
+The maximum of sums is not larger than the sum of the maxima; that is,
+$$
+\max_{w \in \mathcal{W},  \ell \in \mathcal{L}}
+   \sum_{p=1}^P (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}
+   \le
+  \sum_{p=1}^P  \max_{w \in \mathcal{W},  \ell \in \mathcal{L}} 
+  (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
+$$
+
+Define 
+$$
+  e_p \equiv \max_{w \in \mathcal{W} \ell \in \mathcal{L}} 
+     (v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell})/V_{w\ell}.
+$$
+Then no reported margin is overstated by a fraction $\lambda_s$ or more
+if 
+$$ 
+  E \equiv \sum_{p=1}^P e_p < \lambda_s.
+$$
+
+Thus if we can reject the hypothesis $E \ge \lambda_s$, we can conclude that
+no pairwise margin was overstated by as much as a fraction $\lambda_s$.
+
+Testing whether $E \ge \lambda_s$ would require a very large sample if we knew nothing at
+all about $e_p$ without auditing batch $p$: a single large value of $e_p$ could make
+$E$ arbitrarily large.
+But there is an \emph{a priori} upper bound for $e_p$.
+Whatever the reported votes $v_{pi}$ are in batch~$p$, we can find the
+potential values of the actual votes $a_{pi}$ that would make the
+error $e_p$ largest, because $a_{pi}$ must be between 0 and $n_p$,
+the number of ballots in batch~$p$:
+$$
+    \frac{v_{pw}-a_{pw} - v_{p\ell} + a_{p\ell}}{V_{w\ell}} \le 
+    \frac{v_{pw}- 0 - v_{p\ell} + n_p}{V_{w\ell}}.
+$$
+Hence,
+\begin{equation} \label{eq:uDef}
+    e_p \le \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
+    \frac{v_{pw} - v_{p\ell} + n_p}{V_{w\ell}} \equiv u_p.
+\end{equation}
+
+Knowing that $e_p \le u_p$ might let us conclude reliably that $E < \lambda_s$
+by examining only a small number of batches---depending on the 
+values $\{ u_p\}_{p=1}^P$ and on the values of $\{e_p\}$ for the audited batches.
+
+To make inferences about $E$, it is helpful to work with the \emph{taint} 
+$t_p \equiv \frac{e_p}{u_p} \le 1$.
+Define $U \equiv \sum_{p=1}^P u_p$.
+Suppose we draw batches at random with replacement, with probability $u_p/U$
+of drawing batch $p$ in each draw, $p = 1, \ldots, P$.
+(Since $u_p \ge 0$, these are all positive numbers, and they sum to 1,
+so they define a probability distribution on the $P$ batches.)
+
+Let $T_j$ be the value of $t_p$ for the batch $p$ selected in the $j$th draw.
+Then $\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$, and
+$$
+  \mathbb{E} T_1 = \sum_{p=1}^P \frac{u_p}{U} t_p =
+  \frac{1}{U}\sum_{p=1}^P u_p \frac{e_p}{u_p} = 
+  \frac{1}{U} \sum_{p=1}^P e_p = E/U.
+$$
+Thus $E = U \mathbb{E} T_1$. 
+So, if we have strong evidence that
+$\mathbb{E} T_1 < \lambda_s/U$, we have
+strong evidence that $E < \lambda_s$.
+
+This approach can be simplified even further by noting that $u_p$ has
+a simple upper bound that does not depend on $v_{pi}$.
+At worst, the reported result for batch $p$ shows $n_p$ votes for the 
+``least-winning'' apparent winner of the contest with the smallest margin, 
+but a hand interpretation would show that all $n_p$ ballots in the batch 
+had votes for the runner-up in that contest.
+Since $V_{w\ell} \ge V\equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$ and $0 \le v_{pi} \le n_p$,
+$$ 
+    u_p =  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
+    \frac{v_{pw} - v_{p\ell} + n_p}{V_{w\ell}}
+    \le  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
+    \frac{n_p - 0 + n_p}{V_{w\ell}}
+    \le \frac{2n_p}{V}.
+$$
+Thus if we use $2n_p/V$ in lieu of $u_p$, we still get conservative results.
+(We also need to re-define $U$ to be the sum of those upper bounds.)
+An intermediate, still conservative approach would be to use this upper bound for
+batches that consist of a single ballot, but use the sharper bound (\ref{eq:uDef})
+when $n_p > 1$.
+Regardless, for the new definition of $u_p$ and $U$,
+$\{T_j\}_{j=1}^n$ are IID, $\mathbb{P} \{T_j \le 1\} = 1$,
+and
+$$
+  \mathbb{E} T_1 = \sum_{p=1}^P \frac{u_p}{U} t_p =
+  \frac{1}{U}\sum_{p=1}^P u_p \frac{e_p}{u_p} = 
+  \frac{1}{U} \sum_{p=1}^P e_p = E/U.
+$$
+
+So, if we have evidence that $\mathbb{E} T_1 < \lambda_s/U$, we have evidence that 
+$E < \lambda_s$.
+
+\subsection{Testing $\mathbb{E} T_1 \ge \lambda_s/U$}
+
+A variety of methods are available to test whether $\mathbb{E} T_1 < \lambda_s/U$.
+One particularly ``clean'' sequential method is based on Wald's Sequential Probability
+Ratio Test (SPRT) (\cite{wald45}).
+Harold Kaplan pointed out this method on a website that no longer exists.
+A derivation of this ``Kaplan-Wald'' method is given in Appendix A of~\cite{starkTeague14};
+to apply the method here, take $t = \lambda_s$ in their equation~18.
+
+A different sequential method, the Kaplan-Markov method (also due to Harold Kaplan), 
+is given in~\cite{stark09b}.
+
+
+
+
+\section{Ballot-polling derivation}\label{sec:appendix-polling}
+\subsection{Conditional tri-hypergeometric test}
+
+We consider a single stratum $s$, containing $N_s$ ballots.
+Of the $N_s$ ballots,
+$A_{w,s}$ have a vote for $w$ but not for $\ell$, $A_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $A_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
+We might draw a simple random sample of $n$ ballots ($n$ fixed ahead of time), or we might draw 
+sequentially without replacement, so the sample size $B$ could be random.
+For instance, the rule for determining $B$ could depend on the data.\footnote{%
+   Sampling with replacement leads to simpler arithmetic, but is not as efficient.
+}
+
+Regardless, we assume that, conditional on the attained sample size $n$, the ballots are a simple random sample of size $n$ from the $N_s$ ballots in the population.
+In the sample, $B_w$ ballots contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ defined analogously.
+The conditional joint distribution of
+$(B_w, B_\ell, B_u)$ is tri-hypergeometric: 
+
+\begin{equation}
+    \mathbb{P}_{A_{w,s}, A_{\ell,s}} \{ B_w = i, B_\ell = j \vert B=n \} = 
+     \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+\end{equation}
+
+Define the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
+We want to test the compound hypothesis $A_{w,s} - A_{\ell,s} \le c$.
+The value of $c$ is inferred from the definition
+$\omega_{w\ell,s} \equiv V_{w\ell,s} - A_{w\ell,s} = V_{w,s} - V_{\ell,s} - (A_{w,s} -A_{\ell,s})$.
+Thus,
+
+\beq
+    c = V_{w,s} - V_{\ell,s} - \omega_{w\ell,s} = V_{w\ell,s} - \lambda_s V_{w\ell}.
+\eeq
+
+The alternative is the compound hypothesis 
+$A_{w,s} - A_{\ell,s} > c$.\footnote{%
+    To use Wald's Sequential Probability Ratio Test, we might pick a simple alternative instead, e.g.,
+   $A_{w,s} = V_{w,s}$ and $A_{\ell,s} = V_{\ell,s}$, the reported values, provided 
+   $V_{w,s} - V_{\ell,s} > c$.
+}
+Hence, we will reject for large values of $D$.
+Conditional on $B=n$, the event $D = (B_w - B_\ell)/B = d$ is the same as $B_w - B_\ell = nd$.\footnote{%
+In contrast, the BRAVO ballot-polling
+method~\cite{lindemanEtal12}
+conditions only on $B_w+B_\ell = m$.
+}
+
+
+The $P$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
+a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
+and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
+(including undervotes and
+invalid ballots) is the probability that $B_w - B_\ell \geq nd$.
+Therefore,
+
+\begin{equation}
+   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n\right \} = 
+   \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+\end{equation}
+
+
+
+\subsection{Maximizing the $P$-value over the nuisance parameter}
+
+The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
+that $A_{w,s} - A_{\ell,s} \le c$ for
+some fixed, known $c$.
+Define $\mathcal{S}$ to be the set of pairs $(i, j)$ such that $i, j\ge 0, i-j \ge nd,$ and $ i+j \leq n$.
+The (conditional) $P$-value of this composite hypothesis for $D=d$ is the maximum $P$-value for all
+values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
+\begin{equation}
+  \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
+   \sum_{\substack{(i, j)\in \mathcal{S}}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
+\end{equation}
+wherever the summand is defined. 
+(Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
+
+\subsubsection{Characterizing the optimal solution}
+The following result enables us to only test hypotheses along the boundary of the null set.
+
+\begin{thm}
+Assume that $n < A_{w,s}+A_{\ell,s}$.
+Suppose the composite null hypothesis is $N_w - N_\ell \leq c$.
+The $P$-value is maximized on the boundary of the null region, i.e. when $N_w - N_\ell = c$.
+\end{thm}
+
+\begin{proof}
+Without loss of generality, let $c=0$ and assume that $A_{u,s}=N_s - A_{w,s} - A_{\ell,s}$ is fixed.
+Let $N_{w\ell, s} \equiv A_{w,s}+A_{\ell,s}$ be the fixed, unknown number of ballots for $w$ or for $\ell$ in stratum $s$.
+The $P$-value $p_0$ for the simple hypothesis that $c=0$ is
+
+\begin{equation}
+  p_0 = \sum_{\substack{(i, j) \in \mathcal{S}}} \frac{ {N_{w\ell, s}/2 \choose i}{N_{w\ell, s}/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}} =  \sum_{\substack{(i, j) \in \mathcal{S}}}T_{ij},
+\end{equation}
+
+\noindent where $T_{ij}$ is defined as the $(i, j)$ term in the summand and $T_{ij} \equiv 0$ for pairs $(i, j)$ that don't appear in the summation.
+
+Assume that $c>0$ is given.
+The $P$-value $p_c$ for this simple hypothesis is
+\begin{align*}
+p_c &=   \sum_{\substack{(i, j) \in \mathcal{S}}}  \frac{ {(N_{w\ell, s}+c)/2 \choose i}{(N_{w\ell, s}-c)/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}}  \\
+   &=\sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \frac{ \frac{N_{w\ell, s}+c}{2}(\frac{N_{w\ell, s}+c}{2}-1)\cdots(\frac{N_{w\ell, s}}{2}+1) (\frac{N_{w\ell, s}-c}{2} -j)\cdots(\frac{N_{w\ell, s}}{2}-1-j) }
+   {(\frac{N_{w\ell, s}+c}{2} -i)\cdots(\frac{N_{w\ell, s}}{2}+1-i)(\frac{N_{w\ell, s}-c}{2})\cdots(\frac{N_{w\ell, s}}{2}-1)}.
+\end{align*}
+
+Terms in the fraction can be simplified: choose the corresponding pairs in the numerator and denominator.
+Fractions of the form $\frac{\frac{N_{w\ell, s}}{2} + a}{\frac{N_{w\ell,s}}{2} + a - i}$ can be expressed as $1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}$.
+Fractions of the form $\frac{\frac{N_{w\ell, s}}{2}  - a - j}{\frac{N_{w\ell, s}}{2}  - a}$ can be expressed as $1 - \frac{j}{\frac{N_{w\ell, s}}{2} -a}$.
+Thus, the $P$-value can be written as 
+
+\begin{align*}
+p_c &= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \prod_{a=1}^{c/2} \left(1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2} - a}\right) \\
+&> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij} \left[ \left(1 + \frac{i}{\frac{N_{w\ell,s}+c}{2} -i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2}+1}\right) \right]^{c/2} \\
+&= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \left[ 1 + \frac{\frac{N_{w\ell,s}+c}{2}j + \frac{N_{w\ell,s}}{2}i + i}{(\frac{N_{w\ell,s}+c}{2}-i)(\frac{N_{w\ell,s}}{2}+1)}\right]^{c/2} \\
+&> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij}\\
+&= p_0
+\end{align*}
+
+The last inequality follows from the fact that $i$ and $j$ are nonnegative, and 
+that $i < \frac{N_{w\ell,s}+c}{2}$ (it is a possible outcome under the null hypothesis).
+
+
+\end{proof}
+
+\subsubsection{Solving the optimization problem}
+
+We have found empirically (but have not proven) that given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$, the tail probability $p_c$, as a function of $A_{w,s}$,
+has a unique maximum at one of the endpoints, where $A_{w,s}$ is either as small or as large as possible.
+If this empirical result is true in general, then finding the maximum is trivial;
+otherwise, computing the unconditional $P$-value is a simple 1-dimensional optimization problem
+on a bounded interval.
+
+\subsection{Conditional testing}
+If the conditional tests are always conducted at significance level $\alpha$ or less, so that
+$\mathbb{P} \{\mbox{Type I error} | B = n\} \le \alpha$, then the
+overall procedure has significance level $\alpha$ or less:
+\begin{eqnarray}
+    \mathbb{P} \{\mbox{Type I error}\} &=& \sum_{n=0}^N  \mathbb{P}\{\mbox{Type I error} |  B = n\} \mathbb{P} \{ B = n \} \nonumber \\
+       & \le & \sum_{n=0}^N \alpha \mathbb{P} \{  B = n \}  =  \alpha.
+\end{eqnarray}
+
+In particular, this implies that our conditional hypergeometric test will have a conservative $P$-value unconditionally.
+
+
+
+
 \bibliography{./pbsBib}
+
+
 
 \end{document}
