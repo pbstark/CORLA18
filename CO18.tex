@@ -67,10 +67,11 @@ strata, and sampling independently from the strata——-may simplify logistics 
 For instance, Colorado intends to conduct risk-limiting audits of statewide contests and other contests that cross jurisdictional boundaries.
 Some Colorado counties (comprising 98.2\% of voters)
 have new voting systems that allow auditors to check how the system interpreted each ballot; the rest do not.
-Before this work, the only approach to combining information
-from all counties into a single RLA required all counties to 
-use \emph{ballot-polling}, which is not as efficient as \emph{ballot-level comparison}, which only the newer systems support.
-We give a much more efficient approach: stratify ballots into two groups (ballots cast in counties with newer systems and those cast in counties with legacy system); sample from those strata independently; apply a generalization of ballot-level comparison auditing in one stratum and of ballot-polling auditing in the other to test the hypothesis that the ``overstatement error'' in each stratum exceeds some threshold; then combine the stratum-level results using Fisher's nonparametric combination of tests; maximize the combined $P$-value over all partitions of the error.
+Before this work, the only approaches to combining information
+from all counties into a single RLA either required all counties to 
+use \emph{ballot-polling}, which is not as efficient as \emph{ballot-level comparison}, which only the newer systems support, or to use
+variable batch size comparison audits, which would require exporting data from the older systems in a way that the counties have not yet undertaken, and weighted random sampling, which Colorado's audit software does not support.
+We give a simpler approach that is substantially more efficient than using ballot polling everywhere: stratify cast ballots into two groups (ballots cast in counties with newer systems and those cast in counties with legacy system); sample from those strata independently; apply a generalization of ballot-level comparison auditing in one stratum and of ballot-polling auditing in the other to test the hypothesis that the ``overstatement error'' in each stratum exceeds some threshold; then combine the stratum-level results using Fisher's nonparametric combination of tests; maximize the combined $P$-value over all partitions of the error.
 This yields a more efficient audit of contests that cross jurisdictional boundaries (including statewide contests and most federal contests) than ballot-polling would give.
 The method for combining information from different audit strategies (ballot-polling and comparison) is new.
 Moreover, it is more efficient than extant methods for using stratified samples with a single audit strategy
@@ -80,7 +81,7 @@ We also explain how Colorado's current audit software (RLATool) could be extende
 % (Stratification makes it easier to combine ballot-polling and ballot-level comparison, and also is useful to reduce coordination among jurisdictions required to audit cross-jurisdictional contests.)
 We provide an open-source reference implementation of the method and exemplar calculations in Jupyter notebooks.
 
-\keywords{stratified sampling, Fisher's combining function, sequential hypothesis tests, Colorado elections}
+\keywords{stratified sampling, nonparametric testing, Fisher's combining function, sequential hypothesis tests, Colorado elections}
 \end{abstract}
 
 \noindent
