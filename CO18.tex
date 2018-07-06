@@ -215,8 +215,9 @@ We show how the method allows ballot-polling auditing in one
 stratum to be combined with ballot-level comparison auditing in another.
 Next, Section~\ref{sec:combiningMethods} specializes the stratified audit approach to handle heterogeneous voting equipment.
 Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} explain
-the necessary modifications to ballot-level comparison and ballot-polling to construct within-stratum hypothesis tests about the amount of overstatement
-error. \comment{need to sketch what overstatements are here}, respectively. 
+the necessary modifications to ballot-level comparison and ballot-polling, respectively,
+to construct within-stratum hypothesis tests about the amount of \textit{overstatement error},
+errors which increases the apparent margin between reported winners and losers. 
 Section~\ref{sec:colorado} gives numerical examples of these approaches in simulated audits,
 using Colorado as an example use case.
 We provide example software implementing the risk calculations for
@@ -371,6 +372,7 @@ yields piecewise-constant lower and upper bounds for $\chi(\lambda)$; if,
 is larger than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom,
 the audit can stop; if the upper bound is anywhere less than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom, the sample size in one or both strata needs to be larger.
 
+\comment{discussion of how to escalate: refine the mesh before adding new samples!}
 
 
 \section{Strategies for auditing heterogeneous voting systems}\label{sec:combiningMethods}
@@ -400,7 +402,8 @@ that account for heterogeneous voting equipment.
 
 Several auditing strategies could be used in Colorado.
 The first approach is to use ballot-polling audits for all cross-jurisdictional contests.
-This would not take advantage of the gain in efficiency that CVRs provide.
+This would not take advantage information provided by CVRs and would 
+increase the workload disproportionately in the CVR counties.
 
 Another approach is to perform a comparison audit across all counties, but to use batches consisting
 of more than one ballot (and to perform batch-level comparisons)
@@ -408,18 +411,15 @@ in legacy counties and batches consisting of a single ballot (and to perform bal
  For majority and plurality elections, including those in which voters can select more than one candidate,
   audits can be based on overstatement and understatement errors at the level of batches.
 }
-This approach does not unduly increase the workload in CVR counties
-to compensate for legacy equipment.
 
 However, Colorado's software would need to be modified in order to allow sampling batches with
 unequal probabilities and to calculate risk appropriately.
 The mathematical details for calculating
 batch-level error bounds, drawing the samples with probability proportional to an
 error bound, and calculating the attained risk from the sample results are worked out
-in published papers \cite{stark09c,stark09b,stark10d}.
+in published papers \cite{stark09c,stark09b,stark10d} and in Section~\ref{sec:appendix-comparison}.
 Indeed, this is the method that was used in several of California's pilot audits,
 including the audit in Orange County.
-Section~\ref{sec:comparisonError} derives a method for comparison audits with variable batch sizes.
 
 Moreover, this approach requires that the no-CVR counties report vote subtotals
 for physically identifiable batches.
@@ -430,6 +430,12 @@ paper.
 
 Finally, the stratified audit approach from Section~\ref{sec:stratified} can solve the problem of auditing in CVR and no-CVR counties.
 Every ballot cast in the contest is in exactly one of two strata, CVR counties and no-CVR counties. 
+The CVR counties would conduct a ballot-level comparison audit while the
+legacy counties independently conduct a ballot-polling audit, to then be combined by a central organization.
+This approach does not unduly increase the workload in CVR counties
+to compensate for legacy equipment, nor does it force the legacy counties
+to audit entire batches of ballots.
+
 In order to use Equation~\ref{eq:fisher}, we must develop tests for the overstatement error that are appropriate for the
 corresponding voting system.
 Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} describe these tests for overstatement in the CVR and no-CVR strata,
@@ -440,8 +446,6 @@ given the constraints on time for software development and the logistics
 of the audit itself. 
 The workflow for counties would be the same as it was in November, 2017.
 Simulations suggest that this approach is relatively efficient.
-
-
 
 
 %\input{comparisonError}
