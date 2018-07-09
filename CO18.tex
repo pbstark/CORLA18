@@ -39,7 +39,7 @@
 
 
 
-\title{A New Method for Stratified Risk-Limiting Audits}
+\title{Draft: A New Method for Stratified Risk-Limiting Audits}
 
 \author{
    Kellie Ottoboni\inst{1}\orcidID{0000-0002-9107-3402} \and
@@ -81,8 +81,9 @@ then combine the stratum-level results using Fisher's nonparametric combination 
 This yields a more efficient audit of contests that cross jurisdictional boundaries (including statewide contests and most federal contests) than ballot-polling would give.
 The method for combining information from different audit strategies (ballot-polling and comparison) is new.
 Moreover, it is more efficient than extant methods for using stratified samples with a single audit strategy
-(e.g.,comparison audits in separate strata).\comment{Kellie: we need to run a test against the Higgins, Rivest \& Stark method}.
-We also explain how Colorado's current audit software (RLATool) could be extended to support audits of cross-jurisdictional contests. 
+(e.g.,comparison audits in separate strata).
+%\comment{Kellie: we need to run a test against the Higgins, Rivest \& Stark method}.
+%We also explain how Colorado's current audit software (RLATool) could be extended to support audits of cross-jurisdictional contests. 
 %This paper addresses both gaps, along the way introducing a simple, efficient way to use stratified sampling in RLAs.
 % (Stratification makes it easier to combine ballot-polling and ballot-level comparison, and also is useful to reduce coordination among jurisdictions required to audit cross-jurisdictional contests.)
 We provide an open-source reference implementation of the method and exemplar calculations in Jupyter notebooks.
@@ -218,7 +219,7 @@ Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} explain
 the necessary modifications to ballot-level comparison and ballot-polling, respectively,
 to construct within-stratum hypothesis tests about the amount of \textit{overstatement error},
 errors which increases the apparent margin between reported winners and losers. 
-Section~\ref{sec:colorado} gives numerical examples of these approaches in simulated audits,
+Section~\ref{sec:examples} gives numerical examples of these approaches in simulated audits,
 using Colorado as an example use case.
 We provide example software implementing the risk calculations for
 our recommended approach in a Python Jupyter notebook.\footnote{%
@@ -323,8 +324,21 @@ $b$, if $a > b$.
 In particular, this monotonicity holds for the tests proposed in sections~\ref{sec:comparisonError}
 and \ref{sec:ballotPollError}.
 
+One could use another function besides Equation~\ref{eq:fisher} to combine $P$-values.
+Combining functions must satisfy the following properties \cite{pesarinSalmaso10}:
+\begin{itemize}
+\item the function must be non-increasing in each argument and symmetric with respect to rearrangements of the arguments;
+\item the combining function must attain its supremum when one of the arguments approaches zero;
+\item and for every level $\alpha$, the critical value of the combining function is finite and strictly smaller than the function's supremum.
+\end{itemize}
+Other combining functions include Liptak's combining function, $T = \sum_i \Phi^{-1}(1-p_i)$,
+and Tippett's combining function, $T = \max_i (1-p_i)$.
 
-\comment{Other combination methods go here}
+Fisher's combining function is convenient for this application because the tests in different strata are statistically independent,
+ so analytic formulas based on the chi-squared distribution can be used to calibrate the distribution of $\chi(\lambda_1, \lambda_2)$. 
+If the tests across strata were correlated, the distribution of the combination function would need to be calibrated by simulation and another combining function might have better properties \cite{pesarinSalmaso10}.
+
+
 
 \subsection{Maximizing Fisher's combined $P$-value}
 The audit can stop if the maximum of Fisher's combined $P$-value over all
@@ -372,7 +386,7 @@ yields piecewise-constant lower and upper bounds for $\chi(\lambda)$; if,
 is larger than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom,
 the audit can stop; if the upper bound is anywhere less than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom, the sample size in one or both strata needs to be larger.
 
-\comment{discussion of how to escalate: refine the mesh before adding new samples!}
+%\comment{discussion of how to escalate: refine the mesh before adding new samples!}
 
 
 \section{Strategies for auditing heterogeneous voting systems}\label{sec:combiningMethods}
@@ -452,20 +466,21 @@ Simulations suggest that this approach is relatively efficient.
 \subsection{Batch comparison audits of a tolerable overstatement in votes}
 \label{sec:comparisonError}
 
-In this section we expand previous comparison auditing work to handle two new requirements.  
+Previous methods for comparison auditing must be modified to handle two new requirements.  
 The first relates to partitioning the permissible overstatement
 through the parameters $\lambda_s$, as discussed in Section~\ref{sec:stratified}. 
 The second handles batch-level comparison audits.
 
-To test whether the overstatement of any margin
+For this framework, we'd like to test whether the overstatement of any margin
 (in votes) exceeds some fraction $\lambda$ of the overall margin $V_{w\ell}$ between
 reported winner $w$ and reported loser $\ell$.
 If the stratum contains all the ballots cast in the contest, then for $\lambda = 1$, this 
 would confirm the election outcome.
-For stratified audits, we might want to test other values of $\lambda$, as described in Section~\ref{sec:stratified}.
+For stratified audits, we must test other values of $\lambda$, as described in Section~\ref{sec:stratified}.
 
-This section also addresses the second requirement by deriving a method for batches of arbitrary size, which might be useful
+We address the second requirement by deriving a method for batches of arbitrary size, which might be useful
  to audit contests that include CVR counties and legacy counties.
+This modification comes from changing the assumed upper bound on the possible overstatement in batches.
 We keep the \emph{a priori} error bounds tighter than the ``super-simple'' 
 method~\cite{stark10d}.
 To keep the notation simpler, we consider only a single contest, but the 
@@ -489,7 +504,8 @@ The mathematical derivations are in Appendix~\ref{sec:appendix-comparison}.
 \subsection{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
-In this section we develop a new method for ballot-polling audits that can test numerical margins,
+In in Appendix~\ref{sec:appendix-polling},
+ we develop a new method for ballot-polling audits that can test numerical margins,
 rather than just test whether a candidate won.
 This requires a different approach than that taken by \cite{lindemanEtal12}.
 
@@ -503,41 +519,10 @@ This introduces a nuisance parameter, the number of ballots with votes for eithe
 We deal with the nuisance parameter by maximizing the $P$-value 
 over all possible values of the nuisance parameter, which ensures that the test is conservative.
 
-The mathematical derivations are in Appendix~\ref{sec:appendix-polling}.
+\section{Numerical examples}\label{sec:examples}
 
-\section{Case study: Colorado}\label{sec:colorado}
+%\comment{explain hypothetical elections, what we're comparing to}
 
-%
-%CRS~1-7-515 requires Colorado to conduct risk-limiting audits beginning in 2017.
-%%(There are provisions to allow the Secretary of State to exempt some counties.)
-%The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
-% See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
-%}
-%Those audits only covered contests restricted to a single county:
-%counties could audit independently.
-%Colorado's ``uniform voting system'' program\footnote{%
-%  \url{https://www.sos.state.co.us/pubs/elections/VotingSystems/UniformVotingSystem.html}
-%} 
-%led many Colorado counties to purchase (or to plan to purchase) voting systems
-%that export CVRs, and thus can be audited using ballot-level comparisons.
-%It is estimated that by June, 2018, 98.2\% of active Colorado voters will be in CVR counties.
-%These counties cannot audit ballots independently:
-%margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
-%To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
-%that account for heterogeneous voting equipment.
-%
-%
-%Of the methods in Section~\ref{sec:combiningMethods} that Colorado might use to audit cross-jurisdictional contests
-%that include CVR counties and no-CVR counties,
-%stratified ``hybrid'' audits seem the most palatable,
-%given the constraints on time for software development and the logistics
-%of the audit itself. 
-%The workflow for counties would be the same
-%as it was in November, 2017.
-%Simulations suggest that this approach is relatively efficient.
-
-
-\subsection{Software and examples}
 Examples of stratified hybrid audits, like what could be used in Colorado, are in Jupyter notebooks available
 at \url{https://www.github.com/pbstark/CORLA18}.
 
@@ -587,22 +572,26 @@ The maximum Fisher's combined $P$-value is over 20\%, so the audit cannot stop a
 
 \section{Discussion} \label{sec:discussion}
 
-\comment{to do! this needs to get fleshed out}
 We have developed a general procedure for auditing stratified random samples.
+Previous methods for auditing stratified random samples of ballots were tailored to comparison audits.
+Our proposed method is more flexible, in that it allows for different hypothesis tests in each stratum.
+Thus, it can be applied to a variety of situations where stratified random sampling is appropriate:
+sampling ballots independently from several counties,
+or even from different groups of ballots within a county.
+To our knowledge, Fisher's combination method has not been used to combine independent audits before.
 
-These notebooks can be modified and run with different contest sizes, margins, and risk limits to
+Furthermore, we have presented a case study in using the proposed stratified method to audit cross-jurisdictional
+contests in which some jurisdictions use voting equipment that can export a CVR and some jurisdictions use 
+legacy equipment.
+The accompanying Jupyter notebooks can be modified and run with different contest sizes, margins, and risk limits to
 estimate the workload in different scenarios.
-
 The statistical constraints on the two sample sizes are weak: increasing the
 sample size in one stratum generally allows the other sample size to be decreased.
-Allocating the sample across the two strata is therefore largely a political decision,
-as discussed in section~\ref{sec:crude}.
 In general, when the contest outcome is correct, the total workload will be minimized by 
 assigning a disproportionately large (compared to the number of ballots cast) amount of 
 the work to the CVR stratum.
-The software described below can test the implications of different sampling allocations
-on the workload in each stratum and the total workload.
-
+In our numerical experiments, the proposed stratification method greatly reduced the number of ballots needed
+to confirm the reported contest outcome compared to other auditing approaches.
 
 
 \appendix
@@ -626,14 +615,6 @@ $\ell \in \mathcal{L}$, in votes.
 Overall reported margin of reported winner $w \in \mathcal{W}$ over reported loser 
 $\ell \in \mathcal{L}$, in votes, for the entire contest (not just stratum $s$)
 
-% If I'm not punch drunk, we really did manage to keep generalizations across multiple contests out of 
-% the subsequent exposition. However, we still use V
-%
-%    \item  $V_s$: smallest reported margin in the stratum among all $C$ contests audited using the same sample:
-%$V_s \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell, s}$
-%
-%  \item  $V$: smallest reported overall margin among all $C$ contests audited using the same sample:
-% $V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
     \item  $V$: smallest reported overall margin between any reported winner and reported loser:
 $V \equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$
 
