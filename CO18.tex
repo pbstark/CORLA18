@@ -354,13 +354,25 @@ This gives a (constant) lower bound for $\chi$ on the interval $[a, b)$; the cor
 upper bound is $\chi(\lambda) \le -2(\ln p_1(a) + \ln p_2(1-b)) \equiv \chi_+[a,b)$.
 Partitioning $[\lambda_-, \lambda_+]$ into a collection of intervals $[a_k, a_{k+1})$
 and finding $\chi_-[a_k, a_{k+1})$ and $\chi_+[a_k, a_{k+1})$ for each
-yields piecewise-constant lower and upper bounds for $\chi(\lambda)$; if,
- for all $\lambda \in [\lambda_-, \lambda_+]$, the lower bound
+yields piecewise-constant lower and upper bounds for $\chi(\lambda)$.
+
+If, for all $\lambda \in [\lambda_-, \lambda_+]$, the lower bound
 is larger than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom,
-the audit can stop; if the upper bound is anywhere less than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom, the sample size in one or both strata needs to be larger.
+the audit can stop.
 
-%\comment{discussion of how to escalate: refine the mesh before adding new samples!}
+On the other hand, if for all $\lambda \in [\lambda_-, \lambda_+]$, 
+the upper bound is anywhere less than the $1-\alpha$ quantile of the chi-square distribution with 4~degrees of freedom, 
+or if $\chi(a_k)$ is less than this quantile at any of the grid points $\{a_k\}$,
+the sample size in one or both strata needs to be larger.
 
+If the lower bound is less than the chi-square $1-\alpha$ quantile on some interval,
+but $\chi(a_k)$ is above this quantile at each of the grid points $\{a_k\}$, then it is indeterminate whether the
+audit can be stopped.
+One should construct a tighter lower bound by refining the grid, 
+dividing each interval $[a_k, a_{k+1})$ into smaller intervals and recomputing the lower bound.
+If parts of the refined lower bound are still less than the chi-square $1-\alpha$ quantile, then we cannot conclude that
+the risk limit is attained.
+The sample sizes in one or both strata must be increased.
 
 \section{Strategies for auditing heterogeneous voting systems}\label{sec:combiningMethods}
 The stratified auditing method in Section~\ref{sec:stratified} solves the problem of auditing contests
