@@ -230,7 +230,7 @@ def calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2):
     
     
 def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
-                     n_w1, n_l1, n1, n_w2, n_l2, n2):
+                     pvalue_funs, plausible_lambda_range=None, stepsize=0.5):
         """
         Create piecewise constant upper and lower bounds for the Fisher's 
         combination function for varying error allocations
@@ -249,27 +249,48 @@ def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
             votes for the reported loser in the ballot polling stratum
         N2 : int
             total number of votes in the ballot polling stratum
-        n_w1 : int
-            votes for the reported winner in the ballot comparison sample
-        n_l1 : int
-            votes for the reported loser in the ballot comparison sample
-        n1 : int
-            sample size in the ballot comparison stratum
-        n_w2 : int
-            votes for the reported winner in the ballot polling sample
-        n_l2 : int
-            votes for the reported loser in the ballot polling sample
-        n2 : int
-            sample size in the ballot polling stratum
+        pvalue_funs : array_like
+            functions for computing p-values. The observed statistics/sample and known parameters should be plugged in already. 
+            The function should take the lambda allocation AS INPUT and output a p-value.
+        plausible_lambda_range : array-like
+            lower and upper limits to search over lambda. Optional, but will speed up the search
+        stepsize : float
+            size of the mesh to calculate bounds; default 0.5
     
         Returns
         -------
         dict with 
     
-        float
-            maximum combined p-value
-        float
-            minimum value of Fisher's combined test statistic
-        float
-            lambda, the parameter that minimizes the Fisher's combined statistic/maximizes the combined p-value
+        array-like
+           sample_points : Fisher's combining function evaluated at the grid points
+        array-like
+           lower_bounds : piecewise constant lower bound on Fisher's combining function between the grid points
+        array-like
+           upper_bounds : piecewise constant upper bound on Fisher's combining function between the grid points
+        array-like
+           grid : grid of lambdas
         """
+        if plausible_lambda_range is None:
+            plausible_lambda_range = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
+        (lambda_lower, lambda_upper) = plausible_lambda_range
+        
+        cvr_pvalue = pvalue_funs[0]
+        nocvr_pvalue = pvalue_funs[1]
+        cvr_pvalues = []
+        nocvr_pvalues = []
+        
+        for lam in np.arange(lambda_lower, lambda_upper+1, stepsize):
+            pvalue1 = np.min([1, cvr_pvalue(lam)])
+            pvalue2 = np.min([1, nocvr_pvalue(1-lam)])
+            cvr_pvalues.append(pvalue1)
+            nocvr_pvalues.append(pvalue2)
+            
+        lower_bounds = [fisher_combined_pvalue([cvr_pvalues[i+1], nocvr_pvalues[i]]) for i in range(len(cvr_pvalues)-1)]
+        upper_bounds = [fisher_combined_pvalue([cvr_pvalues[i], nocvr_pvalues[i+1]]) for i in range(len(cvr_pvalues)-1)]
+        sample_points = [fisher_combined_pvalue([cvr_pvalues[i], nocvr_pvalues[i]]) for i in range(len(cvr_pvalues))]
+        
+        return {'sample_points' : sample_points,
+                'upper_bounds' : upper_bounds,
+                'lower_bounds' : lower_bounds,
+                'grid' : np.arange(lambda_lower, lambda_upper+1, stepsize)
+                }
