@@ -60,26 +60,24 @@ Department of Political Science, Columbia University, NY, USA and Verified Votin
 
 
 \begin{abstract}
-Risk-limiting audits (RLAs) offer a statistical guarantee that if a full manual tally would
-show that the reported election outcome is wrong, an RLA has a known minimum chance of
-leading to a full manual tally.
-RLAs generally rely on random samples; risk calculations are simplest for random samples of individual ballots drawn with replacement from all validly cast ballots.
+Risk-limiting audits (RLAs) offer a statistical guarantee: if a full manual tally of the paper ballots would show that the reported election outcome is wrong, an RLA has a known minimum chance of leading to a full manual tally.
+The risk limit is the maximum chance the audit will not in that case lead to a full manual tally.
+RLAs generally rely on random samples. 
+Audit risk calculations are simplest for random samples of individual ballots drawn with replacement from all validly cast ballots.
 However, stratified sampling---partitioning the population of ballots into disjoint
-strata, and sampling independently from the strata--€”-may simplify logistics or make the audit more efficient.
-For example, some Colorado counties (comprising 98.2\% of voters)
-have new voting systems that allow auditors to check how the system interpreted each ballot; the rest do not.
-%Before this work, the only approaches to combining information
-%from all counties into a single RLA either required all counties to 
-%use \emph{ballot-polling}, which is not as efficient as \emph{ballot-level comparison}, which only the newer systems support, or to use
-%variable batch size comparison audits, which would require exporting data from the older systems in a way that the counties have not yet undertaken, and weighted random sampling, which Colorado's audit software does not support.
-Previous approaches to combining information from all counties into a single RLA of a statewide contest would require counties with new voting systems to use a less efficient method than their equipment permits, or would require major procedural changes.
-We provide a simpler, more efficient approach: 
-stratify cast ballots into those ballots cast in counties with newer systems and those cast in counties with legacy systems; 
-sample individual ballots from those strata independently; 
-apply a generalization of ballot-level comparison auditing in the first stratum and of ballot-polling auditing in the second to test the hypothesis that the ``overstatement error'' in each stratum exceeds a threshold; combine the stratum-level results using Fisher's nonparametric combination of tests; and find the maximum combined $P$-value over all partitions of the error.
-The audit can stop when the maximum is less than the risk limit.
-The method for combining information from different strata and for combining different audit strategies (ballot-polling and comparison) is new, and immediately applicable in Colorado.
-We provide an open-source reference implementation of the method and exemplar calculations in Jupyter notebooks.
+strata, and sampling independently from the strata--€”-may simplify logistics or increase efficiency.
+For example, some counties in Colorado (comprising 98.2\% of voters)
+have new voting systems that allow auditors to check how the system interpreted each ballot, which allows efficient ``ballot-level comparison'' audits.
+Previous approaches to combining information from all counties into a single RLA of a statewide contest would require major procedural changes, or would sacrifice the efficiency of ballot-level comparison audits.
+We provide a simpler, more efficient approach using stratified sampling.
+Cast ballots are divided into two strata: those ballots cast in counties with newer systems, and the rest. 
+Samples of individual ballots are drawn from those strata independently.
+A generalization of ballot-level comparison auditing in the first stratum and a generalization of ballot-polling auditing in the second are to find $P$-values for the hypotheses that the ``overstatement error'' in each stratum exceeds a threshold.
+The stratum-level $P$-values are combined using Fisher's combining function.
+The combined $P$-value is maximized $P$-value over all combinations of error in the two strata that for which the reported outcome could be incorrect. 
+The audit stops when the maximum combined $P$-value is less than the risk limit.
+This approach to election audits is new, and immediately applicable in Colorado.
+We provide an open-source reference implementation and exemplar calculations in Jupyter notebooks.
 
 \keywords{stratified sampling, nonparametric testing, Fisher's combining function, sequential hypothesis tests, Colorado risk-limiting audits (CORLA), maximizing $P$-values over nuisance parameters}
 \end{abstract}
@@ -89,96 +87,60 @@ We provide an open-source reference implementation of the method and exemplar ca
 We are grateful to Ronald L.~Rivest and Steven N.~Evans for helpful conversations and suggestions.
 
 \section{Introduction}
-A risk-limiting audit (RLA) of an election is a procedure that
-has a known minimum chance of leading to a full manual tally of the ballots if the electoral outcome of that tally would differ from the reported outcome.
-\emph{Outcome} means the winner or winners, not the numerical vote totals. 
+A risk-limiting audit (RLA) of an election contest is a procedure that
+has a known minimum chance of leading to a full manual tally of the ballots if the electoral outcome  according to that tally would differ from the reported outcome.
+\emph{Outcome} means the winner or winners (or, for instance, whether there is a runoff)---not the numerical vote totals. 
 RLAs require a durable, voter-verifiable record of voter intent, such as paper ballots,
 and they assume that this audit trail is sufficiently complete and accurate that a full hand
 tally would show the true electoral outcome.
 That assumption is not automatically satisfied: a \emph{compliance audit}
 \cite{starkWagner12} 
-is required to check whether election accounting and security procedures were followed.
+is required to check whether the paper trail is trustworthy.
 
-Risk-limiting audits are generally (but not necessarily) incremental, relying on sequential hypothesis tests: they examine more ballots, or batches of ballots,
+Current methods for risk-limiting audits are generally \emph{sequential hypothesis testing procedures}: they examine more ballots, or batches of ballots,
 until either (i)~there is strong statistical evidence that a full hand tabulation would confirm the outcome,
 or (ii)~the audit has led to a full hand tabulation, the result of which should become the official
 result.
 
 RLAs have been conducted in California, Colorado, Ohio, and Denmark, and are required by law in Colorado (CRS~1-7-515) and Rhode Island (SB~413A and HB~5704A).
-%RLA procedures has been conducted in Arizona.
-%RLA bills are being drafted or are already under consideration in California,
-%Virginia, Washington, and other states.
-%A number of laws have either allowed or mandated risk-limiting audits,
-%including California AB~2023 (Salda\~{n}a), SB~360 (Padilla), and AB~44 (Mullin);
-%Rhode Island SB~413A and HB~5704A; and Colorado Revised Statutes (CRS)~1-7-515.
-%At the time of writing, California is considering another RLA bill, AB~2125.
 
-%CRS~1-7-515 requires 
-%Colorado to conduct risk-limiting audits beginning in 2017.
-%(There are provisions to allow the Secretary of State to exempt some counties.)
-%The first set of coordinated risk-limiting election audits across the state took place in Colorado in November, 2017.\footnote{%
-% See \url{https://www.sos.state.co.us/pubs/elections/RLA/2017RLABackground.html}
-%}
-%Those audits only covered contests restricted to a single county:
-%counties could audit independently.
-%To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches
-%and modify RLATool\footnote{%
-%  \url{https://github.com/FreeAndFair/ColoradoRLA/}
-%}, 
-%the open-source audit software used for their 2017 audits. 
+The most efficient and transparent sampling design for risk-limiting audits selects individual ballots uniformly at random, with or without replacement~\cite{stark10c}.
+Risk calculations for such samples can be made quite simple without sacrificing rigor~\cite{stark10d,lindemanStark12}.
+However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator method for assessing risk from the sample, which might not take full advantage of the capabilities of some voting systems. 
+For instance, any system that uses paper ballots as the official record can conduct \emph{ballot-polling} audits, while \emph{ballot-level comparison audits} require systems to generate \emph{cast-vote records} that can be checked manually against a human reading of the paper~\cite{lindemanEtal12,lindemanStark12}. 
+(Ballot polling and ballot-level comparison audits are described described below.) 
+We show it then can be advantageous to use a stratified sample, selecting ballots independently from counties that can conduct ballot-level comparison audits and from those that cannot.  
 
-% \comment{confirm or correct these assertions} They are not correct. PBS
-%State laws mandating risk-limiting audits generally require a simple random sample of ballots from each contest to be audited.
-%This is feasible when contests are contained within a single jurisdiction, where elections officials can deal with ballots locally.
-%However, the logistics of drawing a simple random sample of ballots that cross jurisdiction lines are more difficult.
-%This would require a central agency to determine which ballots each jurisdiction should draw, and then each jurisdiction must report the results of their audit back to the central agency to be combined.
+Stratified RLAs have been considered previously, primarily to conform with existing audit laws under which counties draw audit samples independently of each other, but also to allow to allow auditors to start the audit before all vote-by-mail or provisional ballots have been tallied, by sampling independently from ballots cast in person, by mail, and provisionally, as soon as subtotals for each group are available \cite{stark08a,higginsEtal11}.
+However, extant methods address only a single approach to auditing, batch-level comparisons, and only a particular test statistic.
 
-The most efficient and transparent sampling design for risk-limiting audits is to sample individual ballots uniformly at random from the ballots cast in the contest, with or without replacement~\cite{stark10c}.
-Risk calculations for samples of individual ballots can also be made quite simple without sacrificing rigor~\cite{stark10d,lindemanStark12},
-However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator risk calculations, e.g., ballot-polling rather than ballot-level comparisons~\cite{lindemanEtal12,lindemanStark12}, both of which are described below. 
-
-It may be more tractable logistically to use a stratified sample, selecting ballots independently from different counties or groups of counties. 
-Stratification may also be useful within counties, for instance, to allow auditors to start auditing before all vote-by-mail or provisional ballots have been tallied, by sampling independently from ballots cast in person, by mail, and provisionally.
-
-While stratified RLAs have been considered previously \cite{stark08a,higginsEtal11}, the methods addressed only a single approach to auditing, batch-level comparisons, and only a particular test statistic.
-
-This paper introduces a more general approach to using stratified samples in RLAs.
-The approach involves finding a ``worst case'' $P$-value (over a vector of nuisance parameters) for the null hypothesis that a full count would find different winners than were reported.
+Here, we provide a more general approach to using stratified samples in RLAs.
+The approach involves finding the maximum $P$-value (over a vector of nuisance parameters) of all allocations of tabulation error across strata for which a full count would find a different electoral outcome than was reported.
 (A \emph{nuisance parameter} is a property of the population that is not of direct interest, but that affects the probability distribution of the data. 
-Here, only the total \emph{overstatement} determines whether the reported outcome is correct, but how that error is partitioned across strata affects the distribution of the audit sample.
+The total \emph{overstatement} across strata determines whether the reported outcome is correct; the overstatements in individual strata are nuisance parameters that affect the distribution of the audit sample.
 \emph{Overstatement} is error that made the margin of one or more winners over one or more losers appear larger than it really was.)
 
-For each fixed value of the nuisance parameters, Fisher's combining function is used to combine independent $P$-values from the strata into an overall $P$-value that the error in each stratum exceeds a threshold.
-Conceptually, the procedure considers every possible partition of outcome-changing error across the strata, and calculates the largest
-$P$-value across all such partitions, using Fisher's combining function.
-If the maximum $P$-value is less than the risk limit, the audit can stop;
-otherwise, the audit must inspect more ballots.
+The core of the method is to test whether the overstatement error in a single stratum exceeds a quota.
+Fisher's combining function is used to merge the $P$-values for those tests into a single $P$-value for the hypothesis that the overstatement in every stratum exceeds its quota.
+If that hypothesis can be rejected for \emph{all} stratum-level quotas that could change the outcome---that is, if the maximum combined $P$-value is sufficiently small---the audit can stop; otherwise, the audit must inspect more ballots.
 
-In practice, it is not necessary to consider all possible partitions of the allowable error across strata: the $P$-value is a difference of monotonic functions, which allows us to find upper and lower bounds everywhere from the values on a discrete grid.
-We present a numerical procedure (with a Python implementation)
+In fact, it is not necessary to consider all possible quotas: the $P$-value involves a difference of monotonic functions, which allows us to find upper and lower bounds everywhere from the values on a discrete grid.
+We present a numerical procedure, implemented in Python implementation,
 to find bounds on the maximum $P$-value when there are two strata.
 The procedure can be generalized to more than two strata.
 
 
 \subsection{Voting systems and audit strategies}
 
-Voting systems that export cast vote records (CVRs) in a way that the paper ballot corresponding to each CVR can be identified uniquely and retrieved, and for which the CVR corresponding to any particular paper ballot can be found, can be audited using \emph{ballot-level comparison audits} \cite{lindemanStark12}, which compare CVRs to the auditors' interpretation of voter intent directly from paper ballots.
+Voting systems that export cast vote records (CVRs) in a way that the paper ballot corresponding to each CVR can be identified uniquely and retrieved, and for which the CVR corresponding to any particular paper ballot can be found, can be audited using \emph{ballot-level comparison audits} \cite{lindemanStark12}, which involve comparing CVRs to the auditors' interpretation of voter intent directly from paper ballots.
 We call counties with such voting systems \emph{CVR counties}.
-Ballot-level comparison audits are currently the most efficient approach to risk-limiting audits in that they require examining fewer
-ballots than other methods do, when the outcome of the contest under audit 
-is in fact correct.
+Ballot-level comparison audits are currently the most efficient approach to risk-limiting audits in that they require examining fewer ballots than other methods do, when the outcome of the contest under audit is in fact correct.
 
-Voting systems in other counties (``legacy'' or ``no-CVR'' counties) 
-do not allow auditors to check how the system interpreted voter intent for individual ballots.
-Election results involving those counties can still be audited using \emph{ballot-polling audits} \cite{lindemanEtal12,lindemanStark12}, provided the voting systems create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is conserved to ensure that it remains accurate and intact, and organized well enough to permit ballots to be selected at random.
+Voting systems in other counties (\emph{legacy} or \emph{no-CVR} counties) can be audited using \emph{ballot-polling audits} \cite{lindemanEtal12,lindemanStark12}, if the voting systems create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is conserved to ensure that it remains accurate and intact, and organized well enough to permit ballots to be selected at random.
 Ballot-polling audits generally require examining more ballots than ballot-level comparison audits to attain the same risk limit.
 
-There is currently no literature on how to combine
-ballot polling in non-CVR counties with ballot-level comparisons in CVR counties to audit contests that include voters in both.
-Existing methods either would require all counties to use the lowest
-common denominator (ballot-polling, which does not take advantage of the CVRs),
- or would require no-CVR counties to perform \textit{batch-level comparisons}
- (manually tallying physical groups of ballots for which the voting system reported subtotals).
+There is no literature on how to combine ballot polling with ballot-level comparisons to audit (\textit{cross-jurisdictional contests}), such as gubernatorial contests and statewide ballot measures, that include voters in CVR counties and voters in no-CVR counties.
+Existing methods either would require all counties to use ballot-polling, or would require no-CVR counties to perform \textit{batch-level comparisons} (comparing manual tallies of physical groups of ballots to reported results for those groups).
 Batch-level comparison audits were found in
 California to be less efficient than ballot-polling audits \cite{CA_SOS_EAC}.%
 \footnote{%
@@ -186,11 +148,11 @@ California to be less efficient than ballot-polling audits \cite{CA_SOS_EAC}.%
   for a different (Bayesian) approach to auditing contests that include both CVR counties
   and no-CVR counties. In general, Bayesian audits are not risk-limiting.
 }
+Moreover, to conduct batch-level comparison audits would require different pre-audit data export from voting systems, different random sampling procedures, different audit logistics, and different audit data uploads---large changes for no-CVR counties and large changes to Colorado's audit software, RLATool.
 
-Our new approach to stratification solves this problem, facilitating RLAs of contests that cross jurisdictional boundaries (\textit{cross-jurisdictional contests}), such as gubernatorial contests and statewide ballot measures, which in Colorado include CVR and non-CVR counties.
-As of July, 2018, Colorado has not performed a risk-limiting audit of a cross-jurisdictional contest.
+Our new method solves the problem of auditing cross-jurisdictional contests, with almost no change in procedures at the county level and only minimal changes to RLATool. 
 
-Section~\ref{sec:stratified} presents the new method for stratified audits.
+Section~\ref{sec:stratified} presents the new approach to stratified auditing.
 Section~\ref{sec:combiningMethods} illustrates the method by combining ballot-polling in one stratum with ballot-level comparisons auditing in another.
 This requires straightforward modifications of both ballot-polling and ballot-level comparison to allow the overstatement to be compared to thresholds other than the overall contest margin; those modifications are derived in sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError}.
 Section~\ref{sec:examples} gives numerical examples for simulated audits, using parameters intended to reflect how the procedure would work in Colorado.
