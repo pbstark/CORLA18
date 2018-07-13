@@ -39,7 +39,7 @@
 
 
 
-\title{Draft: A New Method for Stratified Risk-Limiting Audits}
+\title{A New Method for Stratified Risk-Limiting Audits}
 
 \author{
    Kellie Ottoboni\inst{1}\orcidID{0000-0002-9107-3402} \and
@@ -51,7 +51,7 @@
 
 \institute{
 Department of Statistics, University of California, Berkeley, CA, USA \and
-Department of Political Science, Columbia University, NY, USA and Verified Voting Foundation}
+Verified Voting Foundation}
 
 \date{Version: \today}
 
@@ -65,7 +65,7 @@ The risk limit is the maximum chance the audit will not in that case lead to a f
 RLAs generally rely on random samples. 
 Audit risk calculations are simplest for random samples of individual ballots drawn with replacement from all validly cast ballots.
 However, stratified sampling---partitioning the population of ballots into disjoint
-strata, and sampling independently from the strata--€”-may simplify logistics or increase efficiency.
+strata and sampling independently from the strata---may simplify logistics or increase efficiency.
 For example, some counties in Colorado (comprising 98.2\% of voters)
 have new voting systems that allow auditors to check how the system interpreted each ballot, which allows efficient ``ballot-level comparison'' audits.
 Previous approaches to combining information from all counties into a single RLA of a statewide contest would require major procedural changes, or would sacrifice the efficiency of ballot-level comparison audits.
@@ -108,10 +108,10 @@ The most efficient and transparent sampling design for risk-limiting audits sele
 Risk calculations for such samples can be made quite simple without sacrificing rigor~\cite{stark10d,lindemanStark12}.
 However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator method for assessing risk from the sample, which might not take full advantage of the capabilities of some voting systems. 
 For instance, any system that uses paper ballots as the official record can conduct \emph{ballot-polling} audits, while \emph{ballot-level comparison audits} require systems to generate \emph{cast-vote records} that can be checked manually against a human reading of the paper~\cite{lindemanEtal12,lindemanStark12}. 
-(Ballot polling and ballot-level comparison audits are described described below.) 
+(Ballot-polling and ballot-level comparison audits are described below.) 
 We show it then can be advantageous to use a stratified sample, selecting ballots independently from counties that can conduct ballot-level comparison audits and from those that cannot.  
 
-Stratified RLAs have been considered previously, primarily to conform with existing audit laws under which counties draw audit samples independently of each other, but also to allow to allow auditors to start the audit before all vote-by-mail or provisional ballots have been tallied, by sampling independently from ballots cast in person, by mail, and provisionally, as soon as subtotals for each group are available \cite{stark08a,higginsEtal11}.
+Stratified RLAs have been considered previously, primarily to conform with existing audit laws under which counties draw audit samples independently of each other, but also to allow auditors to start the audit before all vote-by-mail or provisional ballots have been tallied, by sampling independently from ballots cast in person, by mail, and provisionally, as soon as subtotals for each group are available \cite{stark08a,higginsEtal11}.
 However, extant methods address only a single approach to auditing, batch-level comparisons, and only a particular test statistic.
 
 Here, we provide a more general approach to using stratified samples in RLAs.
@@ -139,7 +139,7 @@ Ballot-level comparison audits are currently the most efficient approach to risk
 Voting systems in other counties (\emph{legacy} or \emph{no-CVR} counties) can be audited using \emph{ballot-polling audits} \cite{lindemanEtal12,lindemanStark12}, if the voting systems create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is conserved to ensure that it remains accurate and intact, and organized well enough to permit ballots to be selected at random.
 Ballot-polling audits generally require examining more ballots than ballot-level comparison audits to attain the same risk limit.
 
-There is no literature on how to combine ballot polling with ballot-level comparisons to audit (\textit{cross-jurisdictional contests}), such as gubernatorial contests and statewide ballot measures, that include voters in CVR counties and voters in no-CVR counties.
+There is no literature on how to combine ballot-polling with ballot-level comparisons to audit (\textit{cross-jurisdictional contests}), such as gubernatorial contests and statewide ballot measures, that include voters in CVR counties and voters in no-CVR counties.
 Existing methods either would require all counties to use ballot-polling, or would require no-CVR counties to perform \textit{batch-level comparisons} (comparing manual tallies of physical groups of ballots to reported results for those groups).
 Batch-level comparison audits were found in
 California to be less efficient than ballot-polling audits \cite{CA_SOS_EAC}.%
@@ -180,7 +180,7 @@ An \emph{understatement error} is an error that caused the margin between \emph{
 winner and \emph{every} reported loser to appear to be smaller than it really was.
 Overstatements cast doubt on outcomes; understatements do not, even though they are tabulation errors.
 
-We use $w$ to denore a reported winner and $\ell$ to denote a reported loser.
+We use $w$ to denote a reported winner and $\ell$ to denote a reported loser.
 The total number of reported votes for candidate~$w$ is $V_w$ 
 and the total for candidate~$\ell$ is $V_\ell$.
 Thus $V_w > V_\ell$, since $w$ is reported to have gotten more votes than $\ell$.
@@ -205,7 +205,7 @@ $\sum_s \omega_{w\ell, s} \ge V_{w\ell}$.
 The null is true if and only if there exist \textit{some} $S$-tuple of real numbers $(\lambda_s)_{s=1}^s$ such that $\sum_s \lambda_s = 1$ and $\omega_{w\ell, s} \ge \lambda_s V_{w\ell}$ for all $s$.\footnote{%
   ``If'' is straightforward. For ``only if,'' suppose $\omega_{w\ell} \ge V_{w\ell}$. Set $\lambda_s = \frac{\omega_{w\ell, s}}{\sum_t \omega_{w\ell, t}}$. Then $\sum_s \lambda_s = 1$, and $\omega_{w\ell, s} = \lambda_s \omega_{w\ell} \ge \lambda_s V_{w\ell}$ for all $s$.
 }
-Thus if we can reject the composite hypothesis $\cap_s \{ \omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ at significance level $\alpha$ for all $(\lambda_s)$ such that $\sum_s \lambda_s = 1$, we can stop the audit, and the risk limit will be $\alpha$.
+Thus if we can reject the composite hypothesis $\cap_s \{ \omega_{w\ell,s} \ge \lambda_s V_{w\ell} \}$ at significance level $\alpha$ for all $(\lambda_s)$ such that $\sum_s \lambda_s = 1$, we can stop the audit, and the risk limit will be $\alpha$.
 
 \subsection{Fisher's combination method}
 
@@ -346,7 +346,7 @@ Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} describe these 
 \subsection{Comparison audits of overstatement quotas}
 \label{sec:comparisonError}
 
-To use comparison auditing in the approach to stratification described above, requires extending previous work to test whether the overstatement error exceeds $\lambda_s V_{w\ell}$, rather than simply $V_{w\ell}$.
+To use comparison auditing in the approach to stratification described above requires extending previous work to test whether the overstatement error exceeds $\lambda_s V_{w\ell}$, rather than simply $V_{w\ell}$.
 Appendix~\ref{sec:appendix-comparison} derives this generalization for arbitrary batch sizes, including batches consisting of one ballot.
 The derivation considers only a single contest, but the 
 MACRO test statistic \cite{stark09c,stark10d} automatically extends the result to 
@@ -356,15 +356,15 @@ Majority and super-majority contests are a minor
 modification~\cite{stark08a}.\footnote{%
   So are some forms of preferential and approval voting, such as Borda count, and
   proportional representation contests, such as D'Hondt~\cite{starkTeague14}.
-  See \url{https://github.com/pbstark/S157F17/blob/master/audit.ipynb} for a derivation
-  of ballot-level comparison risk-limiting audits for super-majority contests. (Last visited 14~May 2018.)
+  For a derivation of ballot-level comparison risk-limiting audits for super-majority contests, 
+  see \url{https://github.com/pbstark/S157F17/blob/master/audit.ipynb}. (Last visited 14~May 2018.)
   Changes for IRV/STV are more complicated.
 }
 
 \subsection{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
-To use the new stratification method with ballot polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum in exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
+To use the new stratification method with ballot-polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum in exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
 This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
 We address this by maximizing the $P$-value over all possible values of the nuisance parameter.
 Appendix~\ref{sec:appendix-polling} develops the test.
@@ -405,7 +405,7 @@ would have sufficed.
 If it were possible to conduct a ballot-level comparison audit for the entire contest, 
 a RLA at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
 The additional work for the hybrid stratified audit is disproportionately in the no-CVR counties, as
-arguably it should.
+arguably it should be.
 
 A second notebook, \texttt{hybrid-audit-example-2}, illustrates the 
 workflow for a hybrid stratified RLA of an election with 2~million ballots cast.
