@@ -72,9 +72,10 @@ Previous approaches to combining information from all counties into a single RLA
 We provide a simpler, more efficient approach using stratified sampling.
 Cast ballots are divided into two strata: those ballots cast in counties with newer systems, and the rest. 
 Samples of individual ballots are drawn from those strata independently.
-A generalization of ballot-level comparison auditing in the first stratum and a generalization of ballot-polling auditing in the second are to find $P$-values for the hypotheses that the ``overstatement error'' in each stratum exceeds a threshold.
+A generalization of ballot-level comparison auditing in the first stratum and a generalization of ballot-polling auditing in the second are
+used to find $P$-values for the hypotheses that the ``overstatement error'' in each stratum exceeds a threshold.
 The stratum-level $P$-values are combined using Fisher's combining function.
-The combined $P$-value is maximized $P$-value over all combinations of error in the two strata that for which the reported outcome could be incorrect. 
+The combined $P$-value is maximized over all combinations of error in the two strata for which the reported outcome could be incorrect. 
 The audit stops when the maximum combined $P$-value is less than the risk limit.
 This approach to election audits is new, and immediately applicable in Colorado.
 We provide an open-source reference implementation and exemplar calculations in Jupyter notebooks.
@@ -109,40 +110,44 @@ Risk calculations for such samples can be made quite simple without sacrificing 
 However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator method for assessing risk from the sample, which might not take full advantage of the capabilities of some voting systems. 
 For instance, any system that uses paper ballots as the official record can conduct \emph{ballot-polling} audits, while \emph{ballot-level comparison audits} require systems to generate \emph{cast-vote records} that can be checked manually against a human reading of the paper~\cite{lindemanEtal12,lindemanStark12}. 
 (Ballot-polling and ballot-level comparison audits are described below.) 
-We show it then can be advantageous to use a stratified sample, selecting ballots independently from counties that can conduct ballot-level comparison audits and from those that cannot.  
+We show it can be advantageous to use a stratified sample, selecting ballots independently from counties that can conduct ballot-level comparison audits and from those that cannot.  
 
 Stratified RLAs have been considered previously, primarily to conform with existing audit laws under which counties draw audit samples independently of each other, but also to allow auditors to start the audit before all vote-by-mail or provisional ballots have been tallied, by sampling independently from ballots cast in person, by mail, and provisionally, as soon as subtotals for each group are available \cite{stark08a,higginsEtal11}.
 However, extant methods address only a single approach to auditing, batch-level comparisons, and only a particular test statistic.
 
 Here, we provide a more general approach to using stratified samples in RLAs.
-The approach involves finding the maximum $P$-value (over a vector of nuisance parameters) of all allocations of tabulation error across strata for which a full count would find a different electoral outcome than was reported.
-(A \emph{nuisance parameter} is a property of the population that is not of direct interest, but that affects the probability distribution of the data. 
-The total \emph{overstatement} across strata determines whether the reported outcome is correct; the overstatements in individual strata are nuisance parameters that affect the distribution of the audit sample.
-\emph{Overstatement} is error that made the margin of one or more winners over one or more losers appear larger than it really was.)
+The approach involves finding the maximum $P$-value over a vector of nuisance parameters, 
+all allocations of tabulation error across strata for which a full count would find a different electoral outcome than was reported.
+A \emph{nuisance parameter} is a property of the population that is not of direct interest, but that affects the probability distribution of the data. 
+\emph{Overstatement} is error that made the margin of one or more winners over one or more losers appear larger than it really was.
+The total \emph{overstatement} across strata determines whether the reported outcome is correct; 
+the overstatements in individual strata are nuisance parameters that affect the distribution of the audit sample.
 
 The core of the method is to test whether the overstatement error in a single stratum exceeds a quota.
 Fisher's combining function is used to merge the $P$-values for those tests into a single $P$-value for the hypothesis that the overstatement in every stratum exceeds its quota.
 If that hypothesis can be rejected for \emph{all} stratum-level quotas that could change the outcome---that is, if the maximum combined $P$-value is sufficiently small---the audit can stop; otherwise, the audit must inspect more ballots.
 
-In fact, it is not necessary to consider all possible quotas: the $P$-value involves a difference of monotonic functions, which allows us to find upper and lower bounds everywhere from the values on a discrete grid.
-We present a numerical procedure, implemented in Python implementation,
+In fact, it is not necessary to consider all possible quotas: the $P$-value involves a sum of monotonic functions, which allows us to find upper and lower bounds everywhere from the values on a discrete grid.
+We present a numerical procedure, implemented in Python,
 to find bounds on the maximum $P$-value when there are two strata.
 The procedure can be generalized to more than two strata.
 
 
 \subsection{Voting systems and audit strategies}
 
-Voting systems that export cast vote records (CVRs) in a way that the paper ballot corresponding to each CVR can be identified uniquely and retrieved, and for which the CVR corresponding to any particular paper ballot can be found, can be audited using \emph{ballot-level comparison audits} \cite{lindemanStark12}, which involve comparing CVRs to the auditors' interpretation of voter intent directly from paper ballots.
+Voting systems that export cast vote records (CVRs) in a way that the paper ballot corresponding to each CVR can be identified uniquely and retrieved, and vice versa, 
+can be audited using \emph{ballot-level comparison audits} \cite{lindemanStark12}, which involve comparing CVRs to the auditors' interpretation of voter intent directly from paper ballots.
 We call counties with such voting systems \emph{CVR counties}.
 Ballot-level comparison audits are currently the most efficient approach to risk-limiting audits in that they require examining fewer ballots than other methods do, when the outcome of the contest under audit is in fact correct.
 
 Voting systems in other counties (\emph{legacy} or \emph{no-CVR} counties) can be audited using \emph{ballot-polling audits} \cite{lindemanEtal12,lindemanStark12}, if the voting systems create a voter-verifiable paper trail (e.g., voter-marked paper ballots) that is conserved to ensure that it remains accurate and intact, and organized well enough to permit ballots to be selected at random.
 Ballot-polling audits generally require examining more ballots than ballot-level comparison audits to attain the same risk limit.
 
-There is no literature on how to combine ballot-polling with ballot-level comparisons to audit (\textit{cross-jurisdictional contests}), such as gubernatorial contests and statewide ballot measures, that include voters in CVR counties and voters in no-CVR counties.
+There is no literature on how to combine ballot-polling with ballot-level comparisons to audit \textit{cross-jurisdictional contests}
+(contests that span multiple jurisdictions, such as gubernatorial contests and statewide ballot measures), 
+that include voters in CVR counties and voters in no-CVR counties.
 Existing methods either would require all counties to use ballot-polling, or would require no-CVR counties to perform \textit{batch-level comparisons} (comparing manual tallies of physical groups of ballots to reported results for those groups).
-Batch-level comparison audits were found in
-California to be less efficient than ballot-polling audits \cite{CA_SOS_EAC}.%
+Batch-level comparison audits were found to be less efficient than ballot-polling audits in California\cite{CA_SOS_EAC}.%
 \footnote{%
   See~\cite{Rivest-2018-bayesian-tabulation-audits}
   for a different (Bayesian) approach to auditing contests that include both CVR counties
@@ -157,7 +162,7 @@ Section~\ref{sec:combiningMethods} illustrates the method by combining ballot-po
 This requires straightforward modifications to the mathematics behind ballot-polling and ballot-level comparison to allow the overstatement to be compared to specified thresholds other than the overall contest margin; those modifications are derived in sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError}.
 Section~\ref{sec:examples} gives numerical examples for simulated audits, using parameters intended to reflect how the procedure would work in Colorado.
 We provide example software implementing the risk calculations for
-our recommended approach in a Python Jupyter notebook.\footnote{%
+our recommended approach in Python Jupyter notebooks.\footnote{%
  See \url{https://github.com/pbstark/CORLA18}.
 }
 Section~\ref{sec:discussion} gives recommendations and
@@ -167,7 +172,7 @@ considerations for implementation.
 \section{Stratified audits} \label{sec:stratified}
 
 \emph{Stratified sampling} involves partitioning a population
-into non-overlapping groups, and drawing independent random samples from those groups.
+into non-overlapping groups and drawing independent random samples from those groups.
 \cite{stark08a,higginsEtal11} developed RLAs based on comparing stratified samples of batches of ballots to hand counts of the votes in those batches: batch-level comparison RLAs, using a particular test statistic.
 The method we develop here is more general and more flexible: it can be used with any test statistic, and test statistics in different strata need not be the same---which is key to combining ballot-polling with ballot-level comparisons.
 
@@ -202,14 +207,14 @@ $\ell$ if and only if $\omega_{w\ell} \equiv \sum_s \omega_{w\ell,s} < V_{w\ell}
 
 An RLA is a test of the hypothesis that the outcome is wrong, that is, that $w$ did not really beat $\ell$:
 $\sum_s \omega_{w\ell, s} \ge V_{w\ell}$.
-The null is true if and only if there exist \textit{some} $S$-tuple of real numbers $(\lambda_s)_{s=1}^s$ such that $\sum_s \lambda_s = 1$ and $\omega_{w\ell, s} \ge \lambda_s V_{w\ell}$ for all $s$.\footnote{%
+The null is true if and only if there exists \textit{some} $S$-tuple of real numbers $(\lambda_s)_{s=1}^S$ with $\sum_s \lambda_s = 1$ such that $\omega_{w\ell, s} \ge \lambda_s V_{w\ell}$ for all $s$.\footnote{%
   ``If'' is straightforward. For ``only if,'' suppose $\omega_{w\ell} \ge V_{w\ell}$. Set $\lambda_s = \frac{\omega_{w\ell, s}}{\sum_t \omega_{w\ell, t}}$. Then $\sum_s \lambda_s = 1$, and $\omega_{w\ell, s} = \lambda_s \omega_{w\ell} \ge \lambda_s V_{w\ell}$ for all $s$.
 }
 Thus if we can reject the composite hypothesis $\cap_s \{ \omega_{w\ell,s} \ge \lambda_s V_{w\ell} \}$ at significance level $\alpha$ for all $(\lambda_s)$ such that $\sum_s \lambda_s = 1$, we can stop the audit, and the risk limit will be $\alpha$.
 
 \subsection{Fisher's combination method}
 
-Fix $\mathbf{\lambda} \equiv (\lambda_s)_{s=1}^s$, with $\sum_s \lambda_s = 1$.
+Fix $\mathbf{\lambda} \equiv (\lambda_s)_{s=1}^S$, with $\sum_s \lambda_s = 1$.
 To test the conjunction hypothesis that stratum null hypotheses are true, that is, that $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ for all $s$, we use Fisher's combining function.
 Let $p_s(\lambda_s)$ be the $P$-value of the hypothesis $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$.
 If the null hypothesis is true, then 
@@ -242,10 +247,10 @@ then $p_s(a) > p_s(b)$.
 This monotonicity is a reasonable requirement because the evidence that the overstatement
 is greater than $a$ should be weaker than the evidence that the overstatement is greater than
 $b$, if $a > b$.
-In particular, this monotonicity holds for the tests proposed in sections~\ref{sec:comparisonError}
+In particular, this monotonicity holds for the tests proposed in Sections~\ref{sec:comparisonError}
 and \ref{sec:ballotPollError}.
 
-One could a function other than Fisher's to combine the stratum-level $P$-values into a $P$-value for the compound hypothesis, provided it satisfies these properties (see \cite{pesarinSalmaso10}):
+One could use a function other than Fisher's to combine the stratum-level $P$-values into a $P$-value for the compound hypothesis, provided it satisfies these properties (see \cite{pesarinSalmaso10}):
 \begin{itemize}
   \item the function is non-increasing in each argument and symmetric with respect to rearrangements of the arguments
   \item the combining function attains its supremum when one of the arguments approaches zero
@@ -260,18 +265,18 @@ If tests in different strata were correlated, the null distribution of the combi
 
 \subsection{Maximizing Fisher's combined $P$-value for $S=2$}
 We now specialize to $S=2$ strata.
-In Colorado, one would comprise all ballots cast in CVR counties and the other all ballots cast in non-CVR counties.
+In Colorado, one stratum would comprise all ballots cast in CVR counties and the other all ballots cast in non-CVR counties.
 The set of $\mathbf{\lambda} = (\lambda_1, \lambda_2)$ such that $\sum_s \lambda_s = 1$ is then a one-dimensional family: if $\lambda_1 = \lambda$, then $\lambda_2 = 1-\lambda$.
 For a given set of data, finding the maximum $P$-value over all $\mathbf{\lambda}$
 is thus a one-dimensional optimization problem.
+We provide two software solutions to the problem.
 
-The software we provide approximates the maximum via a grid search, refining the
+The first approach approximates the maximum via a grid search, refining the
 grid once the maximum has been bracketed.
 This is not guaranteed to find the global maximum exactly, although it can approximate 
 the maximum as closely as one desires by refining the mesh, since the objective function is continuous.
 
-Here is a rigorous approach using bounds on Fisher's combining function $\chi$ for all
-$\lambda$. 
+The second, more rigorous approach uses bounds on Fisher's combining function $\chi$ for all $\lambda$. 
 (A lower bound on $\chi$ implies an upper bound on the $P$-value: if, for all $\lambda$, the lower bound is 
 larger than the $1-\alpha$ quantile of the chi-squared distribution with 4~degrees of freedom, the maximum $P$-value is no larger than $\alpha$.)
 
@@ -318,7 +323,7 @@ The first risk-limiting election audits under this statute were conducted in Nov
 Counties cannot audit cross-jurisdictional contests on their own:
 margins and risk limits apply to entire contests, not to the portion of a contest included in a county.
 Colorado has not yet conducted a RLA of a cross-jurisdictional contest (some counties audited their portion of a cross-jurisdictional contest as if the contest were entirely contained in the county, but the result is not an RLA of the contest).
-To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches and make some changes to RLATool.
+To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches and make some changes to its auditing software, RLATool.
 
 As of this writing, about 98\% of active Colorado voters are in CVR counties.
 As discussed above, Colorado could simply revert to ballot-polling audits for cross-jurisdictional contests that include votes in no-CVR counties, but that would entail a loss of efficiency in CVR counties.
@@ -334,10 +339,10 @@ The changes would include modifying data structures and the county user interfac
 No-CVR counties would also have to revise their audit procedures.
 Among other things, they would need to report vote subtotals
 for physically identifiable groups of ballots before the audit starts.
-And no-CVR counties with voting systems that can only report subtotals by precinct
+No-CVR counties with voting systems that can only report subtotals by precinct
 might have to make major changes to how they handle ballots, for instance, sorting all ballots by precinct.
 
-Fortunately, the stratified audit approach of Section~\ref{sec:stratified} makes possible a ``hybrid'' RLA that keeps the advantages of ballot-level comparison audits in CVR counties but does not require major changes to how no-CVR counties audit, nor major changes to RLATool. 
+The stratified audit approach of Section~\ref{sec:stratified} makes possible a ``hybrid'' RLA that keeps the advantages of ballot-level comparison audits in CVR counties but does not require major changes to how no-CVR counties audit, nor major changes to RLATool. 
 
 In order to use Equation~\ref{eq:fisher}, we must develop tests for the overstatement error that are appropriate for the
 corresponding voting system.
@@ -389,9 +394,9 @@ in the CVR stratum and 700 ballots in the no-CVR stratum
 (1,200 ballots in all)
 would have sufficed to confirm the outcome, if the reported results were correct.
 
-In contrast, an unstratified ballot-level comparison audit with risk limit 10\% could have terminated
-after examining 263~ballots if it found no errors, and a ballot-polling audit of the entire contest 
-would have been expected to examine about 14,000 ballots, more than 10\% of ballots cast.
+If it were possible to conduct a ballot-level comparison audit for the entire contest, 
+an RLA with risk limit 10\% could terminate after examining 263~ballots if it found no errors.
+A ballot-polling audit of the entire contest would have been expected to examine about 14,000 ballots, more than 10\% of ballots cast.
 The hybrid audit is thus not as efficient as a ballot-level comparison audit, but far more efficient than a ballot-polling audit.
 
 The second is a hypothetical large statewide election with 
@@ -403,7 +408,7 @@ CVR stratum and 20~ballots from the no-CVR stratum
 would have sufficed.
 
 If it were possible to conduct a ballot-level comparison audit for the entire contest, 
-a RLA at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
+an RLA at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
 The additional work for the hybrid stratified audit is disproportionately in the no-CVR counties, as
 arguably it should be.
 
@@ -429,7 +434,7 @@ previous methods, which worked only for comparison audits in every stratum.
 
 Among other things, the new approach solves a problem in Colorado by allowing ballot-polling in some counties to be combined with ballot-level comparisons in others to conduct RLAs of contests that cross jurisdictional lines, such as statewide contests and many federal contests.
 
-We give numerical examples relevant to Colorado, implemented in Jupyter notebooks can be modified to estimate the workload for different contest sizes, margins, and risk limits.
+We give numerical examples relevant to Colorado, implemented in Jupyter notebooks, that can be modified to estimate the workload for different contest sizes, margins, and risk limits.
 Generally, increasing the sample size in one stratum allows the other sample size to be decreased.
 When the contest outcome is correct, the total workload will be minimized by 
 assigning a disproportionately large (compared to the number of ballots cast) amount of 
@@ -662,16 +667,15 @@ Therefore,
 
 \begin{equation}
    \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n\right \} = 
-   \sum_{\substack{(i, j) :  i, j\ge 0 \\ i-j \geq nd \\ i+j \leq n}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
+   \sum_{\mathcal{S}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
 \end{equation}
-
+where $\mathcal{S}$ is defined as the set of pairs $(i, j)$ such that $i, j\ge 0, i-j \ge nd,$ and $ i+j \leq n$.
 
 
 \subsection{Maximizing the $P$-value over the nuisance parameter}
 
 The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
 that $A_{w,s} - A_{\ell,s} \le c$ for a fixed $c$.
-Define $\mathcal{S}$ to be the set of pairs $(i, j)$ such that $i, j\ge 0, i-j \ge nd,$ and $ i+j \leq n$.
 The (conditional) $P$-value of this composite hypothesis for $D=d$ is the maximum $P$-value for all
 values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
 \begin{equation}
