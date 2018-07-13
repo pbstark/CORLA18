@@ -227,7 +227,7 @@ Fisher's combined statistic will tend to be small when all stratum-level null hy
 If any is false, then as the sample size increases, Fisher's combined statistic will tend to grow.
 
 If, for all $\mathbf{\lambda}$ with $\sum_s \lambda_s = 1$, we can reject the conjunction
-hypothesis at level $\alpha$, the audit can stop, i.e., if the minimum value Fisher's combined statistic over all $\lambda$ is larger than the $1-\alpha$ quantile of the chi-square
+hypothesis at level $\alpha$, the audit can stop, i.e., if the minimum value of Fisher's combined statistic over all $\lambda$ is larger than the $1-\alpha$ quantile of the chi-square
 distribution with $2S$~degrees of freedom, the audit can stop. 
 
 If the audit is allowed to ``escalate'' in steps, increasing the sample size sequentially, then either the tests used in the separate strata have to be sequential tests, or multiplicity needs to be taken into account, for instance by adjusting the risk limit at each step.
@@ -265,7 +265,7 @@ The set of $\mathbf{\lambda} = (\lambda_1, \lambda_2)$ such that $\sum_s \lambda
 For a given set of data, finding the maximum $P$-value over all $\mathbf{\lambda}$
 is thus a one-dimensional optimization problem.
 
-The in the software we provide approximates the maximum uses a grid search, refining the
+The software we provide approximates the maximum via a grid search, refining the
 grid once the maximum has been bracketed.
 This is not guaranteed to find the global maximum exactly, although it can approximate 
 the maximum as closely as one desires by refining the mesh, since the objective function is continuous.
@@ -364,7 +364,7 @@ modification~\cite{stark08a}.\footnote{%
 \subsection{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
-To use the new stratification method with ballot polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \share{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum in exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
+To use the new stratification method with ballot polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum in exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
 This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
 We address this by maximizing the $P$-value over all possible values of the nuisance parameter.
 Appendix~\ref{sec:appendix-polling} develops the test.
