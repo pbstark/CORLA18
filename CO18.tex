@@ -227,16 +227,15 @@ Fisher's combined statistic will tend to be small when all stratum-level null hy
 If any is false, then as the sample size increases, Fisher's combined statistic will tend to grow.
 
 If, for all $\mathbf{\lambda}$ with $\sum_s \lambda_s = 1$, we can reject the conjunction
-hypothesis at level $\alpha$, the audit can stop.
-The stratified audit thus involves examining more randomly selected ballots from the strata until 
-either the minimum value Fisher's combined statistic over all $\lambda$ 
-is larger than the $1-\alpha$ quantile of the chi-square
-distribution with $2S$~degrees of freedom, or until all strata have been fully hand tabulated.
+hypothesis at level $\alpha$, the audit can stop, i.e., if the minimum value Fisher's combined statistic over all $\lambda$ is larger than the $1-\alpha$ quantile of the chi-square
+distribution with $2S$~degrees of freedom, the audit can stop. 
+
+If the audit is allowed to ``escalate'' in steps, increasing the sample size sequentially, then either the tests used in the separate strata have to be sequential tests, or multiplicity needs to be taken into account, for instance by adjusting the risk limit at each step.
+Otherwise, the overall procedure can have a risk limit that is much larger than $\alpha$.
+For examples of controlling for multiplicity when using non-sequential testing procedures in an RLA, see \cite{stark08a,stark09a}.
 
 $p_s(\lambda)$ could be a $P$-value for the hypothesis
-$\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ from any test procedure (although
-if the audit is to be sequential, the tests in the strata must be sequential tests or
-some other method must be used to account for multiplicity). 
+$\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ from any test procedure. 
 We assume, however, that $p_s$ is based on a one-sided test, and that the tests
 for different values of $\lambda$ ``nest'' in the sense that if $a > b$,
 then $p_s(a) > p_s(b)$.
@@ -246,19 +245,17 @@ $b$, if $a > b$.
 In particular, this monotonicity holds for the tests proposed in sections~\ref{sec:comparisonError}
 and \ref{sec:ballotPollError}.
 
-One could use functions other than Fisher's to combine the stratum-level $P$-values,
-provided they satisfy the following properties listed by \cite{pesarinSalmaso10}:
+One could a function other than Fisher's to combine the stratum-level $P$-values into a $P$-value for the compound hypothesis, provided it satisfies these properties (see \cite{pesarinSalmaso10}):
 \begin{itemize}
-  \item the function must be non-increasing in each argument and symmetric with respect to rearrangements of the arguments;
-  \item the combining function must attain its supremum when one of the arguments approaches zero;
-  \item and for every level $\alpha$, the critical value of the combining function is finite and strictly smaller than the function's supremum.
+  \item the function is non-increasing in each argument and symmetric with respect to rearrangements of the arguments
+  \item the combining function attains its supremum when one of the arguments approaches zero
+  \item for every level $\alpha$, the critical value of the combining function is finite and strictly smaller than the function's supremum
 \end{itemize}
 For instance, one could use Liptak's function, $T = \sum_i \Phi^{-1}(1-p_i)$,
 or Tippett's function, $T = \max_i (1-p_i)$.
 
 Fisher's function is convenient for this application because the tests in different strata are independent, so the chi-squared distribution dominates the distribution of $\chi(\cdot)$ when the null hypothesis is true.
 If tests in different strata were correlated, the null distribution of the combination function would need to be calibrated by simulation; some other combining function might have better properties than Fisher's \cite{pesarinSalmaso10}.
-
 
 
 \subsection{Maximizing Fisher's combined $P$-value for $S=2$}
@@ -381,7 +378,7 @@ This introduces a nuisance parameter, the number of ballots with votes for eithe
 We deal with this by maximizing the $P$-value over all possible values of the nuisance parameter.
 Appendix~\ref{sec:appendix-polling} develops the test.
 
-Unlike the test in \cite{lindemanEtal12}, which is based on Wald's Sequential Probability Ratio Test \cite{wald45}, the test is not inherently sequential; thus, to use it in an audit that can have ``escalation'' in steps, multiplicity has to be accounted for. See~\cite{stark08a,stark09a} for an approach based on Bonferroni's inequality.
+Unlike the test in \cite{lindemanEtal12}, which is based on Wald's Sequential Probability Ratio Test \cite{wald45}, the test is not inherently sequential; thus, to use it in an audit that can have ``escalation'' of the sample size in steps, multiplicity has to be accounted for. See~\cite{stark08a,stark09a} for an approach based on Bonferroni's inequality.
 
 
 \section{Numerical examples}\label{sec:examples}
