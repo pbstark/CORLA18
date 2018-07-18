@@ -39,7 +39,7 @@
 
 
 
-\title{A New Method for Stratified Risk-Limiting Audits}
+\title{Stratified Risk-Limiting Audits by Union-Intersection Tests (SUIT)}
 
 \author{
    Kellie Ottoboni\inst{1}\orcidID{0000-0002-9107-3402} \and
@@ -80,7 +80,8 @@ The audit stops when the maximum combined $P$-value is less than the risk limit.
 This approach to election audits is new, and immediately applicable in Colorado.
 We provide an open-source reference implementation and exemplar calculations in Jupyter notebooks.
 
-\keywords{stratified sampling, nonparametric testing, Fisher's combining function, sequential hypothesis tests, Colorado risk-limiting audits (CORLA), maximizing $P$-values over nuisance parameters}
+\keywords{stratified sampling, nonparametric testing, Fisher's combining function, sequential hypothesis tests, Colorado risk-limiting audits (CORLA), maximizing $P$-values over nuisance parameters,
+intersection-union test}
 \end{abstract}
 
 \noindent
@@ -118,10 +119,13 @@ However, extant methods address only a single approach to auditing, batch-level 
 Here, we provide a more general approach to using stratified samples in RLAs.
 The approach involves finding the maximum $P$-value over a vector of nuisance parameters, 
 all allocations of tabulation error across strata for which a full count would find a different electoral outcome than was reported.
-A \emph{nuisance parameter} is a property of the population that is not of direct interest, but that affects the probability distribution of the data. 
+(A \emph{nuisance parameter} is a property of the population that is not of direct interest, but that affects the probability distribution of the data. 
 \emph{Overstatement} is error that made the margin of one or more winners over one or more losers appear larger than it really was.
 The total \emph{overstatement} across strata determines whether the reported outcome is correct; 
-the overstatements in individual strata are nuisance parameters that affect the distribution of the audit sample.
+the overstatements in individual strata are nuisance parameters that affect the distribution of the audit sample.)
+The method is a twist on \emph{intersection-union} tests \cite{pesarinSalmaso10}, which represent the null hypothesis
+as the intersection of a number of simpler hypotheses, and the alternative hypothesis as a union of their alternatives.
+In contrast, here, the null is the union of simpler hypotheses, and the alternative is the intersection of their alternatives.
 
 The core of the method is to test whether the overstatement error in a single stratum exceeds a quota.
 Fisher's combining function is used to merge the $P$-values for those tests into a single $P$-value for the hypothesis that the overstatement in every stratum exceeds its quota.
@@ -615,35 +619,27 @@ The test is not sequential, so if it is to be used in a RLA that escalates in st
 
 \subsection{Conditional tri-hypergeometric test}
 
-We consider a single stratum $s$, containing $N_s$ ballots.
-Of the $N_s$ ballots,
-$A_{w,s}$ have a vote for $w$ but not for $\ell$, $A_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $A_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
-We might draw a simple random sample of $n$ ballots ($n$ fixed ahead of time), or we might draw 
-sequentially without replacement, so the sample size $B$ could be random.
-For instance, the rule for determining $B$ could depend on the data.\footnote{%
-   Sampling with replacement leads to simpler arithmetic, but is not as efficient.
-}
-
-Regardless, we assume that, conditional on the attained sample size $n$, the ballots are a simple random sample of size $n$ from the $N_s$ ballots in the population.
-In the sample, $B_w$ ballots contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ defined analogously.
+Consider a single stratum $s$ containing $N_s$ ballots, of which $A_{w,s}$ have a vote for $w$ but not for $\ell$, $A_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $A_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
+We assume that, conditional on the sample size $B=n$, the ballots are a simple random sample of size $n$ from the $N_s$ ballots.
+This holds for simple random sampling and for sampling 
+sequentially without replacement ($B$ can be random, and can depend on the
+data).
+In the sample, $B_w$ ballots contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ 
+defined analogously.
 The conditional joint distribution of
 $(B_w, B_\ell, B_u)$ is tri-hypergeometric: 
-
-\begin{equation}
+\beq
     \mathbb{P}_{A_{w,s}, A_{\ell,s}} \{ B_w = i, B_\ell = j \vert B=n \} = 
      \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
-\end{equation}
-
+\eeq
 Define the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
 We want to test the compound hypothesis $A_{w,s} - A_{\ell,s} \le c$.
 The value of $c$ is inferred from the definition
 $\omega_{w\ell,s} \equiv V_{w\ell,s} - A_{w\ell,s} = V_{w,s} - V_{\ell,s} - (A_{w,s} -A_{\ell,s})$.
 Thus,
-
 \beq
     c = V_{w,s} - V_{\ell,s} - \omega_{w\ell,s} = V_{w\ell,s} - \lambda_s V_{w\ell}.
 \eeq
-
 The alternative is the compound hypothesis 
 $A_{w,s} - A_{\ell,s} > c$.\footnote{%
     To use Wald's Sequential Probability Ratio Test, we might pick a simple alternative instead, e.g.,
@@ -657,14 +653,12 @@ method~\cite{lindemanEtal12}
 conditions only on $B_w+B_\ell = m$.
 }
 
-
 The $P$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
 a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
 and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
 (including undervotes and
 invalid ballots) is the probability that $B_w - B_\ell \geq nd$.
 Therefore,
-
 \begin{equation}
    \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n\right \} = 
    \sum_{\mathcal{S}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
@@ -674,74 +668,61 @@ where $\mathcal{S}$ is defined as the set of pairs $(i, j)$ such that $i, j\ge 0
 
 \subsection{Maximizing the $P$-value over the nuisance parameter}
 
-The composite null hypothesis does not specify $A_{w,s}$ or $A_{\ell,s}$ separately, only 
+The composite null hypothesis does not specify $A_{w,s}$ and $A_{\ell,s}$ separately, only 
 that $A_{w,s} - A_{\ell,s} \le c$ for a fixed $c$.
 The (conditional) $P$-value of this composite hypothesis for $D=d$ is the maximum $P$-value for all
-values $(A_{w,s}, A_{\ell,s})$ that are possible under the null hypothesis,
+feasible $(A_{w,s}, A_{\ell,s})$,
 \begin{equation}
   \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
    \sum_{\substack{(i, j)\in \mathcal{S}}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
 \end{equation}
-wherever the summand is defined. 
-(Equivalently, define ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.)
+where we set ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.
 
 \subsubsection{Characterizing the optimal solution}
-The following result enables us to only test hypotheses along the boundary of the null set.
 
 \begin{thm}
-Assume that $n < A_{w,s}+A_{\ell,s}$.
-Suppose the composite null hypothesis is $N_w - N_\ell \leq c$.
-The $P$-value is maximized on the boundary of the null region, i.e. when $N_w - N_\ell = c$.
+Suppose $n < A_{w,s}+A_{\ell,s}$.
+The maximum $P$-value of the composite null hypothesis $N_w - N_\ell \leq c$
+occurs the boundary of the null region, i.e., for $N_w - N_\ell = c$.
 \end{thm}
 
 \begin{proof}
-Without loss of generality, let $c=0$ and assume that $A_{u,s}=N_s - A_{w,s} - A_{\ell,s}$ is fixed.
+Without loss of generality, let $c=0$ and fix $A_{u,s}=N_s - A_{w,s} - A_{\ell,s}$.
 Let $N_{w\ell, s} \equiv A_{w,s}+A_{\ell,s}$ be the fixed, unknown number of ballots for $w$ or for $\ell$ in stratum $s$.
-The $P$-value $p_0$ for the simple hypothesis that $c=0$ is
+The $P$-value $p_0$ for the hypothesis $c=0$ is
 
 \begin{equation}
   p_0 = \sum_{\substack{(i, j) \in \mathcal{S}}} \frac{ {N_{w\ell, s}/2 \choose i}{N_{w\ell, s}/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}} =  \sum_{\substack{(i, j) \in \mathcal{S}}}T_{ij},
 \end{equation}
 
-\noindent where $T_{ij}$ is defined as the $(i, j)$ term in the summand and $T_{ij} \equiv 0$ for pairs $(i, j)$ that don't appear in the summation.
+\noindent 
+where $T_{ij}$ is defined as the $(i, j)$ term in the summand and $T_{ij} \equiv 0$ for pairs $(i, j)$ that don't appear in the summation.
 
 Assume that $c>0$ is given.
 The $P$-value $p_c$ for this simple hypothesis is
 \begin{align*}
 p_c &=   \sum_{\substack{(i, j) \in \mathcal{S}}}  \frac{ {(N_{w\ell, s}+c)/2 \choose i}{(N_{w\ell, s}-c)/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}}  \\
    &=\sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \frac{ \frac{N_{w\ell, s}+c}{2}(\frac{N_{w\ell, s}+c}{2}-1)\cdots(\frac{N_{w\ell, s}}{2}+1) (\frac{N_{w\ell, s}-c}{2} -j)\cdots(\frac{N_{w\ell, s}}{2}-1-j) }
-   {(\frac{N_{w\ell, s}+c}{2} -i)\cdots(\frac{N_{w\ell, s}}{2}+1-i)(\frac{N_{w\ell, s}-c}{2})\cdots(\frac{N_{w\ell, s}}{2}-1)}.
-\end{align*}
-
-Terms in the fraction can be simplified: choose the corresponding pairs in the numerator and denominator.
-Fractions of the form $\frac{\frac{N_{w\ell, s}}{2} + a}{\frac{N_{w\ell,s}}{2} + a - i}$ can be expressed as $1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}$.
-Fractions of the form $\frac{\frac{N_{w\ell, s}}{2}  - a - j}{\frac{N_{w\ell, s}}{2}  - a}$ can be expressed as $1 - \frac{j}{\frac{N_{w\ell, s}}{2} -a}$.
-Thus, the $P$-value can be written as 
-
-\begin{align*}
-p_c &= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \prod_{a=1}^{c/2} \left(1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2} - a}\right) \\
+   {(\frac{N_{w\ell, s}+c}{2} -i)\cdots(\frac{N_{w\ell, s}}{2}+1-i)(\frac{N_{w\ell, s}-c}{2})\cdots(\frac{N_{w\ell, s}}{2}-1)} \\
+&= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \prod_{a=1}^{c/2} \left(1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2} - a}\right) \\
 &> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij} \left[ \left(1 + \frac{i}{\frac{N_{w\ell,s}+c}{2} -i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2}+1}\right) \right]^{c/2} \\
 &= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \left[ 1 + \frac{\frac{N_{w\ell,s}+c}{2}j + \frac{N_{w\ell,s}}{2}i + i}{(\frac{N_{w\ell,s}+c}{2}-i)(\frac{N_{w\ell,s}}{2}+1)}\right]^{c/2} \\
 &> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij}\\
 &= p_0
 \end{align*}
-
 The last inequality follows from the fact that $i$ and $j$ are nonnegative, and 
 that $i < \frac{N_{w\ell,s}+c}{2}$ (it is a possible outcome under the null hypothesis).
-
-
 \end{proof}
 
 \subsubsection{Solving the optimization problem}
 
-We have found empirically (but have not proven) that given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$, the tail probability $p_c$, as a function of $A_{w,s}$,
-has a unique maximum at one of the endpoints, where $A_{w,s}$ is either as small or as large as possible.
+We have observed (but not proven) that given $N$, $c$, and the observed sample values $B_w$ and $B_\ell$, $p_c$ has a unique maximum where $A_{w,s}$ is either as small or as large as possible.
 If this is true always, then finding the maximum is trivial;
 otherwise, computing the unconditional $P$-value is a simple 1-dimensional optimization problem
 on a bounded interval.
 
 \subsection{Conditional testing}
-If the conditional tests are always conducted at significance level $\alpha$ or less, so that
+If the conditional tests are all at significance level $\alpha$ or less, so that
 $\mathbb{P} \{\mbox{Type I error} | B = n\} \le \alpha$, then the
 overall procedure has significance level $\alpha$ or less:
 \begin{eqnarray}
@@ -749,7 +730,7 @@ overall procedure has significance level $\alpha$ or less:
        & \le & \sum_{n=0}^N \alpha \mathbb{P} \{  B = n \}  =  \alpha.
 \end{eqnarray}
 
-In particular, this implies that the conditional hypergeometric test will have a conservative $P$-value unconditionally.
+In particular, the conditional hypergeometric test has a conservative unconditional $P$-value.
 
 
 
