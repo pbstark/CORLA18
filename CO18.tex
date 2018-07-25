@@ -39,7 +39,7 @@
 
 
 
-\title{Stratified Risk-Limiting Audits by Union-Intersection Tests (SUIT)}
+\title{Risk-Limiting Audits by Stratified Union-Intersection Tests of Elections (SUITE)}
 
 \author{
    Kellie Ottoboni\inst{1}\orcidID{0000-0002-9107-3402} \and
@@ -62,22 +62,24 @@ Verified Voting Foundation}
 \begin{abstract}
 Risk-limiting audits (RLAs) offer a statistical guarantee: if a full manual tally of the paper ballots would show that the reported election outcome is wrong, an RLA has a known minimum chance of leading to a full manual tally.
 The risk limit is the maximum chance the audit will not lead to a full manual tally if the reported outcome is wrong.
-RLAs generally rely on random samples. 
-Audit risk calculations are simplest for random samples of individual ballots drawn with replacement from all validly cast ballots.
-However, stratified sampling---partitioning the population of ballots into disjoint
-strata and sampling independently from the strata---may simplify logistics or increase efficiency.
-For example, some counties in Colorado (comprising 98.2\% of voters)
+RLAs generally rely on random samples.
+Stratified sampling---partitioning the population of ballots into disjoint
+strata and sampling independently from the strata---may simplify logistics or increase efficiency compared
+to simpler sampling designs.
+We develop a novel method, SUITE, for conducting RLAs from stratified samples.
+SUITE tests all possible partitions of outcome-changing error across strata.
+It can combine arbitrary methods for finding a $P$-value for the hypothesis that the 
+``overstatement error'' in a single stratum exceeds a specified threshold into a combined
+$P$-value for a particular partition.
+The combined $P$-value is maximized over all such partitions. 
+The audit can stop if the maximum combined $P$-value is less than the risk limit.
+This approach is new and immediately useful in Colorado.
+For example, some Colorado counties (comprising 98.2\% of voters)
 have new voting systems that allow auditors to check how the system interpreted each ballot, which allows efficient ``ballot-level comparison'' audits.
-Previous approaches to combining information from all counties into a single RLA of a statewide contest would require major procedural changes, or would sacrifice the efficiency of ballot-level comparison audits.
-We provide a simpler, more efficient approach using stratified sampling.
-Cast ballots are divided into two strata: those ballots cast in counties with newer systems, and the rest. 
-Samples of individual ballots are drawn from those strata independently.
-A generalization of ballot-level comparison auditing in the first stratum and a generalization of ballot-polling auditing in the second are
-used to find $P$-values for the hypotheses that the ``overstatement error'' in each stratum exceeds a threshold.
-The stratum-level $P$-values are combined using Fisher's combining function.
-The combined $P$-value is maximized over all combinations of error in the two strata for which the reported outcome could be incorrect. 
-The audit stops when the maximum combined $P$-value is less than the risk limit.
-This approach to stratified audits is new, generalizable to more than two strata, and immediately applicable in Colorado.
+Extant approaches to conducting a RLA of a statewide contest would require Colorado to make major procedural changes, or would sacrifice the efficiency of ballot-level comparison audits.
+We present modifications to ballot-polling and ballot-level comparison that provide the stratum-level 
+$P$-values SUITE requires.
+In numerical examples relevant to Colorado, SUITE is quite efficient compared to using ballot-polling throughout the state.
 We provide an open-source reference implementation and exemplar calculations in Jupyter notebooks.
 
 \keywords{stratified sampling, nonparametric testing, Fisher's combining function, sequential hypothesis tests, Colorado risk-limiting audits (CORLA), maximizing $P$-values over nuisance parameters,
@@ -432,9 +434,19 @@ and to compute bounds on the $P$-value via Equation~\ref{eq:lowerbound}.
 
 \section{Discussion} \label{sec:discussion}
 
-We give a new class of procedures for RLAs based on stratified random samples.
-The method is agnostic about the capability of voting equipment in different strata, unlike
-previous methods, which worked only for comparison audits in every stratum.
+We present SUITE, a new class of procedures for RLAs based on stratified random samples.
+SUITE is agnostic about the capability of voting equipment in different strata, unlike
+previous methods, which use comparison in every stratum.
+SUITE allows arbitrary testing methods to be used in different strata; if those tests are sequentially valid, then the overall RLA is sequential. 
+(Otherwise, multiplicity adjustments might be needed if one wants to have an audit that escalates in stages.)
+
+Like other RLA methods, SUITE poses auditing as a hypothesis test.
+The null hypothesis is a union over all ways of partitioning outcome-changing error.
+The hypothesis is rejected if the maximum $P$-value over all such partitions is sufficiently
+small.
+Each possible partition yields an intersection hypothesis, tested by
+combining tests in different strata using Fisher's combining function (or a suitable
+replacement). 
 
 Among other things, the new approach solves a problem in Colorado by allowing ballot-polling in some counties to be combined with ballot-level comparisons in others to conduct RLAs of contests that cross jurisdictional lines, such as statewide contests and many federal contests.
 
