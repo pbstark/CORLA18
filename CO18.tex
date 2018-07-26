@@ -114,7 +114,7 @@ RLAs have been conducted in California, Colorado, Ohio, and Denmark, and are req
 
 The most efficient and transparent sampling design for risk-limiting audits selects individual ballots uniformly at random, with or without replacement~\cite{stark10c}.
 Risk calculations for such samples can be made simple without sacrificing rigor~\cite{stark10d,lindemanStark12}.
-However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator method for assessing risk from the sample, which wouldt not take full advantage of the capabilities of some voting systems. 
+However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator method for assessing risk from the sample, which would not take full advantage of the capabilities of some voting systems. 
 For instance, any system that uses paper ballots as the official record can conduct \emph{ballot-polling} audits, while \emph{ballot-level comparison audits} require systems to generate \emph{cast-vote records} that can be checked manually against a human reading of the paper~\cite{lindemanEtal12,lindemanStark12}. 
 (These terms are described in Section~\ref{sec:combiningMethods}.) 
 
@@ -133,7 +133,7 @@ The total \emph{overstatement} across strata determines whether the reported out
 the overstatements in individual strata are nuisance parameters that affect the distribution of the audit sample.)
 
 The basic building block for the method is testing whether the overstatement error in a single stratum exceeds a quota.
-Fisher's combining function is used to combine $P$-values for tests in different strata into a single $P$-value for the hypothesis that the overstatement in every stratum exceeds its quota.
+Fisher's combining function is used to merge $P$-values for tests in different strata into a single $P$-value for the hypothesis that the overstatement in every stratum exceeds its quota.
 If that hypothesis can be rejected for \emph{all} stratum-level quotas that could change the outcome---that is, if the maximum combined $P$-value is sufficiently small---the audit can stop.
 
 It is not actually necessary to consider all possible quotas: the $P$-value involves a sum of monotonic functions, which allows us to find upper and lower bounds everywhere using only values on a discrete grid.
