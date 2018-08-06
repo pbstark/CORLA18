@@ -170,11 +170,11 @@ winner and \emph{every} reported loser to appear to be smaller than it really wa
 Overstatements cast doubt on outcomes; understatements do not, even though they are tabulation errors.
 
 We use $w$ to denote a reported winner and $\ell$ to denote a reported loser.
-The total number of reported votes for candidate~$w$ is $V_w$ 
-and the total for candidate~$\ell$ is $V_\ell$.
-Thus $V_w > V_\ell$, since $w$ is reported to have gotten more votes than $\ell$.
+The total number of reported votes for candidate~$w$ is $V_{w,s}$ 
+and the total for candidate~$\ell$ is $V_{\ell,s}$.
+Thus $V_{w,s} > V_{\ell,s}$, since $w$ is reported to have gotten more votes than $\ell$.
 
-Let $V_{w\ell} \equiv V_w - V_\ell > 0$ denote the contest-wide margin (in votes) of 
+Let $V_{w\ell} \equiv V_{w,s} - V_{\ell,s} > 0$ denote the contest-wide margin (in votes) of 
 $w$ over  $\ell$.
 We have $S$ strata.
 Let $V_{w\ell,s}$ denote the margin (in votes) of reported winner $w$ over reported loser $\ell$
@@ -224,7 +224,7 @@ If the audit is allowed to ``escalate'' in steps, increasing the sample size seq
 Otherwise, the overall procedure can have a risk limit that is much larger than $\alpha$.
 For examples of controlling for multiplicity when using non-sequential testing procedures in an RLA, see \cite{stark08a,stark09a}.
 
-$p_s(\lambda)$ could be a $P$-value for the hypothesis
+The stratum-level $P$-value $p_s(\lambda)$ could be a $P$-value for the hypothesis
 $\omega_{w\ell,s} \ge \lambda_s V_{w\ell}$ from any test procedure. 
 We assume, however, that $p_s$ is based on a one-sided test, and that the tests
 for different values of $\lambda$ ``nest'' in the sense that if $a > b$,
@@ -384,12 +384,9 @@ modification~\cite{stark08a}.\footnote{%
 
 To use the new stratification method with ballot-polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum in exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
 This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
-We address this by maximizing the $P$-value over all possible values of the nuisance parameter.
+We address this by maximizing the probability ratio in Wald's Sequential Probability Ratio Test 
+\cite{wald45} over all possible values of the nuisance parameter.
 Appendix~\ref{sec:appendix-polling} develops the test.
-
-Unlike the test in \cite{lindemanEtal12}, which is based on Wald's Sequential Probability Ratio Test \cite{wald45}, this test is not inherently sequential.
-Hence, to use it in an audit that can ``escalate'' in steps, multiplicity must be accounted for. See~\cite{stark08a,stark09a} for an approach based on Bonferroni's inequality.
-
 
 \section{Numerical examples}\label{sec:examples}
 
@@ -443,7 +440,8 @@ We present SUITE, a new class of procedures for RLAs based on stratified random 
 SUITE is agnostic about the capability of voting equipment in different strata, unlike
 previous methods, which require batch-level comparisons in every stratum.
 SUITE allows arbitrary testing methods to be used in different strata; if those tests are sequentially valid, then the overall RLA is sequential. 
-(Otherwise, multiplicity adjustments might be needed if one wants an audit that escalates in stages.)
+(Otherwise, multiplicity adjustments might be needed if one wants an audit that escalates in stages.
+See~\cite{stark08a,stark09a} for two approaches.)
 
 Like other RLA methods, SUITE poses auditing as a hypothesis test.
 The null hypothesis is a union over all ways of partitioning outcome-changing error.
@@ -631,125 +629,86 @@ is given in~\cite{stark09b}.
 
 \section{Ballot-polling derivation}\label{sec:appendix-polling}
 In this section, we derive a ballot-polling test of the hypothesis that the margin (in votes) in a single stratum exceeds a threshold $c$. 
-The test is not sequential, so if it is to be used in an RLA that escalates in steps from an initial sample size to larger sample sizes before leading to a full hand count, multiplicity must be taken into account, for instance, using Bonferroni's inequality.
-(See, e.g., \cite{stark08a,stark09a}.)
 
-\subsection{Conditional tri-hypergeometric test}
+\subsection{Wald's SPRT with a nuisance parameter}
 
-Consider a single stratum $s$ containing $N_s$ ballots, of which $A_{w,s}$ have a vote for $w$ but not for $\ell$, $A_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $A_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
-We assume that, conditional on the sample size $B=n$, the ballots are a simple random sample of size $n$ from the $N_s$ ballots.
-This holds for simple random sampling and for sampling 
-sequentially without replacement ($B$ can be random, and can depend on the
-data).
-In the sample, $B_w$ ballots contain a vote for $w$ but not $\ell$, with $B_\ell$ and $B_u$ 
-defined analogously.
-The conditional joint distribution of
-$(B_w, B_\ell, B_u)$ is tri-hypergeometric: 
-\beq
-    \mathbb{P}_{A_{w,s}, A_{\ell,s}} \{ B_w = i, B_\ell = j \vert B=n \} = 
-     \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}}.
-\eeq
-Define the diluted sample margin, $D \equiv (B_w - B_\ell)/B$.
-We want to test the compound hypothesis $A_{w,s} - A_{\ell,s} \le c$.
-The value of $c$ is inferred from the definition
-$\omega_{w\ell,s} \equiv V_{w\ell,s} - A_{w\ell,s} = V_{w,s} - V_{\ell,s} - (A_{w,s} -A_{\ell,s})$.
-Thus,
-\beq
-    c = V_{w,s} - V_{\ell,s} - \omega_{w\ell,s} = V_{w\ell,s} - \lambda_s V_{w\ell}.
-\eeq
-The alternative is the compound hypothesis 
-$A_{w,s} - A_{\ell,s} > c$.\footnote{%
-    To use Wald's Sequential Probability Ratio Test, we might pick a simple alternative instead, e.g.,
-   $A_{w,s} = V_{w,s}$ and $A_{\ell,s} = V_{\ell,s}$, the reported values, provided 
-   $V_{w,s} - V_{\ell,s} > c$.
-}
-Hence, we will reject for large values of $D$.
-Conditional on $B=n$, the event $D = (B_w - B_\ell)/B = d$ is the same as $B_w - B_\ell = nd$.\footnote{%
-In contrast, the BRAVO ballot-polling
-method~\cite{lindemanEtal12}
-conditions only on $B_w+B_\ell = m$.
-}
+Consider a single stratum $s$ containing $N_s$ ballots, of which 
+$N_{w,s}$ have a vote for $w$ but not for $\ell$, $N_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $N_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
+Ballots are drawn sequentially without replacement, with equal probability of selecting each as-yet-unselected ballot in each draw.
 
-The (conditional) $P$-value of the simple hypothesis that there are $A_{w,s}$ ballots with
-a vote for $w$ but not for $\ell$, $A_{\ell,s}$ ballots with a vote for $\ell$ but not for $w$, 
-and $N - A_{w,s} - A_{\ell,s}$ ballots with votes for both $w$ and $\ell$ or neither $w$ nor $\ell$ 
-(including undervotes and
-invalid ballots) is the probability that $B_w - B_\ell \geq nd$.
-Therefore,
-\begin{equation}
-   \mathbb{P}_{A_{w,s}, A_{\ell,s}, N_s} \left \{ D \geq d \;\vert\; B = n\right \} = 
-   \sum_{(i, j) \in \mathcal{S}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
-\end{equation}
-where $\mathcal{S}$ is defined as the set of pairs $(i, j)$ such that $i, j\ge 0, i-j \ge nd,$ and $ i+j \leq n$.
+We want to test the compound hypothesis that $N_{\ell,s} - N_{w,s} \ge c$ against the alternative that $N_{w,s} = V_{w,s}$, $N_{\ell,s} = V_{\ell,s}$, and $N_{u,s} = V_{u,s}$, with $V_{\ell,s} - V_{w,s} < c$.
 
+The values $V_{w,s}$, $V_{\ell,s}$, and $V_{u,s}$ are the reported results for stratum $s$ 
+(or values related to those reported results; see \cite{lindemanEtal12}). 
+In this problem, $N_{u,s}$ (equivalently, $N_{w,s} + N_{\ell,s}$) is a nuisance parameter: we care about $N_{\ell,s} - N_{w,s}$.
 
-\subsection{Maximizing the $P$-value over the nuisance parameter}
+Let $X_k$ be $w$, $\ell$, or $u$ according to whether the ballot selected on the $k$th draw 
+shows a vote for $w$ but not $\ell$, $\ell$ but not $w$, or something else.
+Let $W_n \equiv \sum_{k=1}^n 1_{X_k = w}$; and define $L_n$ and $U_n$ analogously.
 
-The composite null hypothesis does not specify $A_{w,s}$ and $A_{\ell,s}$ separately, only 
-that $A_{w,s} - A_{\ell,s} \le c$ for a fixed $c$.
-The (conditional) $P$-value of this composite hypothesis for $D=d$ is the maximum $P$-value for all
-feasible $(A_{w,s}, A_{\ell,s})$,
-\begin{equation}
-  \max_{A_{w,s}, A_{\ell,s} \in \{0, 1, \ldots, N \}: A_{w,s} - A_{\ell,s} \le c, A_{w,s} + A_{\ell,s} \le N_s}
-   \sum_{\substack{(i, j)\in \mathcal{S}}} \frac{ {A_{w,s } \choose i}{A_{\ell,s} \choose j}{N_s - A_{w,s} - A_{\ell,s} \choose n-i-j}}{{N_s \choose n}},
-\end{equation}
-where we set ${m \choose k} \equiv 0$ if $k > m$, $k < 0$, or $m \le 0$.
+The probability of a given data sequence $X_1, \ldots, X_n$ under the alternative hypothesis is
+$$
+    \frac{\prod_{i=0}^{W_n-1} (V_{w,s}-i) \; 
+             \prod_{i=0}^{L_n-1} (V_{\ell,s}-i) \;
+             \prod_{i=0}^{U_n-1} (V_{u,s}-i)}
+            {\prod_{i=0}^{n-1} (N_s-i)}.
+$$
+If $L_n \ge W_n + cn/N_s$, the data obviously do not provide evidence against the null, so we suppose that
+$L_n < W_n + cn/N_s$, in which case, the element of the null that will maximize the probability of the observed data has $N_{w,s} + c = N_{\ell,s}$.
+Under the null hypothesis, the probability of $X_1, \ldots, X_n$ is
+$$
+    \frac{ \prod_{i=0}^{W_n-1} (N_{w,s}-i) \;
+             \prod_{i=0}^{L_n-1}(N_{w,s}+c - i)
+             \prod_{i=0}^{U_n-1} (N_{u,s}-i)}
+             {\prod_{i=0}^n (N_s-i)},
+$$
+for some value $N_{w,s}$ and the corresponding $N_{u,s} = N_s - 2N_{w,s}-c$.
+How large can that probability be under the null? 
+The probability under the null is maximized by any integer 
+$x \in \{ \max(W_n, L_n-c), \ldots, (N-U_n)/2 \}$ that maximizes 
+$$
+\prod_{i=0}^{W_n-1} (x-i) \; \prod_{i=0}^{L_n-1} (x+c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x-c - i).
+$$
+The logarithm is monotonic, so any maximizer $x^*$ also maximizes
+$$ f(x) = \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x+c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2x- c - i).$$
+The first two terms on the right increase monotonically with $x$ and the last term decreases monotonically with $x$.
+This yields bounds without having to evaluate $f$ everywhere.
+Suppose $y < z$. 
+Then for all integer $x$ between $y$ and $z$, 
+$$ f(x) \le \sum_{i=0}^{W_n-1} \ln (z-i) + \sum_{i=0}^{L_n-1} \ln (z+c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2y-c-i).$$
+The optimization problem can be solved using a branch and bound approach.
+For instance, start by evaluating 
+$$
+   f^+(x) \equiv \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x+c-i)
+$$
+and
+$$
+  f^-(x) \equiv \sum_{i=0}^{U_n-1} \ln (N_s-2x-c-i)
+$$
+at $\max(W_n, L_n-c)$, $\lfloor N(W_n+L_n)/n \rfloor $, and 
+$(N_s-U_n)/2$ to get the values of $f = f^+ + f^-$ at those three points, along with 
+upper bounds on $f$ on the ranges 
+$\{\max(W_n, L_n), \ldots, \lfloor N(W_n+L_n)/n\rfloor \}$ and
+$\{\lfloor N(W_n+L_n)/n \rfloor, \ldots, (N_s-U_n)/2\}$.
+At stage $j$, we have evaluated $f$, $f^+$, and $f^-$ at $j$ points $x_1 < x_2 < x_j$, and 
+we have upper bounds on $f$ on the $j-1$ ranges $R_m = \{x_m, x_m+1, \ldots, x_{m+1}$
+between those points.
+Let $U_m$ be the upper bound on $f(x)$ for $x \in R_m$.
+Suppose that for some $h$, $f(x_h) = \max_{m=1}^j U_m$.
+Then $x^* = x_h$ is a global maximizer of $f$.
+If there is some $U_m > \max_i f(x_i)$, then subdivide the range with the largest $U_m$,
+calculate $f$, $f^+$, and $f^-$ at the new point, and repeat.
+This algorithm must terminate by identifying a global maximizer $x^*$ after a finite number of steps.
 
-\subsubsection{Characterizing the optimal solution}
+A conservative $p$ value for the null hypothesis after $n$ items have been drawn is thus
+$$
+   P_n =  \frac{\prod_{i=0}^{W_n-1} (x^*-i) \; \prod_{i=0}^{L_n-1}  (x^*+c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x^*-c-i)}{\prod_{i=0}^{W_n-1}(V_{w,s}-i) \; \prod_{i=0}^{L_n-1} (V_{\ell,s}-i) \; \prod_{i=0}^{U_n-1} (V_{u,s}-i)}.
+$$
+Because the test is built on Wald's SPRT,  the sample can expand sequentially and 
+(if the null hypothesis is true) the chance that $P_n < p$ is never larger than $p$.
+That is, $\Pr \{ \inf_n P_n < p \} \le p$ if the null is true.
 
-\begin{thm}
-Suppose $n < A_{w,s}+A_{\ell,s}$.
-The maximum $P$-value of the composite null hypothesis $N_w - N_\ell \leq c$
-occurs the boundary of the null region, i.e., for $N_w - N_\ell = c$.
-\end{thm}
-
-\begin{proof}
-Without loss of generality, let $c=0$ and fix $A_{u,s}=N_s - A_{w,s} - A_{\ell,s}$.
-Let $N_{w\ell, s} \equiv A_{w,s}+A_{\ell,s}$ be the fixed, unknown number of ballots for $w$ or for $\ell$ in stratum $s$.
-The $P$-value $p_0$ for the hypothesis $c=0$ is
-
-\begin{equation}
-  p_0 = \sum_{\substack{(i, j) \in \mathcal{S}}} \frac{ {N_{w\ell, s}/2 \choose i}{N_{w\ell, s}/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}} =  \sum_{\substack{(i, j) \in \mathcal{S}}}T_{ij},
-\end{equation}
-
-\noindent 
-where $T_{ij}$ is defined as the $(i, j)$ term in the summand and $T_{ij} \equiv 0$ for pairs $(i, j)$ that don't appear in the summation.
-
-Assume that $c>0$ is given.
-The $P$-value $p_c$ for this simple hypothesis is
-\begin{align*}
-p_c &=   \sum_{\substack{(i, j) \in \mathcal{S}}}  \frac{ {(N_{w\ell, s}+c)/2 \choose i}{(N_{w\ell, s}-c)/2 \choose j}{A_{u,s} \choose n-i-j}}{{N_s \choose n}}  \\
-   &=\sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \frac{ \frac{N_{w\ell, s}+c}{2}(\frac{N_{w\ell, s}+c}{2}-1)\cdots(\frac{N_{w\ell, s}}{2}+1) (\frac{N_{w\ell, s}-c}{2} -j)\cdots(\frac{N_{w\ell, s}}{2}-1-j) }
-   {(\frac{N_{w\ell, s}+c}{2} -i)\cdots(\frac{N_{w\ell, s}}{2}+1-i)(\frac{N_{w\ell, s}-c}{2})\cdots(\frac{N_{w\ell, s}}{2}-1)} \\
-&= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \prod_{a=1}^{c/2} \left(1 + \frac{i}{\frac{N_{w\ell,s}}{2} + a-i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2} - a}\right) \\
-&> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij} \left[ \left(1 + \frac{i}{\frac{N_{w\ell,s}+c}{2} -i}\right)\left(1 - \frac{j}{\frac{N_{w\ell, s}}{2}+1}\right) \right]^{c/2} \\
-&= \sum_{\substack{(i, j) \in \mathcal{S}}} T_{ij} \left[ 1 + \frac{\frac{N_{w\ell,s}+c}{2}j + \frac{N_{w\ell,s}}{2}i + i}{(\frac{N_{w\ell,s}+c}{2}-i)(\frac{N_{w\ell,s}}{2}+1)}\right]^{c/2} \\
-&> \sum_{\substack{(i, j) \in \mathcal{S}}}  T_{ij}\\
-&= p_0
-\end{align*}
-The last inequality follows from the fact that $i$ and $j$ are nonnegative, and 
-that $i < \frac{N_{w\ell,s}+c}{2}$ (it is a possible outcome under the null hypothesis).
-\end{proof}
-
-\subsubsection{Solving the optimization problem}
-
-We have observed (but not proven) that given $N_s$, $c$, and the observed sample values $B_w$ and $B_\ell$, $p_c$ has a unique maximum where $A_{w,s}$ is either as small or as large as possible.
-If this is true always, then finding the maximum is trivial;
-otherwise, computing the unconditional $P$-value is a simple 1-dimensional optimization problem
-on a bounded interval.
-
-\subsection{Conditional testing}
-If the conditional tests are all at significance level $\alpha$ or less, so that
-$\mathbb{P} \{\mbox{Type I error} | B = n\} \le \alpha$, then the
-overall procedure has significance level $\alpha$ or less:
-\begin{eqnarray}
-    \mathbb{P} \{\mbox{Type I error}\} &=& \sum_{n=0}^N  \mathbb{P}\{\mbox{Type I error} |  B = n\} \mathbb{P} \{ B = n \} \nonumber \\
-       & \le & \sum_{n=0}^N \alpha \mathbb{P} \{  B = n \}  =  \alpha.
-\end{eqnarray}
-
-In particular, the conditional hypergeometric test has a conservative unconditional $P$-value.
-
-
+A Jupyter notebook implementing this approach is given in \url{https://github.com/pbstark/CORLA18}.
 
 
 \bibliography{./pbsBib}
