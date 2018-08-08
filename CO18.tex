@@ -636,11 +636,11 @@ Consider a single stratum $s$ containing $N_s$ ballots, of which
 $N_{w,s}$ have a vote for $w$ but not for $\ell$, $N_{\ell,s}$ have a vote for $\ell$ but not for $w$, and $N_{u,s} = N_s - N_{w,s} - N_{\ell,s}$ have votes for both $w$ and $\ell$ or neither $w$ nor $\ell$, including undervotes and invalid ballots.
 Ballots are drawn sequentially without replacement, with equal probability of selecting each as-yet-unselected ballot in each draw.
 
-We want to test the compound hypothesis that $N_{\ell,s} - N_{w,s} \ge c$ against the alternative that $N_{w,s} = V_{w,s}$, $N_{\ell,s} = V_{\ell,s}$, and $N_{u,s} = V_{u,s}$, with $V_{\ell,s} - V_{w,s} < c$.
+We want to test the compound hypothesis that $N_{w,s} - N_{\ell,s} \le c$ against the alternative that $N_{w,s} = V_{w,s}$, $N_{\ell,s} = V_{\ell,s}$, and $N_{u,s} = V_{u,s}$, with $V_{w,s} - V_{\ell,s} > c$.
 
 The values $V_{w,s}$, $V_{\ell,s}$, and $V_{u,s}$ are the reported results for stratum $s$ 
 (or values related to those reported results; see \cite{lindemanEtal12}). 
-In this problem, $N_{u,s}$ (equivalently, $N_{w,s} + N_{\ell,s}$) is a nuisance parameter: we care about $N_{\ell,s} - N_{w,s}$.
+In this problem, $N_{u,s}$ (equivalently, $N_{w,s} + N_{\ell,s}$) is a nuisance parameter: we care about $ N_{w,s} - N_{\ell,s}$.
 
 Let $X_k$ be $w$, $\ell$, or $u$ according to whether the ballot selected on the $k$th draw 
 shows a vote for $w$ but not $\ell$, $\ell$ but not $w$, or something else.
@@ -653,39 +653,39 @@ $$
              \prod_{i=0}^{U_n-1} (V_{u,s}-i)}
             {\prod_{i=0}^{n-1} (N_s-i)}.
 $$
-If $L_n \ge W_n + cn/N_s$, the data obviously do not provide evidence against the null, so we suppose that
-$L_n < W_n + cn/N_s$, in which case, the element of the null that will maximize the probability of the observed data has $N_{w,s} + c = N_{\ell,s}$.
+If $L_n \ge W_n - cn/N_s$, the data obviously do not provide evidence against the null, so we suppose that
+$L_n < W_n - cn/N_s$, in which case, the element of the null that will maximize the probability of the observed data has $N_{w,s} - c = N_{\ell,s}$.
 Under the null hypothesis, the probability of $X_1, \ldots, X_n$ is
 $$
     \frac{ \prod_{i=0}^{W_n-1} (N_{w,s}-i) \;
-             \prod_{i=0}^{L_n-1}(N_{w,s}+c - i)
+             \prod_{i=0}^{L_n-1}(N_{w,s}-c - i)
              \prod_{i=0}^{U_n-1} (N_{u,s}-i)}
              {\prod_{i=0}^n (N_s-i)},
 $$
-for some value $N_{w,s}$ and the corresponding $N_{u,s} = N_s - 2N_{w,s}-c$.
+for some value $N_{w,s}$ and the corresponding $N_{u,s} = N_s - 2N_{w,s}+c$.
 How large can that probability be under the null? 
 The probability under the null is maximized by any integer 
-$x \in \{ \max(W_n, L_n-c), \ldots, (N-U_n)/2 \}$ that maximizes 
+$x \in \{ \max(W_n, L_n+c), \ldots, (N-U_n)/2 \}$ that maximizes 
 $$
-\prod_{i=0}^{W_n-1} (x-i) \; \prod_{i=0}^{L_n-1} (x+c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x-c - i).
+\prod_{i=0}^{W_n-1} (x-i) \; \prod_{i=0}^{L_n-1} (x-c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x+c - i).
 $$
 The logarithm is monotonic, so any maximizer $x^*$ also maximizes
-$$ f(x) = \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x+c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2x- c - i).$$
+$$ f(x) = \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x-c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2x+ c - i).$$
 The first two terms on the right increase monotonically with $x$ and the last term decreases monotonically with $x$.
 This yields bounds without having to evaluate $f$ everywhere.
 Suppose $y < z$. 
 Then for all integer $x$ between $y$ and $z$, 
-$$ f(x) \le \sum_{i=0}^{W_n-1} \ln (z-i) + \sum_{i=0}^{L_n-1} \ln (z+c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2y-c-i).$$
+$$ f(x) \le \sum_{i=0}^{W_n-1} \ln (z-i) + \sum_{i=0}^{L_n-1} \ln (z-c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2y+c-i).$$
 The optimization problem can be solved using a branch and bound approach.
 For instance, start by evaluating 
 $$
-   f^+(x) \equiv \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x+c-i)
+   f^+(x) \equiv \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x-c-i)
 $$
 and
 $$
-  f^-(x) \equiv \sum_{i=0}^{U_n-1} \ln (N_s-2x-c-i)
+  f^-(x) \equiv \sum_{i=0}^{U_n-1} \ln (N_s-2x+c-i)
 $$
-at $\max(W_n, L_n-c)$, $\lfloor N(W_n+L_n)/n \rfloor $, and 
+at $\max(W_n, L_n+c)$, $\lfloor N(W_n+L_n)/n \rfloor $, and 
 $(N_s-U_n)/2$ to get the values of $f = f^+ + f^-$ at those three points, along with 
 upper bounds on $f$ on the ranges 
 $\{\max(W_n, L_n), \ldots, \lfloor N(W_n+L_n)/n\rfloor \}$ and
@@ -702,7 +702,7 @@ This algorithm must terminate by identifying a global maximizer $x^*$ after a fi
 
 A conservative $p$ value for the null hypothesis after $n$ items have been drawn is thus
 $$
-   P_n =  \frac{\prod_{i=0}^{W_n-1} (x^*-i) \; \prod_{i=0}^{L_n-1}  (x^*+c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x^*-c-i)}{\prod_{i=0}^{W_n-1}(V_{w,s}-i) \; \prod_{i=0}^{L_n-1} (V_{\ell,s}-i) \; \prod_{i=0}^{U_n-1} (V_{u,s}-i)}.
+   P_n =  \frac{\prod_{i=0}^{W_n-1} (x^*-i) \; \prod_{i=0}^{L_n-1}  (x^*-c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x^*+c-i)}{\prod_{i=0}^{W_n-1}(V_{w,s}-i) \; \prod_{i=0}^{L_n-1} (V_{\ell,s}-i) \; \prod_{i=0}^{U_n-1} (V_{u,s}-i)}.
 $$
 Because the test is built on Wald's SPRT,  the sample can expand sequentially and 
 (if the null hypothesis is true) the chance that $P_n < p$ is never larger than $p$.
