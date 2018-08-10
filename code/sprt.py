@@ -53,7 +53,7 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
     decision = "None"
     
     # Set up likelihood for null and alternative hypotheses
-    assert Vw > Vl, "Invalid alternative hypothesis. Vw must be larger than Vl"
+#    assert Vw > Vl, "Invalid alternative hypothesis. Vw must be larger than Vl"
     Vw = int(Vw)
     Vl = int(Vl)
     Vu = int(popsize - Vw - Vl)
