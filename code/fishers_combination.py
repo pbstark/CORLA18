@@ -4,6 +4,7 @@ import scipy.stats
 import scipy.optimize
 from ballot_comparison import ballot_comparison_pvalue
 from hypergeometric import trihypergeometric_optim
+from sprt import ballot_polling_sprt
 import matplotlib.pyplot as plt
 
 
@@ -209,9 +210,13 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha
         if verbose:
             print(i)
         sam = np.random.choice(pop2, n2, replace=False)
-        nocvr_pvalue = lambda alloc: trihypergeometric_optim(sample=sam, 
-                                        popsize=N2, 
-                                        null_margin=(N_w2-N_l2) - alloc*margin)
+        #nocvr_pvalue = lambda alloc: trihypergeometric_optim(sample=sam, 
+        #                                popsize=N2, 
+        #                                null_margin=(N_w2-N_l2) - alloc*margin)
+        nocvr_pvalue = lambda alloc: \
+            ballot_polling_sprt(sample=sam, popsize=N2, alpha=alpha,
+                                Vw=N_w2, Vl=N_l2, \
+                                null_margin=(N_w2-N_l2) - alloc*margin)['pvalue']
         fisher_pvalues[i] = maximize_fisher_combined_pvalue(N=(N1, N2),
                                overall_margin=margin, 
                                pvalue_funs=[cvr_pvalue, nocvr_pvalue],
@@ -224,8 +229,8 @@ def calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2):
     V1 = N_w1 - N_l1
     V2 = N_w2 - N_l2
     V = V1+V2
-    lb = 1 - (V2 + N2)/V
-    ub = (V1 + N1)/V
+    lb = np.min([2*N1/V, 1+2*N2/V,1-(N2+V2)/V])
+    ub = np.max([-2*N1/V, 1-2*N2/V,  1+(N2-V2)/V])
     return (lb, ub)
     
     
