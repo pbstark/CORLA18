@@ -62,6 +62,7 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
                 np.sum([np.log(Vl - i) for i in range(Ln)]) + \
                 np.sum([np.log(Vu - i) for i in range(Un)])
         
+    np.seterr(divide='ignore', invalid='ignore')
     null_logLR = lambda Nw: np.sum([np.log(Nw - i) for i in range(Wn)]) + \
                 np.sum([np.log(Nw - null_margin - i) for i in range(Ln)]) + \
                 np.sum([np.log(popsize - 2*Nw + null_margin - i) for i in range(Un)])
@@ -71,12 +72,35 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
         assert isinstance(number_invalid, int)
         assert number_invalid < popsize
         nuisance_param = (popsize - number_invalid + null_margin)/2
+        if nuisance_param < 0 or nuisance_param > popsize:
+            return {'decision' : 'Number invalid is incompatible with the null',
+                    'lower_threshold' : lower,
+                    'upper_threshold' : upper,
+                    'LR' : np.inf,
+                    'pvalue' : 0,
+                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
+                    'Nu_used' : number_invalid,
+                    'Nw_used' : nuisance_param
+                    }
+        if nuisance_param < Wn or (nuisance_param - null_margin) < Ln \
+            or number_invalid < Un:
+            return {'decision' : 'Null is impossible, given the sample',
+                    'lower_threshold' : lower,
+                    'upper_threshold' : upper,
+                    'LR' : np.inf,
+                    'pvalue' : 0,
+                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
+                    'Nu_used' : number_invalid,
+                    'Nw_used' : nuisance_param
+                    }
         res = alt_logLR - null_logLR(nuisance_param)
         LR = np.exp(res)
 
     else:
-        upper_Nw_limit = np.ceil((popsize - Un + null_margin)/2)
+        upper_Nw_limit = np.ceil((popsize - Un + null_margin)/2) - 1
         lower_Nw_limit = int(np.max([Wn, Ln+null_margin]))
+        if lower_Nw_limit > upper_Nw_limit:
+            lower_Nw_limit, upper_Nw_limit = upper_Nw_limit, lower_Nw_limit
         intervals = [lower_Nw_limit, upper_Nw_limit]
         
         f_upper = lambda x: np.sum([np.log(x - i) for i in range(Wn)]) + \
@@ -106,6 +130,28 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
         nuisance_param = intervals[np.argmax(f_eval)]
         number_invalid = popsize - nuisance_param*2 + null_margin
 
+        if nuisance_param < 0 or nuisance_param > popsize:
+            return {'decision' : 'Number invalid is incompatible with the null',
+                    'lower_threshold' : lower,
+                    'upper_threshold' : upper,
+                    'LR' : np.inf,
+                    'pvalue' : 0,
+                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
+                    'Nu_used' : number_invalid,
+                    'Nw_used' : nuisance_param
+                    }
+        if nuisance_param < Wn or (nuisance_param - null_margin) < Ln \
+            or number_invalid < Un:
+            return {'decision' : 'Null is impossible, given the sample',
+                    'lower_threshold' : lower,
+                    'upper_threshold' : upper,
+                    'LR' : np.inf,
+                    'pvalue' : 0,
+                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
+                    'Nu_used' : number_invalid,
+                    'Nw_used' : nuisance_param
+                    }
+        
         logLR = alt_logLR - fmax
         LR = np.exp(logLR)
 
