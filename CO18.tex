@@ -397,7 +397,7 @@ The first is a hypothetical medium-sized election with
 $110,000$ ballots cast, of which 
 9.1\% were cast in no-CVR counties. 
 The diluted margin is $1.8\%$.
-In 95 of 100 simulations, a stratified ``hybrid'' audit at risk limit 10\% with sample sizes of 500 ballots 
+In 87\% of 10,000 simulations, a stratified ``hybrid'' audit at risk limit 10\% with sample sizes of 500 ballots 
 in the CVR stratum and 700 ballots in the no-CVR stratum
 (1,200 ballots in all)
 would have sufficed to confirm the outcome, if the reported results were correct.
@@ -411,8 +411,8 @@ The second is a hypothetical large statewide election with
 2~million ballots cast, of which 5\% were cast in no-CVR counties.
 The contest has a diluted margin of about $20\%$ and the risk limit is 5\%.
 The workload for a hybrid stratified audit is quite low:
-In 98\% of 10,000 simulations, auditing 43~ballots from the 
-CVR stratum and 20~ballots from the no-CVR stratum
+In 100\% of 10,000 simulations, auditing 43~ballots from the 
+CVR stratum and 15~ballots from the no-CVR stratum
 would have sufficed to confirm the outcome, if the reported results were correct.
 
 If it were possible to conduct a ballot-level comparison audit for the entire contest, 
@@ -425,7 +425,7 @@ workflow for a hybrid stratified RLA of an election with 2~million ballots cast.
 The reported margin is just over $1\%$, but the reported winner
 and reported loser are actually tied in both strata.  
 The risk limit is 5\%.
-For a sample of 500~ballots from the CVR stratum and 1000~ballots from the no-CVR stratum, the maximum Fisher's combined $P$-value is over 20\%, so the audit cannot stop there.
+For a sample of 500~ballots from the CVR stratum and 1000~ballots from the no-CVR stratum, the maximum Fisher's combined $P$-value is over 25\%, so the audit cannot stop there.
 
 A third notebook, \texttt{fisher\_combined\_pvalue}, illustrates the numerical methods used
 to check whether the maximum Fisher's combined $P$-value of a hybrid stratified audit is below the risk limit.
