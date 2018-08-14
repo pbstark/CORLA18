@@ -170,11 +170,11 @@ winner and \emph{every} reported loser to appear to be smaller than it really wa
 Overstatements cast doubt on outcomes; understatements do not, even though they are tabulation errors.
 
 We use $w$ to denote a reported winner and $\ell$ to denote a reported loser.
-The total number of reported votes for candidate~$w$ is $V_{w,s}$ 
-and the total for candidate~$\ell$ is $V_{\ell,s}$.
-Thus $V_{w,s} > V_{\ell,s}$, since $w$ is reported to have gotten more votes than $\ell$.
+The total number of reported votes for candidate~$w$ is $V_{w}$ 
+and the total for candidate~$\ell$ is $V_{\ell}$.
+Thus $V_{w} > V_{\ell}$, since $w$ is reported to have gotten more votes than $\ell$.
 
-Let $V_{w\ell} \equiv V_{w,s} - V_{\ell,s} > 0$ denote the contest-wide margin (in votes) of 
+Let $V_{w\ell} \equiv V_{w} - V_{\ell} > 0$ denote the contest-wide margin (in votes) of 
 $w$ over  $\ell$.
 We have $S$ strata.
 Let $V_{w\ell,s}$ denote the margin (in votes) of reported winner $w$ over reported loser $\ell$
@@ -685,13 +685,11 @@ and
 $$
   f^-(x) \equiv \sum_{i=0}^{U_n-1} \ln (N_s-2x+c-i)
 $$
-at $\max(W_n, L_n+c)$, $\lfloor N(W_n+L_n)/n \rfloor $, and 
-$(N_s-U_n)/2$ to get the values of $f = f^+ + f^-$ at those three points, along with 
-upper bounds on $f$ on the ranges 
-$\{\max(W_n, L_n), \ldots, \lfloor N(W_n+L_n)/n\rfloor \}$ and
-$\{\lfloor N(W_n+L_n)/n \rfloor, \ldots, (N_s-U_n)/2\}$.
-At stage $j$, we have evaluated $f$, $f^+$, and $f^-$ at $j$ points $x_1 < x_2 < x_j$, and 
-we have upper bounds on $f$ on the $j-1$ ranges $R_m = \{x_m, x_m+1, \ldots, x_{m+1}$
+at $\max(W_n, L_n+c)$, $(N_s-U_n)/2$, and their midpoint,
+ to get the values of $f = f^+ + f^-$ at those three points, along with 
+upper bounds on $f$ on the ranges between them.
+At stage $j$, we have evaluated $f$, $f^+$, and $f^-$ at $j$ points $x_1 < x_2 < \ldots < x_j$, and 
+we have upper bounds on $f$ on the $j-1$ ranges $R_m = \{x_m, x_m+1, \ldots, x_{m+1}\}$
 between those points.
 Let $U_m$ be the upper bound on $f(x)$ for $x \in R_m$.
 Suppose that for some $h$, $f(x_h) = \max_{m=1}^j U_m$.
@@ -700,7 +698,7 @@ If there is some $U_m > \max_i f(x_i)$, then subdivide the range with the larges
 calculate $f$, $f^+$, and $f^-$ at the new point, and repeat.
 This algorithm must terminate by identifying a global maximizer $x^*$ after a finite number of steps.
 
-A conservative $p$ value for the null hypothesis after $n$ items have been drawn is thus
+A conservative $P$-value for the null hypothesis after $n$ items have been drawn is thus
 $$
    P_n =  \frac{\prod_{i=0}^{W_n-1} (x^*-i) \; \prod_{i=0}^{L_n-1}  (x^*-c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x^*+c-i)}{\prod_{i=0}^{W_n-1}(V_{w,s}-i) \; \prod_{i=0}^{L_n-1} (V_{\ell,s}-i) \; \prod_{i=0}^{U_n-1} (V_{u,s}-i)}.
 $$
