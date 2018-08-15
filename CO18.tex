@@ -66,24 +66,24 @@ RLAs generally rely on random samples.
 Stratified sampling---partitioning the population of ballots into disjoint
 strata and sampling independently from the strata---may simplify logistics or increase efficiency compared
 to simpler sampling designs, but makes risk calculations harder.
-We present SUITE, a novel RLA method for stratified samples.
-SUITE tests all possible partitions of outcome-changing error across strata.
-For each partition, SUITE combines $P$-values for each stratum's error into a combined
-$P$-value.
-(SUITE is agnostic about the methods for finding stratum-level $P$-values.) 
-The combined $P$-value is maximized over all such partitions. 
-The audit can stop if the maximum combined $P$-value is less than the risk limit.
-SUITE is immediately useful for RLAs in Colorado and many other states with hybrid voting systems.
+We present SUITE, a new method for conducting RLAs using stratified samples.
+SUITE considers all possible partitions of outcome-changing error across strata.
+For each partition, it combines $P$-values from stratum-level tests into a combined
+$P$-value; there is no restriction on the tests used in different strata.
+SUITE maximizes the combined $P$-value over all partitions of outcome-changing error. 
+The audit can stop if that maximum is less than the risk limit.
 Voting systems in some Colorado counties (comprising 98.2\% of voters)
 allow auditors to check how the system interpreted each ballot, 
-which allows efficient \emph{ballot-level comparison} RLAs.
-(Other counties use \emph{ballot polling}, which is less efficient.)
-Extant approaches to conducting an RLA of a statewide contest would require Colorado to make major procedural changes, or would sacrifice the efficiency of ballot-level comparison.
-In contrast, SUITE requires little change to Colorado's procedures and is substantially more efficient than
-a statewide ballot-polling RLA.
-The two strata comprise ballots cast in counties that can conduct ballot-level comparisons, and the rest.
-Stratum-level $P$-values can be found using modifications of ballot-polling and ballot-level 
-comparison, derived here.
+which allows \emph{ballot-level comparison} RLAs.
+Other counties use \emph{ballot polling}, which is less efficient.
+Extant approaches to conducting an RLA of a statewide contest would require major changes to 
+Colorado's procedures and software, or would sacrifice the efficiency of ballot-level comparison.
+SUITE does not. 
+It divides ballots into two strata: those cast in counties that can conduct ballot-level comparisons, and the rest.
+Stratum-level $P$-values are found by methods derived here.
+The resulting audit is substantially more efficient than statewide ballot polling.
+SUITE is useful in any state with a mix of voting systems or that uses stratified sampling
+for other reasons.
 We provide an open-source reference implementation and exemplar calculations in Jupyter notebooks.
 
 \keywords{stratified sampling, nonparametric tests, Fisher's combining function, sequential hypothesis tests, Colorado risk-limiting audits, maximizing $P$-values over nuisance parameters, union-intersection test,
@@ -392,76 +392,73 @@ Appendix~\ref{sec:appendix-polling} develops the test.
 
 Jupyter notebooks containing calculations for hybrid stratified audits intended to be relevant for Colorado are available at \url{https://www.github.com/pbstark/CORLA18}.
 
-\texttt{hybrid-audit-example-1} contains two examples. 
-The first is a hypothetical medium-sized election with 
-$110,000$ ballots cast, of which 
-9.1\% were cast in no-CVR counties. 
-The diluted margin is $1.8\%$.
-In 87\% of 10,000 simulations, a stratified ``hybrid'' audit at risk limit 10\% with sample sizes of 500 ballots 
-in the CVR stratum and 700 ballots in the no-CVR stratum
-(1,200 ballots in all)
-would have sufficed to confirm the outcome, if the reported results were correct.
+\texttt{hybrid-audit-example-1} contains two hypothetical examples. 
+The first has $110,000$ cast ballots, of which 
+9.1\% were in no-CVR counties. 
+The \emph{diluted margin} (the margin in votes, divided by the total number of ballots cast) is $1.8\%$.
+In 87\% of 10,000 simulations in which
+the reported results were correct, drawing 500~ballots from the CVR stratum and 700~ballots 
+from the no-CVR stratum (1,200 ballots in all)
+allowed SUITE to confirm the outcome at 10\% risk.
 
 If it were possible to conduct a ballot-level comparison audit for the entire contest, 
 an RLA with risk limit 10\% could terminate after examining 263~ballots if it found no errors.
 A ballot-polling audit of the entire contest would have been expected to examine about 14,000 ballots, more than 10\% of ballots cast.
-The hybrid audit is thus not as efficient as a ballot-level comparison audit, but far more efficient than a ballot-polling audit.
+The hybrid audit is less efficient than a ballot-level comparison audit, but far more efficient than a ballot-polling audit.
 
-The second is a hypothetical large statewide election with 
-2~million ballots cast, of which 5\% were cast in no-CVR counties.
-The contest has a diluted margin of about $20\%$ and the risk limit is 5\%.
-The workload for a hybrid stratified audit is quite low:
-In 100\% of 10,000 simulations, auditing 43~ballots from the 
+The second contest has 2~million cast ballots, of which 5\% were cast in no-CVR counties.
+The diluted margin is about $20\%$.
+The workload for SUITE at 5\% risk is quite low:
+In 100\% of 10,000 simulations in which
+the reported results were correct, auditing 43~ballots from the 
 CVR stratum and 15~ballots from the no-CVR stratum
-would have sufficed to confirm the outcome, if the reported results were correct.
-
+would have confirmed the outcome.
 If it were possible to conduct a ballot-level comparison audit for the entire contest, 
 an RLA at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
-The additional work for the hybrid stratified audit is disproportionately in the no-CVR counties, as
-arguably it should be.
+The additional work for the hybrid stratified audit is disproportionately in the no-CVR counties.
 
 A second notebook, \texttt{hybrid-audit-example-2}, illustrates the 
-workflow for a hybrid stratified RLA of an election with 2~million ballots cast.
+workflow for SUITE for an election with 2~million ballots cast.
 The reported margin is just over $1\%$, but the reported winner
 and reported loser are actually tied in both strata.  
 The risk limit is 5\%.
-For a sample of 500~ballots from the CVR stratum and 1000~ballots from the no-CVR stratum, the maximum Fisher's combined $P$-value is over 25\%, so the audit cannot stop there.
+For a sample of 500~ballots from the CVR stratum and 1000~ballots from the no-CVR stratum, 
+the maximum combined $P$-value is over 25\%, so the audit cannot stop there.
 
 A third notebook, \texttt{fisher\_combined\_pvalue}, illustrates the numerical methods used
-to check whether the maximum Fisher's combined $P$-value of a hybrid stratified audit is below the risk limit.
-It includes code to set up the audits in the CVR stratum and in the no-CVR stratum,
- to find the lower and upper bounds $\lambda_-$ and $\lambda_+$ for $\lambda$,
- evaluate Fisher's combining function along a grid of possible values,
-and to compute bounds on the $P$-value via Equation~\ref{eq:lowerbound}.
+to check whether the maximum combined $P$-value is below the risk limit.
+It includes code for the tests in the two strata,
+for the lower and upper bounds $\lambda_-$ and $\lambda_+$ for $\lambda$,
+for evaluating Fisher's combining function on a grid,
+and for computing bounds on the $P$-value via Equation~\ref{eq:lowerbound}.
 
 \section{Discussion} \label{sec:discussion}
 
-We present SUITE, a new class of procedures for RLAs based on stratified random samples.
+We present SUITE, a new class of procedures for RLAs based on stratified random sampling.
 SUITE is agnostic about the capability of voting equipment in different strata, unlike
 previous methods, which require batch-level comparisons in every stratum.
-SUITE allows arbitrary testing methods to be used in different strata; if those tests are sequentially valid, then the overall RLA is sequential. 
+SUITE allows arbitrary tests to be used in different strata; if those tests are sequentially valid, then the overall RLA is sequential. 
 (Otherwise, multiplicity adjustments might be needed if one wants an audit that escalates in stages.
 See~\cite{stark08a,stark09a} for two approaches.)
 
 Like other RLA methods, SUITE poses auditing as a hypothesis test.
-The null hypothesis is a union over all ways of partitioning outcome-changing error.
+The null hypothesis is a union over all partitions of outcome-changing error across strata.
 The hypothesis is rejected if the maximum $P$-value over all such partitions is sufficiently
 small.
 Each possible partition yields an intersection hypothesis, tested by
-combining tests in different strata using Fisher's combining function (or a suitable
+combining $P$-values from different strata using Fisher's combining function (or a suitable
 replacement). 
 
-Among other things, the new approach solves a problem of current interest in Colorado, by allowing ballot-polling in some counties to be combined with ballot-level comparisons in others to conduct RLAs of contests that cross jurisdictional lines, such as statewide contests and many federal contests.
+Among other things, the new approach solves a current problem in Colorado:
+how to conduct RLAs of contests that cross jurisdictional lines, such as statewide 
+contests and many federal contests.
 
-We give numerical examples relevant to Colorado, implemented in Jupyter notebooks, that can be modified to estimate the workload for different contest sizes, margins, and risk limits.
-Generally, increasing the sample size in one stratum allows the other sample size to be decreased.
-When the contest outcome is correct, the total workload will be minimized by 
-assigning a disproportionately large (compared to the number of ballots cast) amount of 
-the work to the CVR stratum.
+We give numerical examples in Jupyter notebooks
+that can be modified to estimate the workload for different contest sizes, margins, and risk limits.
 In our numerical experiments, the new method requires auditing far fewer ballots than previous approaches would. 
 
 \appendix
-\section{Comparison audits for an overstatement quota}\label{sec:appendix-comparison}
+\section{Comparison tests for an overstatement quota}\label{sec:appendix-comparison}
 \subsection{Notation}
 \begin{itemize}
     \item  $\mathcal{W}$: the set of reported winners of the contest
@@ -590,7 +587,8 @@ At worst, the reported result for batch $p$ shows $n_p$ votes for the
 ``least-winning'' apparent winner of the contest with the smallest margin, 
 but a hand interpretation would show that all $n_p$ ballots in the batch 
 had votes for the runner-up in that contest.
-Since $V_{w\ell} \ge V\equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$ and $0 \le v_{pi} \le n_p$,
+Since 
+$V_{w\ell} \ge V\equiv \min_{w \in \mathcal{W}, \ell \in \mathcal{L}} V_{w \ell}$ and $0 \le v_{pi} \le n_p$,
 $$ 
     u_p =  \max_{w \in \mathcal{W}, \ell \in \mathcal{L}} 
     \frac{v_{pw} - v_{p\ell} + n_p}{V_{w\ell}}
@@ -627,7 +625,7 @@ A different sequential method, the \emph{Kaplan-Markov} method (also due to Haro
 is given in~\cite{stark09b}.
 
 
-\section{Ballot-polling audits with a margin threshold}\label{sec:appendix-polling}
+\section{Ballot-polling tests for an overstatement quota}\label{sec:appendix-polling}
 In this section, we derive a ballot-polling test of the hypothesis that the margin (in votes) in a single stratum exceeds a threshold $c$. 
 
 \subsection{Wald's SPRT with a nuisance parameter}
