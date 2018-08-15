@@ -73,7 +73,7 @@ $P$-value.
 (SUITE is agnostic about the methods for finding stratum-level $P$-values.) 
 The combined $P$-value is maximized over all such partitions. 
 The audit can stop if the maximum combined $P$-value is less than the risk limit.
-SUITE is immediately useful in Colorado.
+SUITE is immediately useful for RLAs in Colorado and many other states with hybrid voting systems.
 Voting systems in some Colorado counties (comprising 98.2\% of voters)
 allow auditors to check how the system interpreted each ballot, 
 which allows efficient \emph{ballot-level comparison} RLAs.
@@ -382,7 +382,7 @@ modification~\cite{stark08a}.\footnote{%
 \subsection{Ballot-polling audits of a tolerable overstatement in votes}
 \label{sec:ballotPollError}
 
-To use the new stratification method with ballot-polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum in exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
+To use the new stratification method with ballot-polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
 This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
 We address this by maximizing the probability ratio in Wald's Sequential Probability Ratio Test 
 \cite{wald45} over all possible values of the nuisance parameter.
@@ -451,7 +451,7 @@ Each possible partition yields an intersection hypothesis, tested by
 combining tests in different strata using Fisher's combining function (or a suitable
 replacement). 
 
-Among other things, the new approach solves a problem in Colorado by allowing ballot-polling in some counties to be combined with ballot-level comparisons in others to conduct RLAs of contests that cross jurisdictional lines, such as statewide contests and many federal contests.
+Among other things, the new approach solves a problem of current interest in Colorado, by allowing ballot-polling in some counties to be combined with ballot-level comparisons in others to conduct RLAs of contests that cross jurisdictional lines, such as statewide contests and many federal contests.
 
 We give numerical examples relevant to Colorado, implemented in Jupyter notebooks, that can be modified to estimate the workload for different contest sizes, margins, and risk limits.
 Generally, increasing the sample size in one stratum allows the other sample size to be decreased.
@@ -627,7 +627,7 @@ A different sequential method, the \emph{Kaplan-Markov} method (also due to Haro
 is given in~\cite{stark09b}.
 
 
-\section{Ballot-polling derivation}\label{sec:appendix-polling}
+\section{Ballot-polling audits with a margin threshold}\label{sec:appendix-polling}
 In this section, we derive a ballot-polling test of the hypothesis that the margin (in votes) in a single stratum exceeds a threshold $c$. 
 
 \subsection{Wald's SPRT with a nuisance parameter}
