@@ -52,7 +52,7 @@
 
 \institute{
 Department of Statistics, University of California, Berkeley, CA, USA \and
-Verified Voting Foundation}
+Verified Voting Foundation, Philadelphia, PA, USA}
 
 \date{Version: \today}
 
@@ -110,12 +110,12 @@ until either (i)~there is strong statistical evidence that a full hand tabulatio
 or (ii)~the audit has led to a full hand tabulation, the result of which should become the official
 result.
 
-RLAs have been conducted in California, Colorado, Ohio, and Denmark, and are required by law in Colorado (CRS~1-7-515) and Rhode Island (SB~413A and HB~5704A).
+RLAs have been conducted in California, Colorado, Indiana, Ohio, Virginia, and Denmark, and are required by law in Colorado (CRS~1-7-515) and Rhode Island (SB~413A and HB~5704A).
 
 The most efficient and transparent sampling design for risk-limiting audits selects individual ballots uniformly at random, with or without replacement~\cite{stark10c}.
 Risk calculations for such samples can be made simple without sacrificing rigor~\cite{stark10d,lindemanStark12}.
-However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest-common denominator method for assessing risk from the sample, which would not take full advantage of the capabilities of some voting systems. 
-For instance, any system that uses paper ballots as the official record can conduct \emph{ballot-polling} audits, while \emph{ballot-level comparison audits} require systems to generate \emph{cast-vote records} that can be checked manually against a human reading of the paper~\cite{lindemanEtal12,lindemanStark12}. 
+However, to audit contests that cross jurisdictional boundaries then requires coordinating sampling in different counties, and may require different counties to use the lowest common denominator method for assessing risk from the sample, which would not take full advantage of the capabilities of some voting systems. 
+For instance, any system that uses paper ballots as the official record can conduct \emph{ballot-polling} audits, while \emph{ballot-level comparison audits} require systems to generate \emph{cast vote records} that can be checked manually against a human reading of the paper~\cite{lindemanEtal12,lindemanStark12}. 
 (These terms are described in Section~\ref{sec:combiningMethods}.) 
 
 Stratified RLAs have been considered previously, primarily to conform with legacy audit laws under which counties draw audit samples independently of each other, but also to allow auditors to start the audit before all vote-by-mail or provisional ballots have been tallied, by sampling independently from ballots cast in person, by mail, and provisionally, as soon as subtotals for each group are available \cite{stark08a,higginsEtal11}.
@@ -129,11 +129,11 @@ The approach involves finding the maximum $P$-value over a vector of nuisance pa
 all allocations of tabulation error across strata for which a full count would find a different electoral outcome than was reported.
 (A \emph{nuisance parameter} is a property of the population that is not of direct interest, but that affects the probability distribution of the data. 
 \emph{Overstatement} is error that made the margin of one or more winners over one or more losers appear larger than it really was.
-The total \emph{overstatement} across strata determines whether the reported outcome is correct; 
+The total overstatement across strata determines whether the reported outcome is correct; 
 the overstatements in individual strata are nuisance parameters that affect the distribution of the audit sample.)
 
-The basic building block for the method is testing whether the overstatement error in a single stratum exceeds a quota.
-Fisher's combining function is used to merge $P$-values for tests in different strata into a single $P$-value for the hypothesis that the overstatement in every stratum exceeds its quota.
+The basic building block for the method is testing whether the overstatement error in a single stratum is greater than or equal to a quota.
+Fisher's combining function is used to merge $P$-values for tests in different strata into a single $P$-value for the hypothesis that the overstatement in every stratum is greater than or equal to its quota.
 If that hypothesis can be rejected for \emph{all} stratum-level quotas that could change the outcome---that is, if the maximum combined $P$-value is sufficiently small---the audit can stop.
 
 It is not actually necessary to consider all possible quotas: the $P$-value involves a sum of monotonic functions, which allows us to find upper and lower bounds everywhere using only values on a discrete grid.
@@ -143,8 +143,8 @@ The procedure can be generalized to more than two strata.
 
 Section~\ref{sec:stratified} presents the new approach to stratified auditing.
 Section~\ref{sec:combiningMethods} illustrates the method by solving a problem pertinent to Colorado:
-combining ballot-polling in one stratum with ballot-level comparisons in another.
-This requires straightforward modifications to the mathematics behind ballot-polling and ballot-level comparison to allow the overstatement to be compared to specified thresholds other than the overall contest margin; those modifications are described in Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError}.
+combining ballot polling in one stratum with ballot-level comparisons in another.
+This requires straightforward modifications to the mathematics behind ballot polling and ballot-level comparison to allow the overstatement to be compared to specified thresholds other than the overall contest margin; those modifications are described in Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError}.
 Section~\ref{sec:examples} gives numerical examples of simulated audits, using parameters intended to reflect how the procedure would work in Colorado.
 We provide example software implementing the risk calculations for
 our recommended approach in Python Jupyter notebooks.\footnote{%
@@ -216,7 +216,7 @@ Fisher's combined statistic will tend to be small when all stratum-level null hy
 If any is false, then as the sample size increases, Fisher's combined statistic will tend to grow.
 
 If, for all $\mathbf{\lambda}$ with $\sum_s \lambda_s = 1$, we can reject the conjunction
-hypothesis at level $\alpha$, 
+hypothesis at level $\alpha$ 
 (i.e., if the minimum value of Fisher's combined statistic over all $\lambda$ is larger than the $1-\alpha$ quantile of the chi-square
 distribution with $2S$~degrees of freedom), the audit can stop. 
 
@@ -320,7 +320,7 @@ Colorado has not yet conducted an RLA of a cross-jurisdictional contest, althoug
 To audit statewide elections and contests that cross county lines, Colorado will need to implement new approaches and make some changes to its auditing software, RLATool.
 
 Colorado's voting systems are heterogeneous. 
-Some counties (containing about 98\% of active voters, as of this writing), have 
+Some counties (containing about 98\% of active voters, as of this writing) have 
 voting systems that export cast vote records (CVRs) in a way that the paper ballot corresponding to each CVR can be identified uniquely and retrieved.
 We call counties with such voting systems \emph{CVR counties}.
 In CVR counties, auditors can manually check the accuracy of the voting system's interpretation of individual ballots.
@@ -331,7 +331,7 @@ Contests entirely contained in CVR counties can be audited using \emph{ballot-le
 Ballot-level comparison audits are currently the most efficient approach to risk-limiting audits in that they require examining fewer ballots than other methods do, when the outcome of the contest under audit is in fact correct.
 Contests involving no-CVR counties can be audited using \emph{ballot-polling audits} \cite{lindemanEtal12,lindemanStark12},  which generally require examining more ballots than ballot-level comparison audits to attain the same risk limit.
 
-Colorado's challenge is to audit contests that include ballots cast in both CVR counties and no-CVR counties. There is no literature on how to combine ballot-polling with ballot-level comparisons to audit 
+Colorado's challenge is to audit contests that include ballots cast in both CVR counties and no-CVR counties. There is no literature on how to combine ballot polling with ballot-level comparisons to audit 
 cross-jurisdictional contests 
 that include voters in CVR counties and voters in no-CVR counties.\footnote{%
   See~\cite{Rivest-2018-bayesian-tabulation-audits}
@@ -364,7 +364,7 @@ Sections~\ref{sec:comparisonError} and~\ref{sec:ballotPollError} describe these 
 \subsection{Comparison audits of overstatement quotas}
 \label{sec:comparisonError}
 
-To use comparison auditing in the approach to stratification described above requires extending previous work to test whether the overstatement error exceeds $\lambda_s V_{w\ell}$, rather than simply $V_{w\ell}$.
+To use comparison auditing in the approach to stratification described above requires extending previous work to test whether the overstatement error is greater than or equal to $\lambda_s V_{w\ell}$, rather than simply $V_{w\ell}$.
 Appendix~\ref{sec:appendix-comparison} derives this generalization for arbitrary batch sizes, including batches consisting of one ballot.
 The derivation considers only a single contest, but the 
 MACRO test statistic \cite{stark09c,stark10d} automatically extends the result to 
@@ -379,10 +379,10 @@ modification~\cite{stark08a}.\footnote{%
   Changes for IRV/STV are more complicated.
 }
 
-\subsection{Ballot-polling audits of a tolerable overstatement in votes}
+\subsection{Ballot-polling audits of overstatement quotas}
 \label{sec:ballotPollError}
 
-To use the new stratification method with ballot-polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin in votes in the stratum exceeds a threshold (namely, $\lambda_s V_{w\ell}$).
+To use the new stratification method with ballot polling requires a different approach than \cite{lindemanEtal12} took: their approach tests whether $w$ got a larger \emph{share} of the votes than $\ell$, but we need to test whether the margin \emph{in votes} in the stratum is greater than or equal to a threshold (namely, $\lambda_s V_{w\ell}$).
 This introduces a nuisance parameter, the number of ballots with votes for either $w$ or $\ell$.
 We address this by maximizing the probability ratio in Wald's Sequential Probability Ratio Test 
 \cite{wald45} over all possible values of the nuisance parameter.
@@ -501,14 +501,14 @@ $$
 $$
 Here, we address the case that the contest may include a portion outside the stratum.
 To combine independent samples in different strata, it is convenient
-to be able to test whether the net overstatement error in a stratum exceeds a given threshold.
+to be able to test whether the net overstatement error in a stratum is greater than or equal to a given threshold.
 
 Instead of testing that condition directly, we will test a condition that is sufficient 
 but not necessary for the inequality to hold, to get a computationally simple test that
 is still conservative (i.e., the level is not larger than its nominal value).
 
 For every winner, loser pair $(w, \ell)$, we want to test
-whether the overstatement error exceeds some threshold, generally
+whether the overstatement error is greater than or equal to some threshold, generally
 one tied to the reported margin between $w$ and $\ell$.
 For instance, for a hybrid stratified audit, we set the threshold to be
 $\lambda_s V_{w\ell}$.
@@ -627,7 +627,7 @@ is given in~\cite{stark09b}.
 
 
 \section{Ballot-polling tests for an overstatement quota}\label{sec:appendix-polling}
-In this section, we derive a ballot-polling test of the hypothesis that the margin (in votes) in a single stratum exceeds a threshold $c$. 
+In this section, we derive a ballot-polling test of the hypothesis that the margin (in votes) in a single stratum is greater than or equal to a threshold $c$. 
 
 \subsection{Wald's SPRT with a nuisance parameter}
 
