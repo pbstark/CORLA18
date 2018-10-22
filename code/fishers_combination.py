@@ -60,7 +60,7 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     pvalue_funs, stepsize=0.05, modulus=None, alpha=0.05, feasible_lambda_range=None):
     """
     Grid search to find the maximum P-value.
-    
+
     Find the smallest Fisher's combined statistic for P-values obtained 
     by testing two null hypotheses at level alpha using data X=(X1, X2).
 
@@ -81,7 +81,6 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     pvalue_funs : array_like
         functions for computing p-values. The observed statistics/sample and known parameters should be
         plugged in already. The function should take the lambda allocation AS INPUT and output a p-value.
-<<<<<<< HEAD
     stepsize : float
         size of the grid for searching over lambda. Default is 0.05
     modulus : function
@@ -308,7 +307,7 @@ def calculate_lambda_range(N_w1, N_ell1, N_1, N_w2, N_ell2, N_2):
    
     Returns:
     --------
-        [lb, ub]: real ordered pair. lb is a sharp lower bound on lambda; ub is a sharp upper bound
+        (lb, ub): real ordered pair. lb is a sharp lower bound on lambda; ub is a sharp upper bound
     
     Derivation:
     -----------
