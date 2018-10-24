@@ -4,6 +4,7 @@ import numpy as np
 import numpy.random
 import scipy as sp
 import scipy.stats
+import scipy.optimize
 
 
 def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl, 
@@ -66,7 +67,7 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
     null_logLR = lambda Nw: np.sum([np.log(Nw - i) for i in range(Wn)]) + \
                 np.sum([np.log(Nw - null_margin - i) for i in range(Ln)]) + \
                 np.sum([np.log(popsize - 2*Nw + null_margin - i) for i in range(Un)])
-        
+    
     # This is for testing purposes. In practice, number_invalid will be unknown.
     if number_invalid is not None:
         assert isinstance(number_invalid, int)
@@ -97,37 +98,22 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
         LR = np.exp(res)
 
     else:
-        upper_Nw_limit = np.ceil((popsize - Un + null_margin)/2) - 1
+        upper_Nw_limit = np.ceil((popsize - Un + null_margin)/2)
         lower_Nw_limit = int(np.max([Wn, Ln+null_margin]))
         if lower_Nw_limit > upper_Nw_limit:
             lower_Nw_limit, upper_Nw_limit = upper_Nw_limit, lower_Nw_limit
-        intervals = [lower_Nw_limit, upper_Nw_limit]
+
         
-        f_upper = lambda x: np.sum([np.log(x - i) for i in range(Wn)]) + \
-                            np.sum([np.log(x - null_margin - i) for i in range(Ln)])
-        f_lower = lambda x: np.sum([np.log(popsize - 2*x + null_margin - i) for \
-                            i in range(Un)])
-        
-        f_eval = [null_logLR(x) for x in intervals]
-        f_upper_eval = [f_upper(x) for x in intervals]
-        f_lower_eval = [f_lower(x) for x in intervals]
-        f_ub = [n*np.log(popsize)]
-        
-        # Branch and bound to find the maximum of f = f_upper+f_lower
-        while max(f_ub) > max(f_eval):
-            max_index = np.argmax(f_ub)
-            midpoint_Nw = int((intervals[max_index] + intervals[max_index+1]) / 2)
-            if midpoint_Nw in intervals:
-                break
-            intervals.insert(max_index+1, midpoint_Nw)
-            
-            f_eval.insert(max_index+1, null_logLR(midpoint_Nw))
-            f_upper_eval.insert(max_index+1, f_upper(midpoint_Nw))
-            f_lower_eval.insert(max_index+1, f_lower(midpoint_Nw))
-            f_ub = np.array(f_upper_eval[1:]) + np.array(f_lower_eval[:-1])
-        
-        fmax = np.max(f_eval)
-        nuisance_param = intervals[np.argmax(f_eval)]
+        # Check if the maximum occurs at an endpoint
+        if np.sign(LR_derivative(upper_Nw_limit)) == np.sign(LR_derivative(lower_Nw_limit)):
+            nuisance_param = upper_Nw_limit if null_logLR(upper_Nw_limit)>=null_logLR(lower_Nw_limit) else lower_Nw_limit
+        # Otherwise, find the (unique) root of the derivative of the log likelihood ratio
+        else:
+            LR_derivative = lambda Nw: np.sum([1/(Nw - i) for i in range(Wn)]) + \
+                    np.sum([1/(Nw - null_margin - i) for i in range(Ln)]) - \
+                    2*np.sum([1/(popsize - 2*Nw + null_margin - i) for i in range(Un)])
+            root = sp.optimize.brentq(LR_derivative, lower_Nw_limit, upper_Nw_limit)
+            nuisance_param = np.floor(root) if null_logLR(np.floor(root))>=null_logLR(np.ceil(root)) else np.ceil(root)
         number_invalid = popsize - nuisance_param*2 + null_margin
 
         if nuisance_param < 0 or nuisance_param > popsize:
@@ -152,7 +138,7 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
                     'Nw_used' : nuisance_param
                     }
         
-        logLR = alt_logLR - fmax
+        logLR = alt_logLR - null_logLR(nuisance_param)
         LR = np.exp(logLR)
 
     if LR <= lower:
@@ -188,11 +174,11 @@ def test_sprt_functionality():
     assert res['sample_proportion']==(0.5, 0.5, 0)
     
     trials[50:60] = 1
-    res = ballot_polling_sprt(trials, popsize=1000, alpha=0.05, Vw=600, Vl=450)
-    assert res['decision']==1
+    res = ballot_polling_sprt(trials, popsize=1000, alpha=0.05, Vw=600, Vl=400)
+    assert res['decision']=='None'
     assert res['lower_threshold']==0.0
     assert res['upper_threshold']==20.0
-    assert res['pvalue']<0.05
+    assert res['pvalue']>0.05
     assert res['LR']>1
     assert res['sample_proportion']==(0.6, 0.4, 0)
     
@@ -216,34 +202,32 @@ def test_sprt_functionality():
     assert res['sample_proportion']==(0.4, 0.6, 0)
 
 
-
 def test_sprt_analytic_example():
     sample = [0, 0, 1, 1]
     population = [0]*5 + [1]*5
     popsize = len(population)
-    res = ballot_polling_sprt(sample, popsize, alpha=0.05, Vw=6, Vl=4, number_invalid=0)
-    np.testing.assert_almost_equal(res['LR'], 0)
+    res = ballot_polling_sprt(sample, popsize, alpha=0.05, Vw=5, Vl=4, number_invalid=0)
+    np.testing.assert_almost_equal(res['LR'], 0.6)
+    np.testing.assert_almost_equal(res['Nu_used'], 0)
     res2 = ballot_polling_sprt(sample, popsize, alpha=0.05, Vw=5, Vl=4)
     np.testing.assert_almost_equal(res2['LR'], 0.6, decimal=2)
     np.testing.assert_almost_equal(res2['Nu_used'], 0)
     
     sample = [0, 1, 1, 1]
     res = ballot_polling_sprt(sample, popsize, alpha=0.05, Vw=6, Vl=4, number_invalid=0)
-    np.testing.assert_almost_equal(res['LR'], 0)
+    np.testing.assert_almost_equal(res['LR'], 1.6)
     res2 = ballot_polling_sprt(sample, popsize, alpha=0.05, Vw=6, Vl=4)
     np.testing.assert_almost_equal(res2['LR'], 1.6, decimal=2)
     np.testing.assert_almost_equal(res2['Nu_used'], 0, decimal=2)
 
     sample = [0, 1, 1]
     res = ballot_polling_sprt(sample, popsize, alpha=0.05, Vw=6, Vl=4, number_invalid=0)
-    np.testing.assert_almost_equal(res['LR'], 0)
+    np.testing.assert_almost_equal(res['LR'], 1.2)
     res2 = ballot_polling_sprt(sample, popsize, alpha=0.05, Vw=6, Vl=4)
     np.testing.assert_almost_equal(res2['LR'], 1.2, decimal=2)
     np.testing.assert_almost_equal(res2['Nu_used'], 0, decimal=2)
-    
 
-   
-    
+
 
 if __name__ == 'main':
     test_sprt_functionality()
