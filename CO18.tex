@@ -664,38 +664,49 @@ $$
 for some value $N_{w,s}$ and the corresponding $N_{u,s} = N_s - 2N_{w,s}+c$.
 How large can that probability be under the null? 
 The probability under the null is maximized by any integer 
-$x \in \{ \max(W_n, L_n+c), \ldots, (N-U_n)/2 \}$ that maximizes 
+$x \in \{ \max(W_n, L_n+c), \ldots, (N_s-U_n)/2 \}$ that maximizes 
 $$
 \prod_{i=0}^{W_n-1} (x-i) \; \prod_{i=0}^{L_n-1} (x-c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x+c - i).
 $$
 The logarithm is monotonic, so any maximizer $x^*$ also maximizes
 $$ f(x) = \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x-c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2x+ c - i).$$
-The first two terms on the right increase monotonically with $x$ and the last term decreases monotonically with $x$.
-This yields bounds without having to evaluate $f$ everywhere.
-Suppose $y < z$. 
-Then for all integer $x$ between $y$ and $z$, 
-$$ f(x) \le \sum_{i=0}^{W_n-1} \ln (z-i) + \sum_{i=0}^{L_n-1} \ln (z-c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2y+c-i).$$
-The optimization problem can be solved using a branch and bound approach.
-For instance, start by evaluating 
-$$
-   f^+(x) \equiv \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x-c-i)
-$$
-and
-$$
-  f^-(x) \equiv \sum_{i=0}^{U_n-1} \ln (N_s-2x+c-i)
-$$
-at $\max(W_n, L_n+c)$, $(N_s-U_n)/2$, and their midpoint,
- to get the values of $f = f^+ + f^-$ at those three points, along with 
-upper bounds on $f$ on the ranges between them.
-At stage $j$, we have evaluated $f$, $f^+$, and $f^-$ at $j$ points $x_1 < x_2 < \ldots < x_j$, and 
-we have upper bounds on $f$ on the $j-1$ ranges $R_m = \{x_m, x_m+1, \ldots, x_{m+1}\}$
-between those points.
-Let $U_m$ be the upper bound on $f(x)$ for $x \in R_m$.
-Suppose that for some $h$, $f(x_h) = \max_{m=1}^j U_m$.
-Then $x^* = x_h$ is a global maximizer of $f$.
-If there is some $U_m > \max_i f(x_i)$, then subdivide the range with the largest $U_m$,
-calculate $f$, $f^+$, and $f^-$ at the new point, and repeat.
-This algorithm must terminate by identifying a global maximizer $x^*$ after a finite number of steps.
+
+The second derivative of $f$ is everywhere negative, so $f$ has a unique maximum on $[ \max(W_n, L_n+c), (N_s-U_n)/2]$,
+either at one of the endpoints or somewhere on the interval.
+The derivative $f'(x)$ gives information about where the maximum occurs:
+$$ f'(x) = \sum_{i=0}^{W_n-1} \frac{1}{ x-i } + \sum_{i=0}^{L_n-1} \frac{1}{ x-c-i} -2 \sum_{i=0}^{U_n-1} \frac{1}{N_s-2x+ c - i}.$$
+
+If $f'(x)$ does not change signs, then the maximum is at one of the endpoints;
+set $x^*$ to be the endpoint that makes $f$ larger.
+Otherwise, the maximum occurs where $f'(x) = 0$ and can be found using a root finder such as Brent's method.
+Since the maximizer must be an integer, set $x^*$ to be the value of $\{\lfloor x \rfloor, \lceil x \rceil\}$ that makes $f$ larger.
+
+%The first two terms on the right increase monotonically with $x$ and the last term decreases monotonically with $x$.
+%This yields bounds without having to evaluate $f$ everywhere.
+%Suppose $y < z$. 
+%Then for all integer $x$ between $y$ and $z$, 
+%$$ f(x) \le \sum_{i=0}^{W_n-1} \ln (z-i) + \sum_{i=0}^{L_n-1} \ln (z-c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2y+c-i).$$
+%The optimization problem can be solved using a branch and bound approach.
+%For instance, start by evaluating 
+%$$
+%   f^+(x) \equiv \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x-c-i)
+%$$
+%and
+%$$
+%  f^-(x) \equiv \sum_{i=0}^{U_n-1} \ln (N_s-2x+c-i)
+%$$
+%at $\max(W_n, L_n+c)$, $(N_s-U_n)/2$, and their midpoint,
+% to get the values of $f = f^+ + f^-$ at those three points, along with 
+%upper bounds on $f$ on the ranges between them.
+%At stage $j$, we have evaluated $f$, $f^+$, and $f^-$ at $j$ points $x_1 < x_2 < \ldots < x_j$, and 
+%we have upper bounds on $f$ on the $j-1$ ranges $R_m = \{x_m, x_m+1, \ldots, x_{m+1}\}$
+%between those points.
+%Let $U_m$ be the upper bound on $f(x)$ for $x \in R_m$.
+%Suppose that for some $h$, $f(x_h) = \max_{m=1}^j U_m$.
+%Then $x^* = x_h$ is a global maximizer of $f$.
+%If there is some $U_m > \max_i f(x_i)$, then subdivide the range with the largest $U_m$,
+%calculate $f$, $f^+$, and $f^-$ at the new point, and repeat.
+%This algorithm must terminate by identifying a global maximizer $x^*$ after a finite number of steps.
 
 A conservative $P$-value for the null hypothesis after $n$ items have been drawn is thus
 $$
