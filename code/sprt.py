@@ -100,18 +100,40 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
     else:
         upper_Nw_limit = np.ceil((popsize - Un + null_margin)/2)
         lower_Nw_limit = int(np.max([Wn, Ln+null_margin]))
+        
+        # For extremely small or large null_margins, the limits do not
+        # make sense with the sample values.
+        if upper_Nw_limit < Wn or (upper_Nw_limit - null_margin) < Ln:
+            return {'decision' : 'Null is impossible, given the sample',
+                    'lower_threshold' : lower,
+                    'upper_threshold' : upper,
+                    'LR' : np.inf,
+                    'pvalue' : 0,
+                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
+                    'Nu_used' : None,
+                    'Nw_used' : None
+                    }
+        
         if lower_Nw_limit > upper_Nw_limit:
             lower_Nw_limit, upper_Nw_limit = upper_Nw_limit, lower_Nw_limit
 
+#        print("null_margin=", null_margin)
+#        print("lower, upper limits=", lower_Nw_limit, upper_Nw_limit)
         
+        LR_derivative = lambda Nw: np.sum([1/(Nw - i) for i in range(Wn)]) + \
+                    np.sum([1/(Nw - null_margin - i) for i in range(Ln)]) - \
+                    2*np.sum([1/(popsize - 2*Nw + null_margin - i) for i in range(Un)])
+
+        # Sometimes the upper_Nw_limit is too extreme, causing illegal 0s.
+        # Check and change the limit when that occurs.
+        if np.isinf(null_logLR(upper_Nw_limit)) or np.isinf(LR_derivative(upper_Nw_limit)):
+            upper_Nw_limit -= 1
+
         # Check if the maximum occurs at an endpoint
         if np.sign(LR_derivative(upper_Nw_limit)) == np.sign(LR_derivative(lower_Nw_limit)):
             nuisance_param = upper_Nw_limit if null_logLR(upper_Nw_limit)>=null_logLR(lower_Nw_limit) else lower_Nw_limit
         # Otherwise, find the (unique) root of the derivative of the log likelihood ratio
         else:
-            LR_derivative = lambda Nw: np.sum([1/(Nw - i) for i in range(Wn)]) + \
-                    np.sum([1/(Nw - null_margin - i) for i in range(Ln)]) - \
-                    2*np.sum([1/(popsize - 2*Nw + null_margin - i) for i in range(Un)])
             root = sp.optimize.brentq(LR_derivative, lower_Nw_limit, upper_Nw_limit)
             nuisance_param = np.floor(root) if null_logLR(np.floor(root))>=null_logLR(np.ceil(root)) else np.ceil(root)
         number_invalid = popsize - nuisance_param*2 + null_margin
