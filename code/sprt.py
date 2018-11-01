@@ -59,14 +59,14 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
     Vl = int(Vl)
     Vu = int(popsize - Vw - Vl)
     assert Vw >= Wn and Vl >= Ln and Vu >= Un, "Alternative hypothesis isn't consistent with the sample"
-    alt_logLR = np.sum([np.log(Vw - i) for i in range(Wn)]) + \
-                np.sum([np.log(Vl - i) for i in range(Ln)]) + \
-                np.sum([np.log(Vu - i) for i in range(Un)])
+    alt_logLR = np.sum(np.log(Vw - np.arange(Wn))) + \
+                np.sum(np.log(Vl - np.arange(Ln))) + \
+                np.sum(np.log(Vu - np.arange(Un)))
         
     np.seterr(divide='ignore', invalid='ignore')
-    null_logLR = lambda Nw: np.sum([np.log(Nw - i) for i in range(Wn)]) + \
-                np.sum([np.log(Nw - null_margin - i) for i in range(Ln)]) + \
-                np.sum([np.log(popsize - 2*Nw + null_margin - i) for i in range(Un)])
+    null_logLR = lambda Nw: np.sum(np.log(Nw - np.arange(Wn))) + \
+                np.sum(np.log(Nw - null_margin - np.arange(Ln))) + \
+                np.sum(np.log(popsize - 2*Nw + null_margin - np.arange(Un)))
     
     # This is for testing purposes. In practice, number_invalid will be unknown.
     if number_invalid is not None:
