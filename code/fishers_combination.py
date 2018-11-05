@@ -28,24 +28,70 @@ def fisher_combined_pvalue(pvalues):
     return 1-scipy.stats.chi2.cdf(obs, df=2*len(pvalues))
 
 
-def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs, precise=True, plausible_lambda_range=None):
+def create_modulus(n1, n2, n_w2, n_l2, N1, V_wl, gamma):
     """
-    Find the smallest Fisher's combined statistic for p-values obtained 
-    by testing two null hypotheses at level alpha using data X=(X1, X2) 
+    The modulus of continuity for the Fisher's combined p-value.
+    This function returns the modulus of continuity, as a function of
+    the distance between two lambda values.
+    
+    n1 : int
+        sample size in the ballot comparison stratum
+    n2 : int
+        sample size in the ballot polling stratum
+    n_w2 : int
+        votes for the reported winner in the ballot polling sample
+    n_l2 : int
+        votes for the reported loser in the ballot polling sample
+    N1 : int
+        total number of votes in the ballot comparison stratum
+    V_wl : int
+        margin (in votes) between w and l in the whole contest
+    gamma : float
+        gamma from the ballot comparison audit
+    """
+    Wn = n_w2; Ln = n_l2; Un = n2-n_w2-n_l2
+    assert Wn>=0 and Ln>=0 and Un>=0
+    
+    return lambda delta: 2*Wn*np.log(1 + V_wl*delta/2) + 2*Ln*np.log(1 + 3*V_wl*delta/2) + \
+            2*Un*np.log(1 + 2*V_wl*delta) + 2*n1*np.log(1 + V_wl*delta/(2*N1*gamma))
+
+
+def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
+    pvalue_funs, stepsize=0.05, modulus=None, alpha=0.05, feasible_lambda_range=None):
+    """
+    Deprecated: grid search to find the maximum P-value.
+    
+    Find the smallest Fisher's combined statistic for P-values obtained 
+    by testing two null hypotheses at level alpha using data X=(X1, X2).
 
     Parameters
     ----------
-    N : array_like
-        Array of stratum sizes
-    overall_margin : int
-        the difference in votes for reported winner and loser in the population
+    N_w1 : int
+        votes for the reported winner in the ballot comparison stratum
+    N_l1 : int
+        votes for the reported loser in the ballot comparison stratum
+    N1 : int
+        total number of votes in the ballot comparison stratum
+    N_w2 : int
+        votes for the reported winner in the ballot polling stratum
+    N_l2 : int
+        votes for the reported loser in the ballot polling stratum
+    N2 : int
+        total number of votes in the ballot polling stratum
     pvalue_funs : array_like
         functions for computing p-values. The observed statistics/sample and known parameters should be
         plugged in already. The function should take the lambda allocation AS INPUT and output a p-value.
-    precise : bool
-        Optional, should we refine the maximum found by minimize_scalar? Default is True
-    plausible_lambda_range : array-like
-        lower and upper limits to search over lambda. Optional, but will speed up the search
+    stepsize : float
+        size of the grid for searching over lambda. Default is 0.05
+    modulus : function
+        the modulus of continuity of the Fisher's combination function.
+        This should be created using `create_modulus`.
+        Optional (Default is None), but increases the precision of the grid search.
+    alpha : float
+        Risk limit. Default is 0.05.
+    feasible_lambda_range : array-like
+        lower and upper limits to search over lambda. 
+        Optional, but a smaller interval will speed up the search.
     
     Returns
     -------
@@ -57,46 +103,47 @@ def maximize_fisher_combined_pvalue(N, overall_margin, pvalue_funs, precise=True
         minimum value of Fisher's combined test statistic
     float
         lambda, the parameter that minimizes the Fisher's combined statistic/maximizes the combined p-value
-    """
-	
-    assert len(N)==2
+    """	
     assert len(pvalue_funs)==2
         
     # find range of possible lambda
-    if plausible_lambda_range is None:
-        lambda_upper = int(np.min([2*N[0]/overall_margin, 1+2*N[1]/overall_margin]))+1
-        lambda_lower = int(np.max([-2*N[0]/overall_margin, 1-2*N[1]/overall_margin]))
-    else:
-        lambda_upper = plausible_lambda_range[1]
-        lambda_lower = plausible_lambda_range[0]
+    if feasible_lambda_range is None:
+        feasible_lambda_range = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
+    (lambda_lower, lambda_upper) = feasible_lambda_range
 
     fisher_pvalues = []
-    cvr_pvalues = []
-    test_lambdas = np.arange(lambda_lower, lambda_upper+1, 0.5)
+    test_lambdas = np.arange(lambda_lower, lambda_upper+stepsize, stepsize)
+    if len(test_lambdas) < 5:
+        stepsize = (lambda_upper + 1 - lambda_lower)/5
+        test_lambdas = np.arange(lambda_lower, lambda_upper+stepsize, stepsize)
     for lam in test_lambdas:
         pvalue1 = np.min([1, pvalue_funs[0](lam)])
-        if pvalue1 < 0.01:
-            fisher_pvalues.append(0)
-        else:
-            pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
-            fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
+        pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
+        fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
         
     pvalue = np.max(fisher_pvalues)
     alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
     
-    # go back and make sure that this is actually the maximizer within a window
-    
-    if precise is True:
-        fisher_pvalues = []
-        test_lambdas = np.arange(alloc_lambda-0.5, alloc_lambda+0.5, 0.1)
-        for lam in test_lambdas:
-            pvalue1 = np.min([1, pvalue_funs[0](lam)])
-            pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
-            fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
-            
-        if np.max(fisher_pvalues) > pvalue:
-            pvalue = np.max(fisher_pvalues)
-            alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
+    # Use modulus of continuity for the Fisher combination function to check
+    # how close this is to the true max
+    if modulus is not None:
+        fisher_fun_obs = scipy.stats.chi2.ppf(1-pvalue, df=4)
+        fisher_fun_alpha = scipy.stats.chi2.ppf(1-alpha, df=4)
+        dist = np.abs(fisher_fun_obs - fisher_fun_alpha)
+        mod = modulus(stepsize)
+        
+        if mod <= dist:
+            return {'max_pvalue' : pvalue,
+                    'min_chisq' : fisher_fun_obs,
+                    'allocation lambda' : alloc_lambda
+                    }
+        else:
+            new_step = scipy.optimize.brentq(lambda lam: modulus(lam) - dist, 0, stepsize)
+            lambda_lower = alloc_lambda - 2*stepsize
+            lambda_upper = alloc_lambda + 2*stepsize
+            return maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
+                pvalue_funs, stepsize=new_step, modulus=None, alpha=alpha, 
+                feasible_lambda_range=(lambda_lower, lambda_upper))
     
     return {'max_pvalue' : pvalue,
             'min_chisq' : sp.stats.chi2.ppf(1 - pvalue, df=4),
