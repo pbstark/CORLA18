@@ -97,15 +97,21 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     -------
     dict with 
     
-    float
+    max_pvalue: float
         maximum combined p-value
-    float
+    min_chisq: float
         minimum value of Fisher's combined test statistic
-    float
-        lambda, the parameter that minimizes the Fisher's combined statistic/maximizes the combined p-value
+    allocation lambda : float
+        the parameter that minimizes the Fisher's combined statistic/maximizes the combined p-value
+    refined : bool
+        was the grid search refined after the first pass?
+    stepsize : float
+        the final grid step size used
+    tol : float
+        if refined is True, this is an upper bound on potential approximation error of min_chisq
     """	
     assert len(pvalue_funs)==2
-        
+    
     # find range of possible lambda
     if feasible_lambda_range is None:
         feasible_lambda_range = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
@@ -124,31 +130,41 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     pvalue = np.max(fisher_pvalues)
     alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
     
+    # If p-value is over the risk limit, then there's no need to refine the
+    # maximization. We have a lower bound on the maximum.
+    if pvalue > alpha or modulus is None:
+        return {'max_pvalue' : pvalue,
+                'min_chisq' : sp.stats.chi2.ppf(1 - pvalue, df=4),
+                'allocation lambda' : alloc_lambda,
+                'tol' : None,
+                'stepsize' : stepsize,
+                'refined' : False
+                }
+    
     # Use modulus of continuity for the Fisher combination function to check
     # how close this is to the true max
-    if modulus is not None:
-        fisher_fun_obs = scipy.stats.chi2.ppf(1-pvalue, df=4)
-        fisher_fun_alpha = scipy.stats.chi2.ppf(1-alpha, df=4)
-        dist = np.abs(fisher_fun_obs - fisher_fun_alpha)
-        mod = modulus(stepsize)
-        
-        if mod <= dist:
-            return {'max_pvalue' : pvalue,
-                    'min_chisq' : fisher_fun_obs,
-                    'allocation lambda' : alloc_lambda
-                    }
-        else:
-            new_step = scipy.optimize.brentq(lambda lam: modulus(lam) - dist, 0, stepsize)
-            lambda_lower = alloc_lambda - 2*stepsize
-            lambda_upper = alloc_lambda + 2*stepsize
-            return maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
-                pvalue_funs, stepsize=new_step, modulus=None, alpha=alpha, 
-                feasible_lambda_range=(lambda_lower, lambda_upper))
-    
-    return {'max_pvalue' : pvalue,
-            'min_chisq' : sp.stats.chi2.ppf(1 - pvalue, df=4),
-            'allocation lambda' : alloc_lambda
-            }
+    fisher_fun_obs = scipy.stats.chi2.ppf(1-pvalue, df=4)
+    fisher_fun_alpha = scipy.stats.chi2.ppf(1-alpha, df=4)
+    dist = np.abs(fisher_fun_obs - fisher_fun_alpha)
+    mod = modulus(stepsize)
+
+    if mod <= dist:
+        return {'max_pvalue' : pvalue,
+                'min_chisq' : fisher_fun_obs,
+                'allocation lambda' : alloc_lambda,
+                'stepsize' : stepsize,
+                'tol' : mod,
+                'refined' : False
+                }
+    else:
+        new_step = scipy.optimize.brentq(lambda lam: modulus(lam) - dist, 0, stepsize)
+        lambda_lower = alloc_lambda - 2*stepsize
+        lambda_upper = alloc_lambda + 2*stepsize
+        refined = maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
+            pvalue_funs, stepsize=new_step/2, modulus=modulus, alpha=alpha, 
+            feasible_lambda_range=(lambda_lower, lambda_upper))
+        refined['refined'] = True
+        return refined
 
 
 def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
