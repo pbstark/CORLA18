@@ -250,7 +250,6 @@ If tests in different strata were correlated, the null distribution of the combi
 
 \subsection{Maximizing Fisher's combined $P$-value for $S=2$}
 We now specialize to $S=2$ strata.
-%In Colorado, one stratum would comprise all ballots cast in CVR counties and the other all ballots cast in no-CVR counties.
 The set of $\mathbf{\lambda} = (\lambda_1, \lambda_2)$ such that $\sum_s \lambda_s = 1$ is then a one-dimensional family: if $\lambda_1 = \lambda$, then $\lambda_2 = 1-\lambda$.
 For a given set of data, finding the maximum $P$-value over all $\mathbf{\lambda}$
 is thus a one-dimensional optimization problem.
@@ -260,8 +259,11 @@ The first approach approximates the maximum via a grid search, refining the
 grid once the maximum has been bracketed.
 This is not guaranteed to find the global maximum exactly, although it can approximate 
 the maximum as closely as one desires by refining the mesh, since the objective function is continuous.
+Appendix~\ref{sec:appendix-max-fisher} derives a bound on the approximation error for the special
+case when $p_1$ and $p_2$ are $P$-values from a comparison audit and a ballot-polling audit, respectively.
 
-The second, more rigorous approach uses bounds on Fisher's combining function $\chi$ for all $\lambda$. 
+A second, more rigorous approach uses bounds on Fisher's combining function $\chi$ for all $\lambda$, 
+which are valid when the $P$-values are monotonic functions of $\lambda$. 
 (A lower bound on $\chi$ implies an upper bound on the $P$-value: if, for all $\lambda$, the lower bound is 
 larger than the $1-\alpha$ quantile of the chi-squared distribution with 4~degrees of freedom, the maximum $P$-value is no larger than $\alpha$.)
 
@@ -271,7 +273,7 @@ Some values of $\lambda$ can be ruled out \emph{a priori}, because (for instance
 \eeq
 Let $\lambda_-$ and $\lambda_+$ be lower and upper bounds on $\lambda$.
 
-Recall that $p_s(\cdot)$ are monotonically increasing functions, so, as a function of $\lambda$, $p_1(\lambda)$ increases monotonically and $p_2(1-\lambda)$ decreases monotonically.
+When the $p_s(\cdot)$ are monotonically increasing functions of $\lambda$, $p_1(\lambda)$ increases monotonically and $p_2(1-\lambda)$ decreases monotonically.
 Suppose $[a, b) \subset [\lambda_-, \lambda_+]$.
 Then for all $\lambda \in [a, b)$, $-2\ln p_1(\lambda) \ge -2\ln p_1(b)$ and
 $-2\ln p_2(1-\lambda) \ge -2\ln p_2(1-a)$.
@@ -717,6 +719,96 @@ Because the test is built on Wald's SPRT,  the sample can expand sequentially an
 That is, $\Pr \{ \inf_n P_n < p \} \le p$ if the null is true.
 
 A Jupyter notebook implementing this approach is given in \url{https://github.com/pbstark/CORLA18}.
+
+
+
+\section{Maximizing Fisher's combined $P$-value for a hybrid stratified audit}\label{sec:appendix-max-fisher}
+
+Below, we present an algorithm for maximizing the $P$-value of a hybrid stratified audit that combines
+ballot comparison with ballot polling.
+Let $p_1(\lambda)$ be the $P$-value from a ballot-polling audit and $p_2(1-\lambda)$ be the
+$P$-value from a ballot comparison audit.
+The calculation of these $P$-values is derived in Appendix~\ref{sec:appendix-polling} 
+and~\ref{sec:appendix-comparison}, respectively.
+
+The algorithm computes $\chi(\lambda)$ along a discrete grid of $\lambda$ values separated by distance $\delta$
+and estimates the minimum of $\chi$ as $\chi^*(\delta)$, the minimum along the $\delta$-grid
+(equivalently, the maximum $P$-value is estimated to be the area under the chi-square distribution
+with $4$ degrees of freedom, to the right of $\chi^*(\delta)$).
+How do we know if the minimum is approximated sufficiently?
+
+One way to guarantee that the true minimum is not much smaller than the one estimated from a grid search
+is by bounding how much the function can change between grid points.
+The \emph{modulus of continuity}, $\omega(\delta)$, is an upper bound on how much $\chi$ can change on an interval
+of a given size $\delta$:
+
+$$\lvert \chi(\lambda) - \chi(\lambda + \delta) \rvert \leq \omega(\delta).$$
+
+We'd like to be certain that the true minimum value of $\chi$ is not smaller than $\chi_\alpha$,
+the $\alpha$ quantile of the chi-square distribution on 4 degrees of freedom.
+Using the modulus of continuity, we know that the distance between the estimated minimum and the
+true minimum is at most $\omega(\delta)$.
+This provides us with a sufficient condition to check whether the minimum has been approximated to
+sufficient accuracy:
+If $\min_\lambda \chi(\lambda) \ge \chi_\alpha$, then
+
+\begin{equation}
+\chi^*(\delta) - \min_\lambda \chi(\lambda)  \le \omega(\delta) \le \chi^*(\delta) - \chi_\alpha.
+\end{equation}
+
+If this condition holds, then it's guaranteed that the true minimum is above $\chi_\alpha$.
+The audit can stop here.
+If not, then either the true minimum is above $\chi_\alpha$ or the grid size $\delta$ is too coarse.
+
+The algorithm to approximate $\min_\lambda \chi(\lambda)$ is as follows:
+
+\begin{enumerate}
+\item Perform a $\delta$-grid search over $\chi$ to find $\chi^*(\delta)$.
+\item If $\chi^*(\delta) < \chi_\alpha$, stop. The audit must escalate.
+\item Otherwise, check whether $\omega(\delta) \le \chi^*(\delta) - \chi_\alpha$.
+\item If yes, stop: the minimum $\chi$ is above $\chi_\alpha$. 
+If no, determine a new step size $\delta'$ such that $\omega(\delta') < \chi^*(\delta) - \chi_\alpha$,
+set $\delta \leftarrow \delta'$,
+and return to step 1.
+\end{enumerate}
+
+\subsection{The modulus of continuity for Fisher's combining function}
+
+Fisher's combining function is
+
+\begin{align}\label{eq:fisher-hybrid}
+\chi(\lambda) = -2 & \Bigg[ \sum_{i=0}^{W_n - 1} \log(N_{w,2}(\lambda) - i) +\sum_{i=0}^{L_n - 1} \log(N_{w,2}(\lambda) - c(\lambda) - i) +\sum_{i=0}^{U_n - 1} \log(N_2 - 2N_{w,2}(\lambda) + c(\lambda) - i)   \nonumber \\
+  & - \sum_{i=0}^{W_n - 1} \log(V_{w,2} - i) - \sum_{i=0}^{L_n - 1} \log(V_{\ell,2} - i) - \sum_{i=0}^{U_n - 1} \log(V_{u,2} - i) \nonumber \\
+  & +n_1 \log\left( 1 - \frac{(1-\lambda)V_{w\ell}}{2N_1 \gamma}\right) - o_1 \log(1 - 1/2\gamma) - o_2 \log(1 - 1/\gamma) \nonumber \\
+  &  - u_1 \log(1 + 1/2\gamma) - u_2 \log(1 + 1/\gamma) \Bigg]
+\end{align}
+
+We'd like to calculate the modulus of continuity (or an upper bound on it) for this function.
+Moduli of continuity obey two key properties:
+
+\begin{itemize}
+\item \textbf{Linearity}: $\omega(a f + b g, \delta) = \lvert a \rvert \omega_f(\delta) + \lvert b \rvert \omega_g (\delta)$
+\item \textbf{Composition}: $\omega(g \circ f, \delta) = \omega_g(\omega_f(\delta))$
+\end{itemize}
+
+First, we find the modulus of continuity for several simple functions:
+
+\begin{itemize}
+\item $\log(ax - b)$: the modulus of continuity is $\log(1 + a\delta)$.
+\item $c(\lambda) = (V_{w,2}-V_{\ell,2}) - \lambda V_{w\ell}$: since this function is linear in $\lambda$, the modulus of continuity is $V_{w\ell}\delta$.
+\item $N_{w,2}(\lambda)$. When $N_{u,2}$ is known, this is also linear in $c(\lambda)$. 
+When $N_{u,2}$ is not known but $\delta$ is small, this will still be linear in $c(\lambda)$.
+Thus it also has modulus of continuity $V_{w\ell}\delta$.
+\item For terms that don't involve $\lambda$, the modulus of continuity is 0.
+\end{itemize}
+
+There are four terms in $\chi(\lambda)$ that involve $\lambda$.
+Using the two key properties of linearity and composition, as well as the moduli for simple functions above, we obtain the following:
+
+\begin{align}
+\omega_\chi(\delta) = & 2W_n \log(1 + V_{w\ell}\delta) + 2L_n \log(1+ 2V_{w\ell}\delta) + \nonumber \\
+& 2U_n \log(1 + 3V_{w\ell}\delta) + 2n_1 \log\left(1 + \frac{V_{w\ell}{2N_1\gamma}}\delta\right)
+\end{align}
 
 
 \bibliography{./pbsBib}
