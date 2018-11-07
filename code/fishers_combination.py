@@ -6,7 +6,7 @@ from ballot_comparison import ballot_comparison_pvalue
 from hypergeometric import trihypergeometric_optim
 from sprt import ballot_polling_sprt
 import matplotlib.pyplot as plt
-
+import numpy.testing
 
 def fisher_combined_pvalue(pvalues):
     """
@@ -52,8 +52,8 @@ def create_modulus(n1, n2, n_w2, n_l2, N1, V_wl, gamma):
     Wn = n_w2; Ln = n_l2; Un = n2-n_w2-n_l2
     assert Wn>=0 and Ln>=0 and Un>=0
     
-    return lambda delta: 2*Wn*np.log(1 + V_wl*delta/2) + 2*Ln*np.log(1 + 3*V_wl*delta/2) + \
-            2*Un*np.log(1 + 2*V_wl*delta) + 2*n1*np.log(1 + V_wl*delta/(2*N1*gamma))
+    return lambda delta: 2*Wn*np.log(1 + V_wl*delta) + 2*Ln*np.log(1 + 2*V_wl*delta) + \
+            2*Un*np.log(1 + 3*V_wl*delta) + 2*n1*np.log(1 + V_wl*delta/(2*N1*gamma))
 
 
 def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
@@ -97,15 +97,21 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     -------
     dict with 
     
-    float
+    max_pvalue: float
         maximum combined p-value
-    float
+    min_chisq: float
         minimum value of Fisher's combined test statistic
-    float
-        lambda, the parameter that minimizes the Fisher's combined statistic/maximizes the combined p-value
+    allocation lambda : float
+        the parameter that minimizes the Fisher's combined statistic/maximizes the combined p-value
+    refined : bool
+        was the grid search refined after the first pass?
+    stepsize : float
+        the final grid step size used
+    tol : float
+        if refined is True, this is an upper bound on potential approximation error of min_chisq
     """	
     assert len(pvalue_funs)==2
-        
+    
     # find range of possible lambda
     if feasible_lambda_range is None:
         feasible_lambda_range = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
@@ -124,31 +130,41 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     pvalue = np.max(fisher_pvalues)
     alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
     
+    # If p-value is over the risk limit, then there's no need to refine the
+    # maximization. We have a lower bound on the maximum.
+    if pvalue > alpha or modulus is None:
+        return {'max_pvalue' : pvalue,
+                'min_chisq' : sp.stats.chi2.ppf(1 - pvalue, df=4),
+                'allocation lambda' : alloc_lambda,
+                'tol' : None,
+                'stepsize' : stepsize,
+                'refined' : False
+                }
+    
     # Use modulus of continuity for the Fisher combination function to check
     # how close this is to the true max
-    if modulus is not None:
-        fisher_fun_obs = scipy.stats.chi2.ppf(1-pvalue, df=4)
-        fisher_fun_alpha = scipy.stats.chi2.ppf(1-alpha, df=4)
-        dist = np.abs(fisher_fun_obs - fisher_fun_alpha)
-        mod = modulus(stepsize)
-        
-        if mod <= dist:
-            return {'max_pvalue' : pvalue,
-                    'min_chisq' : fisher_fun_obs,
-                    'allocation lambda' : alloc_lambda
-                    }
-        else:
-            new_step = scipy.optimize.brentq(lambda lam: modulus(lam) - dist, 0, stepsize)
-            lambda_lower = alloc_lambda - 2*stepsize
-            lambda_upper = alloc_lambda + 2*stepsize
-            return maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
-                pvalue_funs, stepsize=new_step, modulus=None, alpha=alpha, 
-                feasible_lambda_range=(lambda_lower, lambda_upper))
-    
-    return {'max_pvalue' : pvalue,
-            'min_chisq' : sp.stats.chi2.ppf(1 - pvalue, df=4),
-            'allocation lambda' : alloc_lambda
-            }
+    fisher_fun_obs = scipy.stats.chi2.ppf(1-pvalue, df=4)
+    fisher_fun_alpha = scipy.stats.chi2.ppf(1-alpha, df=4)
+    dist = np.abs(fisher_fun_obs - fisher_fun_alpha)
+    mod = modulus(stepsize)
+
+    if mod <= dist:
+        return {'max_pvalue' : pvalue,
+                'min_chisq' : fisher_fun_obs,
+                'allocation lambda' : alloc_lambda,
+                'stepsize' : stepsize,
+                'tol' : mod,
+                'refined' : False
+                }
+    else:
+        new_step = scipy.optimize.brentq(lambda lam: modulus(lam) - dist, 0, stepsize)
+        lambda_lower = alloc_lambda - 2*stepsize
+        lambda_upper = alloc_lambda + 2*stepsize
+        refined = maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
+            pvalue_funs, stepsize=new_step/2, modulus=modulus, alpha=alpha, 
+            feasible_lambda_range=(lambda_lower, lambda_upper))
+        refined['refined'] = True
+        return refined
 
 
 def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
@@ -346,3 +362,65 @@ def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
                 'lower_bounds' : lower_bounds,
                 'grid' : np.arange(lambda_lower, lambda_upper+1, stepsize)
                 }
+
+
+################################################################################
+############################## Unit tests ######################################
+################################################################################
+
+def test_modulus():
+    N1 = 1000
+    N2 = 100
+    Vw1 = 550
+    Vl1 = 450
+    Vw2 = 60
+    Vl2 = 40
+    Vu2 = N2-Vw2-Vl2
+
+    Vwl = (Vw1 + Vw2) - (Vl1 + Vl2)
+
+    Nw1_null = N1/2
+
+
+    n1 = 100
+    o1 = o2 = u1 = u2 = 0
+    gamma = 1.03
+
+    nw2 = 6; Wn = nw2
+    nl2 = 4; Ln = nl2
+    n2 = 10; Un = n2 - nl2 - nw2
+
+    def c(lam):
+        return Vw2 - Vl2 - lam*Vwl
+
+    def Nw_null(lam):
+        return (N2 - Un + c(lam))/2
+
+    def fisher_fun(lam):
+        Nw_null_val = Nw_null(lam)
+        c_val = c(lam)
+        fisher_fun = -2*np.sum(np.log(Nw_null_val - np.arange(Wn))) +\
+        -2*np.sum(np.log(Nw_null_val - c_val - np.arange(Ln))) +\
+        -2*np.sum(np.log(N2 - 2*Nw_null_val + c_val - np.arange(Un))) +\
+        2*np.sum(np.log(Vw2 - np.arange(Wn))) +\
+        2*np.sum(np.log(Vl2 - np.arange(Ln))) +\
+        2*np.sum(np.log(Vu2 - np.arange(Un))) +\
+        -2*n1*np.log(1 - (1-lam)*Vwl/(2*N1*gamma)) + \
+        2*o1*np.log(1 - 1/(2*gamma)) + \
+        2*o2*np.log(1 - 1/(gamma)) + \
+        2*u1*np.log(1 + 1/(2*gamma)) + \
+        2*u2*np.log(1 + 1/(gamma))
+        return fisher_fun
+        
+    mod = create_modulus(n1, n2, nw2, nl2, N1, Vwl, gamma)
+    
+    v1 = np.abs(fisher_fun(0.6 + 0.1) - fisher_fun(0.6))
+    v2 = mod(0.1)
+    np.testing.assert_array_less(v1, v2)
+    v1 = np.abs(fisher_fun(0.2 + 0.01) - fisher_fun(0.2))
+    v2 = mod(0.01)
+    np.testing.assert_array_less(v1, v2)
+    v1 = np.abs(fisher_fun(0.8 + 0.001) - fisher_fun(0.8))
+    v2 = mod(0.001)
+    np.testing.assert_array_less(v1, v2)
+    

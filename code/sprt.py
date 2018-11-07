@@ -52,7 +52,6 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
     Ln = np.sum(sample == 0)
     Un = n - Wn - Ln
     decision = "None"
-    null_margin = int(null_margin)
 
     # Set up likelihood for null and alternative hypotheses
 #    assert Vw > Vl, "Invalid alternative hypothesis. Vw must be larger than Vl"
@@ -99,8 +98,8 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
         LR = np.exp(res)
 
     else:
-        upper_Nw_limit = np.ceil((popsize - Un + null_margin)/2)
-        lower_Nw_limit = int(np.max([Wn, Ln+null_margin]))
+        upper_Nw_limit = (popsize - Un + null_margin)/2
+        lower_Nw_limit = np.max([Wn, Ln+null_margin])
         
         # For extremely small or large null_margins, the limits do not
         # make sense with the sample values.
