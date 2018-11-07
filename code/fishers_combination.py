@@ -59,7 +59,7 @@ def create_modulus(n1, n2, n_w2, n_l2, N1, V_wl, gamma):
 def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     pvalue_funs, stepsize=0.05, modulus=None, alpha=0.05, feasible_lambda_range=None):
     """
-    Deprecated: grid search to find the maximum P-value.
+    Grid search to find the maximum P-value.
     
     Find the smallest Fisher's combined statistic for P-values obtained 
     by testing two null hypotheses at level alpha using data X=(X1, X2).
@@ -198,9 +198,7 @@ def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
     assert len(pvalue_funs)==2
         
     # find range of possible lambda
-#    (lambda_lower, lambda_upper) = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
-    lambda_upper = int(np.min([2*N[0]/overall_margin, 1+2*N[1]/overall_margin]))+1
-    lambda_lower = int(np.max([-2*N[0]/overall_margin, 1-2*N[1]/overall_margin]))
+    (lambda_lower, lambda_upper) = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
 
     fisher_pvalues = []
     cvr_pvalues = []
@@ -261,6 +259,7 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha
     margin = (N_w1+N_w2)-(N_l1+N_l2)
     N1 = N_w1+N_l1
     N2 = N_w2+N_l2
+    Vwl = (N_w1 + N_w2) - (N_l1 + N_l2)
     pop2 = [1]*N_w2 + [0]*N_l2 + [np.nan]*(N2 - N_w2 - N_l2)
     
     cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1, gamma=1.03905, \
@@ -273,17 +272,17 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha
         if verbose:
             print(i)
         sam = np.random.choice(pop2, n2, replace=False)
-        #nocvr_pvalue = lambda alloc: trihypergeometric_optim(sample=sam, 
-        #                                popsize=N2, 
-        #                                null_margin=(N_w2-N_l2) - alloc*margin)
+        nw2 = np.sum(sam == 1)
+        nl2 = np.sum(sam == 0)
+        mod = create_modulus(n1, n2, nw2, nl2, N1, Vwl, 1.03905)
         nocvr_pvalue = lambda alloc: \
             ballot_polling_sprt(sample=sam, popsize=N2, alpha=alpha,
                                 Vw=N_w2, Vl=N_l2, \
                                 null_margin=(N_w2-N_l2) - alloc*margin)['pvalue']
-        fisher_pvalues[i] = maximize_fisher_combined_pvalue(N=(N1, N2),
-                               overall_margin=margin, 
+        fisher_pvalues[i] = maximize_fisher_combined_pvalue(N_w1, N_l1, 
+                               N1, N_w2, N_l2, N2,
                                pvalue_funs=[cvr_pvalue, nocvr_pvalue],
-                               precise=True,
+                               modulus=mod,
                                plausible_lambda_range=plausible_lambda_range)['max_pvalue']
     return np.mean(fisher_pvalues <= alpha)
 
@@ -300,7 +299,7 @@ def calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2):
 def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
                      pvalue_funs, plausible_lambda_range=None, stepsize=0.5):
         """
-        Create piecewise constant upper and lower bounds for the Fisher's 
+        DEPRECATED: Create piecewise constant upper and lower bounds for the Fisher's 
         combination function for varying error allocations
 
         Parameters
@@ -368,7 +367,7 @@ def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
 ############################## Unit tests ######################################
 ################################################################################
 
-def test_modulus():
+def test_modulus1():
     N1 = 1000
     N2 = 100
     Vw1 = 550
@@ -376,12 +375,9 @@ def test_modulus():
     Vw2 = 60
     Vl2 = 40
     Vu2 = N2-Vw2-Vl2
-
     Vwl = (Vw1 + Vw2) - (Vl1 + Vl2)
 
     Nw1_null = N1/2
-
-
     n1 = 100
     o1 = o2 = u1 = u2 = 0
     gamma = 1.03
@@ -424,3 +420,6 @@ def test_modulus():
     v2 = mod(0.001)
     np.testing.assert_array_less(v1, v2)
     
+    
+if __name__ == "__main__":
+    test_modulus1()
