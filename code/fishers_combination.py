@@ -117,15 +117,15 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
         feasible_lambda_range = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
     (lambda_lower, lambda_upper) = feasible_lambda_range
 
-    fisher_pvalues = []
     test_lambdas = np.arange(lambda_lower, lambda_upper+stepsize, stepsize)
     if len(test_lambdas) < 5:
         stepsize = (lambda_upper + 1 - lambda_lower)/5
         test_lambdas = np.arange(lambda_lower, lambda_upper+stepsize, stepsize)
-    for lam in test_lambdas:
-        pvalue1 = np.min([1, pvalue_funs[0](lam)])
-        pvalue2 = np.min([1, pvalue_funs[1](1-lam)])
-        fisher_pvalues.append(fisher_combined_pvalue([pvalue1, pvalue2]))
+    fisher_pvalues = np.empty_like(test_lambdas)
+    for i in range(len(test_lambdas)):
+        pvalue1 = np.min([1, pvalue_funs[0](test_lambdas[i])])
+        pvalue2 = np.min([1, pvalue_funs[1](1-test_lambdas[i])])
+        fisher_pvalues[i] = fisher_combined_pvalue([pvalue1, pvalue2])
         
     pvalue = np.max(fisher_pvalues)
     alloc_lambda = test_lambdas[np.argmax(fisher_pvalues)]
