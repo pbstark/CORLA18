@@ -157,11 +157,10 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
                 'refined' : False
                 }
     else:
-        new_step = scipy.optimize.brentq(lambda lam: modulus(lam) - dist, 0, stepsize)
         lambda_lower = alloc_lambda - 2*stepsize
         lambda_upper = alloc_lambda + 2*stepsize
         refined = maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
-            pvalue_funs, stepsize=new_step/2, modulus=modulus, alpha=alpha, 
+            pvalue_funs, stepsize=stepsize/10, modulus=modulus, alpha=alpha, 
             feasible_lambda_range=(lambda_lower, lambda_upper))
         refined['refined'] = True
         return refined
