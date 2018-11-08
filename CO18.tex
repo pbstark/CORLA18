@@ -767,9 +767,8 @@ The algorithm to approximate $\min_\lambda \chi(\lambda)$ is as follows:
 \item If $\chi^*(\delta) < \chi_\alpha$, stop. The audit must escalate.
 \item Otherwise, check whether $\omega(\delta) \le \chi^*(\delta) - \chi_\alpha$.
 \item If yes, stop: the minimum $\chi$ is above $\chi_\alpha$. 
-If no, determine a new step size $\delta'$ such that $\omega(\delta') < \chi^*(\delta) - \chi_\alpha$,
-set $\delta \leftarrow \delta'$,
-and return to step 1.
+If no, decrease to step size $\delta'$ ,
+e.g. $\delta' = \delta/10$, and return to step 1.
 \end{enumerate}
 
 \subsection{The modulus of continuity for Fisher's combining function}
@@ -807,7 +806,7 @@ Using the two key properties of linearity and composition, as well as the moduli
 
 \begin{align}
 \omega_\chi(\delta) = & 2W_n \log(1 + V_{w\ell}\delta) + 2L_n \log(1+ 2V_{w\ell}\delta) + \nonumber \\
-& 2U_n \log(1 + 3V_{w\ell}\delta) + 2n_1 \log\left(1 + \frac{V_{w\ell}{2N_1\gamma}}\delta\right)
+& 2U_n \log(1 + 3V_{w\ell}\delta) + 2n_1 \log\left(1 + \frac{V_{w\ell}}{2N_1\gamma}\delta\right)
 \end{align}
 
 
