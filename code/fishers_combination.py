@@ -60,7 +60,7 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     pvalue_funs, stepsize=0.05, modulus=None, alpha=0.05, feasible_lambda_range=None):
     """
     Grid search to find the maximum P-value.
-    
+
     Find the smallest Fisher's combined statistic for P-values obtained 
     by testing two null hypotheses at level alpha using data X=(X1, X2).
 
@@ -92,11 +92,11 @@ def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
     feasible_lambda_range : array-like
         lower and upper limits to search over lambda. 
         Optional, but a smaller interval will speed up the search.
-    
+
     Returns
     -------
     dict with 
-    
+
     max_pvalue: float
         maximum combined p-value
     min_chisq: float
@@ -216,7 +216,7 @@ def plot_fisher_pvalues(N, overall_margin, pvalue_funs, alpha=None):
     
     
 def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha,
-    reps=10000, verbose=False, plausible_lambda_range=None):
+    reps=10000, verbose=False, feasible_lambda_range=None):
     """
     Simulate the Fisher method of combining a ballot comparison audit
     and ballot polling audit, assuming the reported results are correct.
@@ -247,7 +247,7 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha
         number of times to simulate the audit. Default 10,000
     verbose : bool
         Optional, print iteration number if True
-    plausible_lambda_range : array-like
+    feasible_lambda_range : array-like
         lower and upper limits to search over lambda. Optional, but will speed up the search
     
     Returns
@@ -286,17 +286,62 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha
     return np.mean(fisher_pvalues <= alpha)
 
 
-def calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2):
-    V1 = N_w1 - N_l1
-    V2 = N_w2 - N_l2
-    V = V1+V2
-    lb = np.min([2*N1/V, 1+2*N2/V,1-(N2+V2)/V])
-    ub = np.max([-2*N1/V, 1-2*N2/V,  1+(N2-V2)/V])
+def calculate_lambda_range(N_w1, N_ell1, N_1, N_w2, N_ell2, N_2):
+    '''
+    Find the largest and smallest possible values of lambda.
+    
+    Input:
+    ------
+        N_w1 : int
+            reported votes for overall reported winner w in stratum 1
+        N_ell1 : int
+            reported votes for overall reported loser ell in stratum 1
+        N1 : int
+            ballots cast in stratum 1
+        N_w2 : int
+            reported votes for overall reported winner w in stratum 2
+        N_ell2 : int
+            reported votes for overall reported loser ell in stratum 2
+        N1 : int
+            ballots cast in stratum 2
+   
+    Returns:
+    --------
+        (lb, ub): real ordered pair. lb is a sharp lower bound on lambda; ub is a sharp upper bound
+    
+    Derivation:
+    -----------
+    Let V denote the overall reported margin of w over ell across both strata, i.e., 
+        V = (N_w1 + N_w2) - (N_ell1 + N_ell2)
+        
+    The overstatement error in votes in stratum s is *at most* the difference between the 
+    reported margin in that stratum and the margin that would result if all ballots in 
+    stratum s had votes for the loser; i.e.,
+       margin_error_s <= (N_ws - N_ells)+N_s.
+    Thus 
+        lambda*V <= N_w1 - N_ell1 + N_1.
+        (1-lambda)*V <= N_w2 - N_ell2 + N_2, i.e., lambda*V >= V - (N_w2 - N_ell2 + N_2)
+    
+    The overstatement error in votes in a stratum is at least the difference between the 
+    reported margin in that stratum and the margin that would result if all ballots in the
+    stratum had votes for the winner; i.e.,
+       margin_error_s >= (N_ws - N_ells)-N_s.
+    Thus
+       lambda*V >=  N_w1 - N_ell1 - N_1 
+       (1 - lambda)*V >=  N_w2 - N_ell2 - N_2, i.e., lambda*V <= V - (N_w2 - N_ell2 - N_2)
+    
+    Combining these yields
+       lambda >= max( N_w1 - N_ell1 - N_1, V - (N_w2 - N_ell2 + N_2) )/V
+       lambda <= min( N_w1 - N_ell1 + N_1, V - (N_w2 - N_ell2 - N_2) )/V.
+    '''
+    V = N_w1 + N_w2 - N_ell1 - N_ell2
+    lb = np.amax([N_w1 - N_ell1 - N_1, V - (N_w2 - N_ell2 + N_2)] )/V
+    ub = np.amin([ N_w1 - N_ell1 + N_1, V - (N_w2 - N_ell2 - N_2)] )/V       
     return (lb, ub)
     
     
 def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
-                     pvalue_funs, plausible_lambda_range=None, stepsize=0.5):
+                     pvalue_funs, feasible_lambda_range=None, stepsize=0.05):
         """
         DEPRECATED: Create piecewise constant upper and lower bounds for the Fisher's 
         combination function for varying error allocations
@@ -316,9 +361,10 @@ def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
         N2 : int
             total number of votes in the ballot polling stratum
         pvalue_funs : array_like
-            functions for computing p-values. The observed statistics/sample and known parameters should be plugged in already. 
+            functions for computing p-values. The observed statistics/sample and known parameters
+            should be plugged in already. 
             The function should take the lambda allocation AS INPUT and output a p-value.
-        plausible_lambda_range : array-like
+        feasible_lambda_range : array-like
             lower and upper limits to search over lambda. Optional, but will speed up the search
         stepsize : float
             size of the mesh to calculate bounds; default 0.5
@@ -336,9 +382,9 @@ def bound_fisher_fun(N_w1, N_l1, N1, N_w2, N_l2, N2,
         array-like
            grid : grid of lambdas
         """
-        if plausible_lambda_range is None:
-            plausible_lambda_range = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
-        (lambda_lower, lambda_upper) = plausible_lambda_range
+        if feasible_lambda_range is None:
+            feasible_lambda_range = calculate_lambda_range(N_w1, N_l1, N1, N_w2, N_l2, N2)
+        (lambda_lower, lambda_upper) = feasible_lambda_range
         
         cvr_pvalue = pvalue_funs[0]
         nocvr_pvalue = pvalue_funs[1]
