@@ -219,8 +219,7 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
                                               modulus=bounding_fun, \
                                               alpha=risk_limit)
         expected_pvalue = res['max_pvalue']
-        if (n % 100) == 0:
-            print('...trying...', n, expected_pvalue)
+        print('...trying...', n, expected_pvalue)
         return expected_pvalue
 
     # step 1: linear search, doubling n each time
@@ -232,7 +231,7 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
     low_n = n/2
     high_n = n
     mid_pvalue = 1
-    while  (mid_pvalue > risk_limit) or (expected_pvalue is np.nan):
+    while  (mid_pvalue > risk_limit) or (mid_pvalue < risk_limit - 0.01) or (expected_pvalue is np.nan):
         mid_n = np.floor((low_n+high_n)/2)
         mid_pvalue = try_n(mid_n)
         if mid_pvalue <= risk_limit:
@@ -587,3 +586,74 @@ def audit_contest(candidates, winners, losers, stratum_sizes,\
         audit_pvalues[k] = res['max_pvalue']
 
     return audit_pvalues
+
+
+################################################################################
+############################## Unit testing ####################################
+################################################################################
+
+def test_initial_n():
+    """
+    Assume N1 = N2 = 500, n1 = n2 \equiv n,
+    and the margins V1 = V2 = V/2 are identical in each stratum.
+    w got 60% of the vote and l got 40%.
+    It's known that there are no invalid ballots or votes for other candidates.
+    Assume there are no errors in the comparison stratum and the sample
+    proportions in the polling stratum are 60% and 40%.
+
+    In the polling stratum,
+        $$c(\lambda) = V/2 - (1-\lambda)V = 200\lambda - 100$$
+    and
+        $$N_w(\lambda) = (N2 + c(\lambda))/2 = 200 + 100\lambda.$$
+    Therefore the Fisher combination function is
+        $$ \chi(\lambda) = -2\[ \sum_{i=1}^{np_w - 1} \log(200+100\lambda - i)
+            - \sum_{i=1}^{np_w - 1} \log(300 - i) +
+            \sum_{i=1}^{np_\ell - 1} \log(300-100\lambda - i)
+            - \sum_{i=1}^{np_\ell - 1} \log(200 - i)
+            + n\log( 1 - \frac{\lambda}{5\gamma} )\] $$
+    """
+
+    chi_5percent = scipy.stats.chi2.ppf(1-0.05, df=4)
+    chi_10percent = scipy.stats.chi2.ppf(1-0.10, df=4)
+
+    # sample sizes: n = 50 in each stratum. Not sufficient.
+    chi50 = lambda lam: -2*( np.sum(np.log(200 + 100*lam - np.arange(30))) - \
+        np.sum(np.log(300 - np.arange(30))) + np.sum(np.log(300 - 100*lam - \
+        np.arange(20))) - np.sum(np.log(200 - np.arange(20))) + \
+        50*np.log(1 - lam/(5*gamma)))
+
+    # Valid lambda range is (-2, 3)
+    approx_chisq_min = np.nanmin(list(map(chi50, np.arange(-2,3,0.05))))
+    np.testing.assert_array_less(approx_chisq_min, chi_5percent)
+
+    # sample sizes: n = 70 in each stratum. Sufficient.
+    chi70 = lambda lam: -2*( np.sum(np.log(200 + 100*lam - np.arange(42))) - \
+        np.sum(np.log(300 - np.arange(42))) + np.sum(np.log(300 - 100*lam - \
+        np.arange(28))) - np.sum(np.log(200 - np.arange(28))) + \
+        70*np.log(1 - lam/(5*gamma)))
+    approx_chisq_min = np.nanmin(list(map(chi70, np.arange(-2,3,0.05))))
+    np.testing.assert_array_less(chi_10percent, approx_chisq_min)
+    np.testing.assert_array_less(chi_5percent, approx_chisq_min)
+
+    n = estimate_n(N_w1 = 300, N_w2 = 300, N_l1 = 200, N_l2 = 200,\
+           N1 = 500, N2 = 500, o1_rate = 0, o2_rate = 0,\
+           u1_rate = 0, u2_rate = 0, n_ratio = 0.5,
+           risk_limit = 0.05, gamma = 1.03905)
+    np.testing.assert_equal(n[0] <= 70 and n[0] > 30, True)
+    if (n[0]+n[1]) % 2 == 1:
+        np.testing.assert_equal(n[0], n[1]+1)
+    else:
+        np.testing.assert_equal(n[0], n[1])
+    
+    # sample sizes: n = 55 in each stratum. Should be sufficient.
+    chi55 = lambda lam: -2*( np.sum(np.log(200 + 100*lam - np.arange(33))) - \
+        np.sum(np.log(300 - np.arange(33))) + np.sum(np.log(300 - 100*lam - \
+        np.arange(22))) - np.sum(np.log(200 - np.arange(22))) + \
+        55*np.log(1 - lam/(5*gamma)))
+    approx_chisq_min = np.nanmin(list(map(chi55, np.arange(-2,3,0.05))))
+    np.testing.assert_array_less(chi_10percent, approx_chisq_min)
+    np.testing.assert_array_less(chi_5percent, approx_chisq_min)
+
+
+if __name__ == "__main__":
+    test_initial_n()
