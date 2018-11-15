@@ -641,6 +641,10 @@ We want to test the compound hypothesis that $N_{w,s} - N_{\ell,s} \le c$ agains
 
 The values $V_{w,s}$, $V_{\ell,s}$, and $V_{u,s}$ are the reported results for stratum $s$ 
 (or values related to those reported results; see \cite{lindemanEtal12}). 
+The value of $c$ is inferred from the definition $\omega_{w\ell, s} \equiv V_{w\ell, s} - (N_{w,s} - N_{\ell,s})$.
+Thus,
+$$ c = V_{w, s} - V_{\ell, s} - \omega_{w\ell, s} = V_{w\ell, s} - \lambda_s V_{w\ell}.$$
+
 In this problem, $N_{u,s}$ (equivalently, $N_{w,s} + N_{\ell,s}$) is a nuisance parameter: we care about $ N_{w,s} - N_{\ell,s}$.
 
 Let $X_k$ be $w$, $\ell$, or $u$ according to whether the ballot selected on the $k$th draw 
@@ -776,13 +780,17 @@ e.g. $\delta' = \delta/10$, and return to step 1.
 Fisher's combining function is
 
 \begin{align}\label{eq:fisher-hybrid}
-\chi(\lambda) = -2 & \Bigg[ \sum_{i=0}^{W_n - 1} \log(N_{w,2}(\lambda) - i) +\sum_{i=0}^{L_n - 1} \log(N_{w,2}(\lambda) - c(\lambda) - i) +\sum_{i=0}^{U_n - 1} \log(N_2 - 2N_{w,2}(\lambda) + c(\lambda) - i)   \nonumber \\
-  & - \sum_{i=0}^{W_n - 1} \log(V_{w,2} - i) - \sum_{i=0}^{L_n - 1} \log(V_{\ell,2} - i) - \sum_{i=0}^{U_n - 1} \log(V_{u,2} - i) \nonumber \\
-  & +n_1 \log\left( 1 - \frac{(1-\lambda)V_{w\ell}}{2N_1 \gamma}\right) - o_1 \log(1 - 1/2\gamma) - o_2 \log(1 - 1/\gamma) \nonumber \\
-  &  - u_1 \log(1 + 1/2\gamma) - u_2 \log(1 + 1/\gamma) \Bigg]
+\chi(\lambda) = -2 & \Bigg[ n_1 \log\left( 1 - \frac{\lambda V_{w\ell}}{2N_1 \gamma}\right) - o_1 \log(1 - 1/2\gamma) - o_2 \log(1 - 1/\gamma) \nonumber \\
+  &  - u_1 \log(1 + 1/2\gamma) - u_2 \log(1 + 1/\gamma)+ \sum_{i=0}^{W_n - 1} \log(N_{w,2}(1-\lambda) - i)  \nonumber \\
+  & +\sum_{i=0}^{L_n - 1} \log(N_{w,2}(1-\lambda) - c(1-\lambda) - i) +\sum_{i=0}^{U_n - 1} \log(N_2 - 2N_{w,2}(1-\lambda) + c(1-\lambda) - i)   \nonumber \\
+  & - \sum_{i=0}^{W_n - 1} \log(V_{w,2} - i) - \sum_{i=0}^{L_n - 1} \log(V_{\ell,2} - i) - \sum_{i=0}^{U_n - 1} \log(V_{u,2} - i)  \Bigg].
 \end{align}
 
 We'd like to calculate the modulus of continuity (or an upper bound on it) for this function.
+While in reality, $c(\lambda)$ and $N_w(\lambda)$ must be integer values
+(as they represent numbers of ballots),
+the $P$-value from the ballot-polling SPRT and thus $\chi(\lambda)$ will be continuous by allowing
+$c(\lambda)$ and $N_w(\lambda)$ to be continuous.
 Moduli of continuity obey two key properties:
 
 \begin{itemize}
@@ -790,7 +798,7 @@ Moduli of continuity obey two key properties:
 \item \textbf{Composition}: $\omega(g \circ f, \delta) = \omega_g(\omega_f(\delta))$
 \end{itemize}
 
-First, we find the modulus of continuity for several simple functions:
+\noindent First, we find the modulus of continuity for several simple functions:
 
 \begin{itemize}
 \item $\log(ax - b)$: the modulus of continuity is $\log(1 + a\delta)$.
