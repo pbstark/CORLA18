@@ -4,10 +4,58 @@ from collections import OrderedDict
 from itertools import product
 import math
 import numpy as np
+import json
 
 from ballot_comparison import ballot_comparison_pvalue
 from fishers_combination import  maximize_fisher_combined_pvalue, create_modulus
 from sprt import ballot_polling_sprt
+
+
+################################################################################
+############################# Import/export data ###############################
+################################################################################
+
+def write_audit_parameters(filename, \
+                       risk_limit, stratum_sizes, num_winners, seed, gamma, \
+                       lambda_step, o1_rate, o2_rate, \
+                       u1_rate, u2_rate, n_ratio):
+    param = {"risk_limit" : risk_limit,  
+             "stratum_sizes": stratum_sizes,
+             "num_winners" : num_winners,
+             "seed" : seed,
+             "gamma" : gamma,
+             "lambda_step" : lambda_step,
+             "o1_rate" : o1_rate,
+             "o2_rate" : o2_rate,
+             "u1_rate" : u1_rate,
+             "u2_rate" : u2_rate,
+             "n_ratio" : n_ratio
+             }
+    with open(filename, 'w') as f:
+        json.dump(param, f)
+
+
+def write_audit_results(filename, \
+                        n1, n2, cvr_sample, nocvr_sample, \
+                        o1, o2, u1, u2, observed_poll, \
+                        audit_pvalues):
+    samples = {"cvr_sample" : cvr_sample.tolist(),
+               "nocvr_sample" : nocvr_sample.tolist()}
+    audit_pvalues_str = {}
+    for key, value in audit_pvalues.items():
+        audit_pvalues_str[str(key)] = value
+    results = {"n1" : n1,
+               "n2" : n2,
+               "samples" : samples,
+               "o1" : o1,
+               "o2" : o2,
+               "u1" : u1,
+               "u2" : u2,
+               "observed_poll" : observed_poll,
+               "audit_pvalues" : audit_pvalues_str
+             }
+    with open(filename, 'w') as f:
+        json.dump(results, f)
 
 
 ################################################################################
