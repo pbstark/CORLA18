@@ -94,8 +94,8 @@ def check_valid_vote_counts(candidates, stratum_sizes):
     for votes in candidates.values():
         cvr_votes += votes[0]
         poll_votes += votes[1]
-    assert cvr_votes <= stratum_sizes[0]
-    assert poll_votes <= stratum_sizes[1]
+    assert cvr_votes <= stratum_sizes[0], "More votes entered than total for the stratum"
+    assert poll_votes <= stratum_sizes[1], "More votes entered than total for the stratum"
 
 
 def check_overvote_rates(margins, total_votes, o1_rate, o2_rate):
@@ -333,9 +333,15 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
                             null_margin=(N_w2-N_l2) - \
                              alloc*reported_margin)['pvalue']
 
+        if N2 == 0:
+            n_w2 = 0
+            n_l2 = 0
+        else:
+            n_w2 = int(n2*N_w2/N2)
+            n_l2 = int(n2*N_l2/N2)
         bounding_fun = create_modulus(n1=n1, n2=n2,
-                                      n_w2=int(n2*N_w2/N2), \
-                                      n_l2=int(n2*N_l2/N2), \
+                                      n_w2=n_w2, \
+                                      n_l2=n_l2, \
                                       N1=N1, V_wl=reported_margin, gamma=gamma)
         res = maximize_fisher_combined_pvalue(N_w1=N_w1, N_l1=N_l1, N1=N1, \
                                               N_w2=N_w2, N_l2=N_l2, N2=N2, \
@@ -352,6 +358,11 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
     # step 1: linear search, doubling n each time
     while (expected_pvalue > risk_limit) or (expected_pvalue is np.nan):
         n = 2*n
+        if N2 > 0:
+            n1 = math.ceil(n_ratio * n)
+            n2 = int(n - n1)
+            if (N_w2 < int(n2*N_w2/N2) or N_l2 < int(n2*N_l2/N2)):
+                return(N1, N2)
         expected_pvalue = try_n(n)
 
     # step 2: bisection between n/2 and n
@@ -520,6 +531,11 @@ def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
     # step 1: linear search, increasing n by a factor of 1.1 each time
     while (expected_pvalue > risk_limit) or (expected_pvalue is np.nan):
         n = np.ceil(1.1*n)
+        if N2 > 0:
+            n1 = math.ceil(n_ratio * n)
+            n2 = int(n - n1)
+            if (N_w2 < int(n2*N_w2/N2) or N_l2 < int(n2*N_l2/N2)):
+                return(N1, N2)
         expected_pvalue = try_n(n)
 
     # step 2: bisection between n/1.1 and n
