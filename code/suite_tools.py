@@ -38,7 +38,7 @@ def write_audit_parameters(filename, \
 def write_audit_results(filename, \
                         n1, n2, cvr_sample, nocvr_sample, \
                         o1, o2, u1, u2, observed_poll, \
-                        audit_pvalues):
+                        audit_pvalues, prng_state):
     samples = {"cvr_sample" : cvr_sample.tolist(),
                "nocvr_sample" : nocvr_sample.tolist()}
     audit_pvalues_str = {}
@@ -52,7 +52,8 @@ def write_audit_results(filename, \
                "u1" : u1,
                "u2" : u2,
                "observed_poll" : observed_poll,
-               "audit_pvalues" : audit_pvalues_str
+               "audit_pvalues" : audit_pvalues_str,
+               "prng_state" : prng_state
              }
     with open(filename, 'w') as f:
         json.dump(results, f)
