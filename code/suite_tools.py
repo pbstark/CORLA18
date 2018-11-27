@@ -85,7 +85,7 @@ def check_valid_audit_parameters(risk_limit, lambda_step, o1_rate, o2_rate,
            "Invalid number of winners"
 
 
-def check_valid_vote_counts(candidates, stratum_sizes):
+def check_valid_vote_counts(candidates, num_winners, stratum_sizes):
     """
     Check that the candidates dict containing vote totals
     makes sense
@@ -97,6 +97,7 @@ def check_valid_vote_counts(candidates, stratum_sizes):
         poll_votes += votes[1]
     assert cvr_votes <= stratum_sizes[0], "More votes entered than total for the stratum"
     assert poll_votes <= stratum_sizes[1], "More votes entered than total for the stratum"
+    assert len(candidates) >= num_winners, "Fewer candidates than number of winners"
 
 
 def check_overvote_rates(margins, total_votes, o1_rate, o2_rate):
