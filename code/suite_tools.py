@@ -44,8 +44,8 @@ def write_audit_results(filename, \
     audit_pvalues_str = {}
     for key, value in audit_pvalues.items():
         audit_pvalues_str[str(key)] = value
-    results = {"n1" : n1,
-               "n2" : n2,
+    results = {"n1" : int(n1),
+               "n2" : int(n2),
                "samples" : samples,
                "o1" : o1,
                "o2" : o2,
