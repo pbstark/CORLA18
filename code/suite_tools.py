@@ -44,8 +44,8 @@ def write_audit_results(filename, \
     audit_pvalues_str = {}
     for key, value in audit_pvalues.items():
         audit_pvalues_str[str(key)] = value
-    results = {"n1" : n1,
-               "n2" : n2,
+    results = {"n1" : int(n1),
+               "n2" : int(n2),
                "samples" : samples,
                "o1" : o1,
                "o2" : o2,
@@ -85,7 +85,7 @@ def check_valid_audit_parameters(risk_limit, lambda_step, o1_rate, o2_rate,
            "Invalid number of winners"
 
 
-def check_valid_vote_counts(candidates, stratum_sizes):
+def check_valid_vote_counts(candidates, num_winners, stratum_sizes):
     """
     Check that the candidates dict containing vote totals
     makes sense
@@ -97,6 +97,7 @@ def check_valid_vote_counts(candidates, stratum_sizes):
         poll_votes += votes[1]
     assert cvr_votes <= stratum_sizes[0], "More votes entered than total for the stratum"
     assert poll_votes <= stratum_sizes[1], "More votes entered than total for the stratum"
+    assert len(candidates) >= num_winners, "Fewer candidates than number of winners"
 
 
 def check_overvote_rates(margins, total_votes, o1_rate, o2_rate):
@@ -196,18 +197,22 @@ def print_reported_votes(candidates, winners, losers, margins, stratum_sizes,
     # Reorder candidates if print_alphabetical is True
     if print_alphabetical:
         candidates = OrderedDict(sorted(candidates.items()))
-
-    print('\nTotal reported votes:\n\t\t\tCVR\tno-CVR\ttotal')
+    
+    tot_valid = cvr_votes + poll_votes
+    tot_votes = stratum_sizes[0] + stratum_sizes[1]
+    print('\nTotal reported votes:\n\t\t\tCVR\tno-CVR\ttotal\t% of all votes\t% of valid votes')
     for k, v in candidates.items():
-        print('\t', k, ':', v[0], '\t', v[1], '\t', v[2])
-    print('\n\t total votes:\t', cvr_votes, \
-          '\t', poll_votes, '\t', \
-          cvr_votes + poll_votes)
+        print('\t', k, ':', v[0], '\t', v[1], '\t', v[2], '\t', \
+              "{:>2.2%}".format(v[2]/tot_votes), '\t', \
+              "{:>2.2%}".format(v[2]/tot_valid))
+    print('\n\t valid votes:\t', cvr_votes, \
+          '\t', poll_votes, '\t', tot_valid,
+          '\t', "{:>2.2%}".format(tot_valid/tot_votes))
     print('\n\t non-votes:\t',\
           stratum_sizes[0] - cvr_votes, '\t',\
           stratum_sizes[1] - poll_votes, '\t',\
-          stratum_sizes[0] + stratum_sizes[1] - cvr_votes - poll_votes\
-         )
+          tot_votes - tot_valid,\
+          '\t', "{:>2.2%}".format((tot_votes-tot_valid)/tot_votes))
 
     print('\nReported winners:')
     for w in winners:
@@ -220,10 +225,10 @@ def print_reported_votes(candidates, winners, losers, margins, stratum_sizes,
     print('\n\nReported margins:')
     for k, v in margins.items():
         dum = k[0] + ' beat ' + k[1] + ' by'
-        print('\t', dum, v, 'votes')
+        print('\t', dum, "{:,}".format(v), 'votes')
 
-    print('\nSmallest reported margin:', min_margin, \
-          '\nReported diluted margin:', min_margin/np.sum(stratum_sizes))
+    print('\nSmallest reported margin:', "{:,}".format(min_margin), \
+          '\nCorresponding reported diluted margin:', "{:.2%}".format(min_margin/np.sum(stratum_sizes)))
 
 
 ################################################################################
@@ -494,9 +499,9 @@ def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
             n_w2 = 0
             n_l2 = 0
         else:
-            expected_new_sample = [0]*int((n2-n2_original)*N_l2/N2)+ \
-                                  [1]*int((n2-n2_original)*N_w2/N2)+ \
-                                [np.nan]*int((n2-n2_original)*(N2-N_l2-N_w2)/N2)
+            expected_new_sample = [0]*int((n2-n2_original)*(n2l_obs/n2_original))+ \
+                                  [1]*int((n2-n2_original)*(n2w_obs/n2_original))+ \
+                                [np.nan]*int((n2-n2_original)*(n2_original-n2w_obs-n2l_obs)/n2_original)
             totsample = observed_nocvr_sample+expected_new_sample
             if len(totsample) < n2:
                 totsample += [np.nan]*(n2 - len(totsample))
