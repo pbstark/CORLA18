@@ -197,18 +197,22 @@ def print_reported_votes(candidates, winners, losers, margins, stratum_sizes,
     # Reorder candidates if print_alphabetical is True
     if print_alphabetical:
         candidates = OrderedDict(sorted(candidates.items()))
-
-    print('\nTotal reported votes:\n\t\t\tCVR\tno-CVR\ttotal')
+    
+    tot_valid = cvr_votes + poll_votes
+    tot_votes = stratum_sizes[0] + stratum_sizes[1]
+    print('\nTotal reported votes:\n\t\t\tCVR\tno-CVR\ttotal\t% of all votes\t% of valid votes')
     for k, v in candidates.items():
-        print('\t', k, ':', v[0], '\t', v[1], '\t', v[2])
-    print('\n\t total votes:\t', cvr_votes, \
-          '\t', poll_votes, '\t', \
-          cvr_votes + poll_votes)
+        print('\t', k, ':', v[0], '\t', v[1], '\t', v[2], '\t', \
+              "{:>2.2%}".format(v[2]/tot_votes), '\t', \
+              "{:>2.2%}".format(v[2]/tot_valid))
+    print('\n\t valid votes:\t', cvr_votes, \
+          '\t', poll_votes, '\t', tot_valid,
+          '\t', "{:>2.2%}".format(tot_valid/tot_votes))
     print('\n\t non-votes:\t',\
           stratum_sizes[0] - cvr_votes, '\t',\
           stratum_sizes[1] - poll_votes, '\t',\
-          stratum_sizes[0] + stratum_sizes[1] - cvr_votes - poll_votes\
-         )
+          tot_votes - tot_valid,\
+          '\t', "{:>2.2%}".format((tot_votes-tot_valid)/tot_votes))
 
     print('\nReported winners:')
     for w in winners:
@@ -221,10 +225,10 @@ def print_reported_votes(candidates, winners, losers, margins, stratum_sizes,
     print('\n\nReported margins:')
     for k, v in margins.items():
         dum = k[0] + ' beat ' + k[1] + ' by'
-        print('\t', dum, v, 'votes')
+        print('\t', dum, "{:,}".format(v), 'votes')
 
-    print('\nSmallest reported margin:', min_margin, \
-          '\nReported diluted margin:', min_margin/np.sum(stratum_sizes))
+    print('\nSmallest reported margin:', "{:,}".format(min_margin), \
+          '\nCorresponding reported diluted margin:', "{:.2%}".format(min_margin/np.sum(stratum_sizes)))
 
 
 ################################################################################
