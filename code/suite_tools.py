@@ -328,8 +328,7 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
         if n2 == 0:
             nocvr_pvalue = lambda alloc: 1
         else:
-            sample = [0]*int(n2*N_l2/N2)+[1]*int(n2*N_w2/N2)+ \
-                        [np.nan]*int(n2*(N2-N_l2-N_w2)/N2)
+            sample = [0]*math.ceil(n2*N_l2/N2)+[1]*int(n2*N_w2/N2)
             if len(sample) < n2:
                 sample += [np.nan]*(n2 - len(sample))
             nocvr_pvalue = lambda alloc: ballot_polling_sprt(sample=np.array(sample), \
@@ -499,9 +498,8 @@ def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
             n_w2 = 0
             n_l2 = 0
         else:
-            expected_new_sample = [0]*int((n2-n2_original)*(n2l_obs/n2_original))+ \
-                                  [1]*int((n2-n2_original)*(n2w_obs/n2_original))+ \
-                                [np.nan]*int((n2-n2_original)*(n2_original-n2w_obs-n2l_obs)/n2_original)
+            expected_new_sample = [0]*math.ceil((n2-n2_original)*(n2l_obs/n2_original))+ \
+                                  [1]*int((n2-n2_original)*(n2w_obs/n2_original))
             totsample = observed_nocvr_sample+expected_new_sample
             if len(totsample) < n2:
                 totsample += [np.nan]*(n2 - len(totsample))
