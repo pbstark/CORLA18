@@ -5,6 +5,7 @@ from itertools import product
 import math
 import numpy as np
 import json
+import matplotlib.pyplot as plt
 
 from ballot_comparison import ballot_comparison_pvalue
 from fishers_combination import  maximize_fisher_combined_pvalue, create_modulus
@@ -304,66 +305,99 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
     reported_margin = (N_w1+N_w2)-(N_l1+N_l2)
     expected_pvalue = 1
 
-    def try_n(n):
-        """
-        Find expected combined P-value for a total sample size n.
-        """
-        n1 = math.ceil(n_ratio * n)
-        n2 = int(n - n1)
-
-        # Set up the p-value function for the CVR stratum
-        if n1 == 0:
-            cvr_pvalue = lambda alloc: 1
-        else:
-            o1 = math.ceil(o1_rate*n1)
-            o2 = math.ceil(o2_rate*n1)
-            u1 = math.floor(u1_rate*n1)
-            u2 = math.floor(u2_rate*n1)
-            cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1, \
-                            gamma=gamma, o1=o1, u1=u1, o2=o2, u2=u2, \
-                            reported_margin=reported_margin, N=N1, \
-                            null_lambda=alloc)
-
-        # Set up the p-value function for the no-CVR stratum
-        if n2 == 0:
-            nocvr_pvalue = lambda alloc: 1
-        else:
-            sample = [0]*int(n2*N_l2/N2)+[1]*int(n2*N_w2/N2)+ \
-                        [np.nan]*int(n2*(N2-N_l2-N_w2)/N2)
-            if len(sample) < n2:
-                sample += [np.nan]*(n2 - len(sample))
-            nocvr_pvalue = lambda alloc: ballot_polling_sprt(sample=np.array(sample), \
+    if N1 == 0:
+        def try_n(n):
+            n = int(n)
+            sample = [0]*math.ceil(n*N_l2/N2)+[1]*int(n*N_w2/N2)
+            if len(sample) < n:
+                sample += [np.nan]*(n - len(sample))
+            expected_pvalue = ballot_polling_sprt(sample=np.array(sample), \
                             popsize=N2, \
                             alpha=risk_limit,\
                             Vw=N_w2, Vl=N_l2, \
-                            null_margin=(N_w2-N_l2) - \
-                             alloc*reported_margin)['pvalue']
+                            null_margin=0)['pvalue']
+            if verbose:
+                print('...trying...', n, expected_pvalue)
+            return expected_pvalue
 
-        if N2 == 0:
-            n_w2 = 0
-            n_l2 = 0
-        else:
-            n_w2 = int(n2*N_w2/N2)
-            n_l2 = int(n2*N_l2/N2)
-        bounding_fun = create_modulus(n1=n1, n2=n2,
-                                      n_w2=n_w2, \
-                                      n_l2=n_l2, \
-                                      N1=N1, V_wl=reported_margin, gamma=gamma)
-        res = maximize_fisher_combined_pvalue(N_w1=N_w1, N_l1=N_l1, N1=N1, \
-                                              N_w2=N_w2, N_l2=N_l2, N2=N2, \
-                                              pvalue_funs=(cvr_pvalue, \
-                                               nocvr_pvalue), \
-                                              stepsize=stepsize, \
-                                              modulus=bounding_fun, \
-                                              alpha=risk_limit)
-        expected_pvalue = res['max_pvalue']
-        if verbose:
-            print('...trying...', n, expected_pvalue)
-        return expected_pvalue
+    elif N2 == 0:
+        def try_n(n):
+            o1 = math.ceil(o1_rate*n)
+            o2 = math.ceil(o2_rate*n)
+            u1 = math.floor(u1_rate*n)
+            u2 = math.floor(u2_rate*n)
+            expected_pvalue = ballot_comparison_pvalue(n=n, \
+                            gamma=gamma, o1=o1, u1=u1, o2=o2, u2=u2, \
+                            reported_margin=reported_margin, N=N1, \
+                            null_lambda=1)
+            if verbose:
+                print('...trying...', n, expected_pvalue)
+            return expected_pvalue
+
+    else:
+        def try_n(n):
+            """
+            Find expected combined P-value for a total sample size n.
+            """
+            n1 = math.ceil(n_ratio * n)
+            n2 = int(n - n1)
+
+            # Set up the p-value function for the CVR stratum
+            if n1 == 0:
+                cvr_pvalue = lambda alloc: 1
+            else:
+                o1 = math.ceil(o1_rate*n1)
+                o2 = math.ceil(o2_rate*n1)
+                u1 = math.floor(u1_rate*n1)
+                u2 = math.floor(u2_rate*n1)
+                cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1, \
+                                gamma=gamma, o1=o1, u1=u1, o2=o2, u2=u2, \
+                                reported_margin=reported_margin, N=N1, \
+                                null_lambda=alloc)
+
+            # Set up the p-value function for the no-CVR stratum
+            if n2 == 0:
+                nocvr_pvalue = lambda alloc: 1
+            else:
+                sample = [0]*math.ceil(n2*N_l2/N2)+[1]*int(n2*N_w2/N2)
+                if len(sample) < n2:
+                    sample += [np.nan]*(n2 - len(sample))
+                nocvr_pvalue = lambda alloc: ballot_polling_sprt(sample=np.array(sample), \
+                                popsize=N2, \
+                                alpha=risk_limit,\
+                                Vw=N_w2, Vl=N_l2, \
+                                null_margin=(N_w2-N_l2) - \
+                                 alloc*reported_margin)['pvalue']
+
+            if N2 == 0:
+                n_w2 = 0
+                n_l2 = 0
+            else:
+                n_w2 = int(n2*N_w2/N2)
+                n_l2 = int(n2*N_l2/N2)
+            bounding_fun = create_modulus(n1=n1, n2=n2,
+                                          n_w2=n_w2, \
+                                          n_l2=n_l2, \
+                                          N1=N1, V_wl=reported_margin, gamma=gamma)
+            res = maximize_fisher_combined_pvalue(N_w1=N_w1, N_l1=N_l1, N1=N1, \
+                                                  N_w2=N_w2, N_l2=N_l2, N2=N2, \
+                                                  pvalue_funs=(cvr_pvalue, \
+                                                   nocvr_pvalue), \
+                                                  stepsize=stepsize, \
+                                                  modulus=bounding_fun, \
+                                                  alpha=risk_limit)
+            expected_pvalue = res['max_pvalue']
+            if verbose:
+                print('...trying...', n, expected_pvalue)
+            return expected_pvalue
 
     # step 1: linear search, doubling n each time
     while (expected_pvalue > risk_limit) or (expected_pvalue is np.nan):
         n = 2*n
+        if n > N1+N2:
+            n1 = math.ceil(n_ratio * (N1+N2))
+            n2 = int(N1 + N2 - n1)
+            return (n1, n2)
         if N2 > 0:
             n1 = math.ceil(n_ratio * n)
             n2 = int(n - n1)
@@ -389,6 +423,61 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
     n1 = math.ceil(n_ratio * high_n)
     n2 = math.ceil(high_n - n1)
     return (n1, n2)
+
+
+def check_polling_sample_size(candidates, winners, losers, \
+                              stratum_sizes, risk_limit):
+    """
+    Print what the sample size would need to be, assuming everything
+    were done using ballot polling
+    """
+    sample_sizes = {}
+    for k in product(winners, losers):
+        sample_sizes[k] = estimate_n(N_w1 = 0,\
+                                     N_w2 = candidates[k[0]][0]+candidates[k[0]][1],\
+                                     N_l1 = 0,\
+                                     N_l2 = candidates[k[1]][0]+candidates[k[1]][1],\
+                                     N1 = 0,\
+                                     N2 = np.sum(stratum_sizes),\
+                                     n_ratio = 0,\
+                                     risk_limit = risk_limit,\
+                                     min_n = 5,\
+                                     risk_limit_tol = 0.95)
+    sample_size = np.amax([v[0]+v[1] for v in sample_sizes.values()])
+    print('\n\nexpected minimum sample size that would be needed using ballot polling ONLY, for all ballots:', sample_size)
+
+
+def plot_nratio_sample_sizes(candidates, winners, losers, stratum_sizes, \
+                             n_ratio_step=0.1, \
+                             o1_rate=0, o2_rate=0, u1_rate=0, u2_rate=0, \
+                             risk_limit=0.05, gamma=1.03905, stepsize=0.05):
+    
+    sample_size_estimate = []
+    for nratio_val in np.arange(0, 1+n_ratio_step, n_ratio_step):
+        print("trying", nratio_val)
+        sample_sizes = {}
+        for k in product(winners, losers):
+            sample_sizes[k] = estimate_n(N_w1 = candidates[k[0]][0],\
+                                         N_w2 = candidates[k[0]][1],\
+                                         N_l1 = candidates[k[1]][0],\
+                                         N_l2 = candidates[k[1]][1],\
+                                         N1 = stratum_sizes[0],\
+                                         N2 = stratum_sizes[1],\
+                                         o1_rate = o1_rate,\
+                                         o2_rate = o2_rate,\
+                                         u1_rate = u1_rate,\
+                                         u2_rate = u2_rate,\
+                                         n_ratio = nratio_val,\
+                                         risk_limit = risk_limit,\
+                                         gamma = gamma,\
+                                         stepsize = stepsize,\
+                                         min_n = 5,\
+                                         risk_limit_tol = 0.95)
+        sample_size_estimate.append(np.amax([v[0]+v[1] for v in sample_sizes.values()]))
+    plt.plot(np.arange(0, 1+n_ratio_step, n_ratio_step), sample_size_estimate)
+    plt.xlabel("fraction of sample drawn from the CVR stratum (n_ratio)")
+    plt.ylabel("total sample size")
+    plt.show()
 
 
 def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
@@ -467,76 +556,118 @@ def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
                             [np.nan]*(n2_original-n2l_obs-n2w_obs)
 
     # Assume o1, o2, u1, u2 rates will be the same as what we observed in sample
-    o1_rate = o1_obs/n1_original
-    o2_rate = o2_obs/n1_original
-    u1_rate = u1_obs/n1_original
-    u2_rate = u2_obs/n1_original
+    if n1_original != 0:
+        o1_rate = o1_obs/n1_original
+        o2_rate = o2_obs/n1_original
+        u1_rate = u1_obs/n1_original
+        u2_rate = u2_obs/n1_original
 
-    def try_n(n):
-        n1 = math.ceil(n_ratio * n)
-        n2 = int(n - n1)
-        
-        if (n1 < n1_original) or (n2 < n2_original):
-            return 1
-
-        # Set up the p-value function for the CVR stratum
-        if n1 == 0:
-            cvr_pvalue = lambda alloc: 1
-        else:
-            o1 = math.ceil(o1_rate*(n1-n1_original)) + o1_obs
-            o2 = math.ceil(o2_rate*(n1-n1_original)) + o2_obs
-            u1 = math.floor(u1_rate*(n1-n1_original)) + u1_obs
-            u2 = math.floor(u2_rate*(n1-n1_original)) + u2_obs
-            cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1,\
-                                gamma=1.03905, o1=o1, \
-                                u1=u1, o2=o2, u2=u2, \
-                                reported_margin=reported_margin, N=N1, \
-                                null_lambda=alloc)
-
-        # Set up the p-value function for the no-CVR stratum
-        if n2 == 0:
-            nocvr_pvalue = lambda alloc: 1
-            n_w2 = 0
-            n_l2 = 0
-        else:
-            expected_new_sample = [0]*int((n2-n2_original)*(n2l_obs/n2_original))+ \
-                                  [1]*int((n2-n2_original)*(n2w_obs/n2_original))+ \
-                                [np.nan]*int((n2-n2_original)*(n2_original-n2w_obs-n2l_obs)/n2_original)
+    if N1 == 0:
+        def try_n(n):
+            n = int(n)
+            expected_new_sample = [0]*math.ceil((n-n2_original)*(n2l_obs/n2_original))+ \
+                                  [1]*int((n-n2_original)*(n2w_obs/n2_original))
             totsample = observed_nocvr_sample+expected_new_sample
-            if len(totsample) < n2:
-                totsample += [np.nan]*(n2 - len(totsample))
+            if len(totsample) < n:
+                totsample += [np.nan]*(n - len(totsample))
             totsample = np.array(totsample)
             n_w2 = np.sum(totsample == 1)
             n_l2 = np.sum(totsample == 0)
 
-            nocvr_pvalue = lambda alloc: ballot_polling_sprt( \
+            expected_pvalue = ballot_polling_sprt( \
                             sample=totsample,\
                             popsize=N2, \
                             alpha=risk_limit,\
                             Vw=N_w2, Vl=N_l2, \
-                            null_margin=(N_w2-N_l2) - \
-                             alloc*reported_margin)['pvalue']
+                            null_margin=0)['pvalue']
+            if verbose:
+                print('...trying...', n, expected_pvalue)
+            return expected_pvalue
 
-        # Compute combined p-value
-        bounding_fun = create_modulus(n1=n1, n2=n2,
-                                      n_w2=n_w2, \
-                                      n_l2=n_l2, \
-                                      N1=N1, V_wl=reported_margin, gamma=gamma)
-        res = maximize_fisher_combined_pvalue(N_w1=N_w1, N_l1=N_l1, N1=N1, \
-                                              N_w2=N_w2, N_l2=N_l2, N2=N2, \
-                                              pvalue_funs=(cvr_pvalue,\
-                                                nocvr_pvalue), \
-                                              stepsize=stepsize, \
-                                              modulus=bounding_fun, \
-                                              alpha=risk_limit)
-        expected_pvalue = res['max_pvalue']
-        if verbose:
-            print('...trying...', n, expected_pvalue)
-        return expected_pvalue
+    elif N2 == 0:
+        def try_n(n):
+            o1 = math.ceil(o1_rate*(n-n1_original)) + o1_obs
+            o2 = math.ceil(o2_rate*(n-n1_original)) + o2_obs
+            u1 = math.floor(u1_rate*(n-n1_original)) + u1_obs
+            u2 = math.floor(u2_rate*(n-n1_original)) + u2_obs
+            expected_pvalue = ballot_comparison_pvalue(n=n,\
+                                    gamma=1.03905, o1=o1, \
+                                    u1=u1, o2=o2, u2=u2, \
+                                    reported_margin=reported_margin, N=N1, \
+                                    null_lambda=1)
+            if verbose:
+                print('...trying...', n, expected_pvalue)
+            return expected_pvalue
+    
+    else:
+        def try_n(n):
+            n1 = math.ceil(n_ratio * n)
+            n2 = int(n - n1)
+        
+            if (n1 < n1_original) or (n2 < n2_original):
+                return 1
+
+            # Set up the p-value function for the CVR stratum
+            if n1 == 0:
+                cvr_pvalue = lambda alloc: 1
+            else:
+                o1 = math.ceil(o1_rate*(n1-n1_original)) + o1_obs
+                o2 = math.ceil(o2_rate*(n1-n1_original)) + o2_obs
+                u1 = math.floor(u1_rate*(n1-n1_original)) + u1_obs
+                u2 = math.floor(u2_rate*(n1-n1_original)) + u2_obs
+                cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1,\
+                                    gamma=1.03905, o1=o1, \
+                                    u1=u1, o2=o2, u2=u2, \
+                                    reported_margin=reported_margin, N=N1, \
+                                    null_lambda=alloc)
+
+            # Set up the p-value function for the no-CVR stratum
+            if n2 == 0:
+                nocvr_pvalue = lambda alloc: 1
+                n_w2 = 0
+                n_l2 = 0
+            else:
+                expected_new_sample = [0]*math.ceil((n2-n2_original)*(n2l_obs/n2_original))+ \
+                                      [1]*int((n2-n2_original)*(n2w_obs/n2_original))
+                totsample = observed_nocvr_sample+expected_new_sample
+                if len(totsample) < n2:
+                    totsample += [np.nan]*(n2 - len(totsample))
+                totsample = np.array(totsample)
+                n_w2 = np.sum(totsample == 1)
+                n_l2 = np.sum(totsample == 0)
+
+                nocvr_pvalue = lambda alloc: ballot_polling_sprt( \
+                                sample=totsample,\
+                                popsize=N2, \
+                                alpha=risk_limit,\
+                                Vw=N_w2, Vl=N_l2, \
+                                null_margin=(N_w2-N_l2) - \
+                                 alloc*reported_margin)['pvalue']
+
+            # Compute combined p-value
+            bounding_fun = create_modulus(n1=n1, n2=n2,
+                                          n_w2=n_w2, \
+                                          n_l2=n_l2, \
+                                          N1=N1, V_wl=reported_margin, gamma=gamma)
+            res = maximize_fisher_combined_pvalue(N_w1=N_w1, N_l1=N_l1, N1=N1, \
+                                                  N_w2=N_w2, N_l2=N_l2, N2=N2, \
+                                                  pvalue_funs=(cvr_pvalue,\
+                                                    nocvr_pvalue), \
+                                                  stepsize=stepsize, \
+                                                  modulus=bounding_fun, \
+                                                  alpha=risk_limit)
+            expected_pvalue = res['max_pvalue']
+            if verbose:
+                print('...trying...', n, expected_pvalue)
+            return expected_pvalue
 
     # step 1: linear search, increasing n by a factor of 1.1 each time
     while (expected_pvalue > risk_limit) or (expected_pvalue is np.nan):
         n = np.ceil(1.1*n)
+        if n > N1+N2:
+            n1 = math.ceil(n_ratio * (N1+N2))
+            n2 = int(N1 + N2 - n1)
+            return (n1, n2)
         if N2 > 0:
             n1 = math.ceil(n_ratio * n)
             n2 = int(n - n1)
@@ -710,44 +841,62 @@ def audit_contest(candidates, winners, losers, stratum_sizes,\
         N_w2 = candidates[k[0]][1]
         N_l1 = candidates[k[1]][0]
         N_l2 = candidates[k[1]][1]
+        n2w = observed_poll[k[0]]
+        n2l = observed_poll[k[1]]
         reported_margin = (N_w1+N_w2)-(N_l1+N_l2)
-        if n1 == 0:
-            cvr_pvalue = lambda alloc: 1
-        else:
-            cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1, \
+        
+        if stratum_sizes[1] == 0:
+            audit_pvalues[k] = ballot_comparison_pvalue(n=n1, \
                         gamma=gamma, \
                         o1=o1_obs, u1=u1_obs, o2=o2_obs, u2=u2_obs, \
                         reported_margin=reported_margin, \
                         N=stratum_sizes[0], \
-                        null_lambda=alloc)
-
-        n2w = observed_poll[k[0]]
-        n2l = observed_poll[k[1]]
-        if n2 == 0:
-            nocvr_pvalue = lambda alloc: 1
-        else:
+                        null_lambda=1)
+        
+        elif stratum_sizes[0] == 0:
             sam = np.array([0]*n2l+[1]*n2w+[np.nan]*(n2-n2w-n2l))
-            nocvr_pvalue = lambda alloc: ballot_polling_sprt(\
+            audit_pvalues[k] = ballot_polling_sprt(\
                                 sample=sam, \
                                 popsize=stratum_sizes[1], \
                                 alpha=risk_limit, \
                                 Vw=N_w2, Vl=N_l2, \
-                                null_margin=(N_w2-N_l2) - \
-                                  alloc*reported_margin)['pvalue']
-        bounding_fun = create_modulus(n1=n1, n2=n2, \
-                                      n_w2=n2w, \
-                                      n_l2=n2l, \
-                                      N1=stratum_sizes[0], \
-                                      V_wl=reported_margin, gamma=gamma)
-        res = maximize_fisher_combined_pvalue(N_w1=N_w1, N_l1=N_l1,\
-                         N1=stratum_sizes[0], \
-                         N_w2=N_w2, N_l2=N_l2, \
-                         N2=stratum_sizes[1], \
-                         pvalue_funs=(cvr_pvalue, nocvr_pvalue), \
-                         stepsize=stepsize, \
-                         modulus=bounding_fun, \
-                         alpha=risk_limit)
-        audit_pvalues[k] = res['max_pvalue']
+                                null_margin=0)['pvalue']
+        else:
+            if n1 == 0:
+                cvr_pvalue = lambda alloc: 1
+            else:
+                cvr_pvalue = lambda alloc: ballot_comparison_pvalue(n=n1, \
+                            gamma=gamma, \
+                            o1=o1_obs, u1=u1_obs, o2=o2_obs, u2=u2_obs, \
+                            reported_margin=reported_margin, \
+                            N=stratum_sizes[0], \
+                            null_lambda=alloc)
+
+            if n2 == 0:
+                nocvr_pvalue = lambda alloc: 1
+            else:
+                sam = np.array([0]*n2l+[1]*n2w+[np.nan]*(n2-n2w-n2l))
+                nocvr_pvalue = lambda alloc: ballot_polling_sprt(\
+                                    sample=sam, \
+                                    popsize=stratum_sizes[1], \
+                                    alpha=risk_limit, \
+                                    Vw=N_w2, Vl=N_l2, \
+                                    null_margin=(N_w2-N_l2) - \
+                                      alloc*reported_margin)['pvalue']
+            bounding_fun = create_modulus(n1=n1, n2=n2, \
+                                          n_w2=n2w, \
+                                          n_l2=n2l, \
+                                          N1=stratum_sizes[0], \
+                                          V_wl=reported_margin, gamma=gamma)
+            res = maximize_fisher_combined_pvalue(N_w1=N_w1, N_l1=N_l1,\
+                             N1=stratum_sizes[0], \
+                             N_w2=N_w2, N_l2=N_l2, \
+                             N2=stratum_sizes[1], \
+                             pvalue_funs=(cvr_pvalue, nocvr_pvalue), \
+                             stepsize=stepsize, \
+                             modulus=bounding_fun, \
+                             alpha=risk_limit)
+            audit_pvalues[k] = res['max_pvalue']
 
     return audit_pvalues
 
