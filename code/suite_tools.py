@@ -5,6 +5,7 @@ from itertools import product
 import math
 import numpy as np
 import json
+import matplotlib.pyplot as plt
 
 from ballot_comparison import ballot_comparison_pvalue
 from fishers_combination import  maximize_fisher_combined_pvalue, create_modulus
@@ -393,6 +394,10 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
     # step 1: linear search, doubling n each time
     while (expected_pvalue > risk_limit) or (expected_pvalue is np.nan):
         n = 2*n
+        if n > N1+N2:
+            n1 = math.ceil(n_ratio * (N1+N2))
+            n2 = int(N1 + N2 - n1)
+            return (n1, n2)
         if N2 > 0:
             n1 = math.ceil(n_ratio * n)
             n2 = int(n - n1)
@@ -420,7 +425,8 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
     return (n1, n2)
 
 
-def check_polling_sample_size(candidates, winners, losers):
+def check_polling_sample_size(candidates, winners, losers, \
+                              stratum_sizes, risk_limit):
     """
     Print what the sample size would need to be, assuming everything
     were done using ballot polling
@@ -439,6 +445,39 @@ def check_polling_sample_size(candidates, winners, losers):
                                      risk_limit_tol = 0.95)
     sample_size = np.amax([v[0]+v[1] for v in sample_sizes.values()])
     print('\n\nexpected minimum sample size that would be needed using ballot polling ONLY, for all ballots:', sample_size)
+
+
+def plot_nratio_sample_sizes(candidates, winners, losers, stratum_sizes, \
+                             n_ratio_step=0.1, \
+                             o1_rate=0, o2_rate=0, u1_rate=0, u2_rate=0, \
+                             risk_limit=0.05, gamma=1.03905, stepsize=0.05):
+    
+    sample_size_estimate = []
+    for nratio_val in np.arange(0, 1+n_ratio_step, n_ratio_step):
+        print("trying", nratio_val)
+        sample_sizes = {}
+        for k in product(winners, losers):
+            sample_sizes[k] = estimate_n(N_w1 = candidates[k[0]][0],\
+                                         N_w2 = candidates[k[0]][1],\
+                                         N_l1 = candidates[k[1]][0],\
+                                         N_l2 = candidates[k[1]][1],\
+                                         N1 = stratum_sizes[0],\
+                                         N2 = stratum_sizes[1],\
+                                         o1_rate = o1_rate,\
+                                         o2_rate = o2_rate,\
+                                         u1_rate = u1_rate,\
+                                         u2_rate = u2_rate,\
+                                         n_ratio = nratio_val,\
+                                         risk_limit = risk_limit,\
+                                         gamma = gamma,\
+                                         stepsize = stepsize,\
+                                         min_n = 5,\
+                                         risk_limit_tol = 0.95)
+        sample_size_estimate.append(np.amax([v[0]+v[1] for v in sample_sizes.values()]))
+    plt.plot(np.arange(0, 1+n_ratio_step, n_ratio_step), sample_size_estimate)
+    plt.xlabel("fraction of sample drawn from the CVR stratum (n_ratio)")
+    plt.ylabel("total sample size")
+    plt.show()
 
 
 def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
@@ -625,6 +664,10 @@ def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
     # step 1: linear search, increasing n by a factor of 1.1 each time
     while (expected_pvalue > risk_limit) or (expected_pvalue is np.nan):
         n = np.ceil(1.1*n)
+        if n > N1+N2:
+            n1 = math.ceil(n_ratio * (N1+N2))
+            n2 = int(N1 + N2 - n1)
+            return (n1, n2)
         if N2 > 0:
             n1 = math.ceil(n_ratio * n)
             n2 = int(n - n1)
