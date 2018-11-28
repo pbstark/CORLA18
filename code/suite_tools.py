@@ -306,6 +306,7 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
 
     if N1 == 0:
         def try_n(n):
+            n = int(n)
             sample = [0]*math.ceil(n*N_l2/N2)+[1]*int(n*N_w2/N2)
             if len(sample) < n:
                 sample += [np.nan]*(n - len(sample))
@@ -419,6 +420,27 @@ def estimate_n(N_w1, N_w2, N_l1, N_l2, N1, N2,\
     return (n1, n2)
 
 
+def check_polling_sample_size(candidates, winners, losers):
+    """
+    Print what the sample size would need to be, assuming everything
+    were done using ballot polling
+    """
+    sample_sizes = {}
+    for k in product(winners, losers):
+        sample_sizes[k] = estimate_n(N_w1 = 0,\
+                                     N_w2 = candidates[k[0]][0]+candidates[k[0]][1],\
+                                     N_l1 = 0,\
+                                     N_l2 = candidates[k[1]][0]+candidates[k[1]][1],\
+                                     N1 = 0,\
+                                     N2 = np.sum(stratum_sizes),\
+                                     n_ratio = 0,\
+                                     risk_limit = risk_limit,\
+                                     min_n = 5,\
+                                     risk_limit_tol = 0.95)
+    sample_size = np.amax([v[0]+v[1] for v in sample_sizes.values()])
+    print('\n\nexpected minimum sample size that would be needed using ballot polling ONLY, for all ballots:', sample_size)
+
+
 def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
                           o1_obs, o2_obs, u1_obs, u2_obs, \
                           n2l_obs, n2w_obs, \
@@ -503,6 +525,7 @@ def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
 
     if N1 == 0:
         def try_n(n):
+            n = int(n)
             expected_new_sample = [0]*math.ceil((n-n2_original)*(n2l_obs/n2_original))+ \
                                   [1]*int((n-n2_original)*(n2w_obs/n2_original))
             totsample = observed_nocvr_sample+expected_new_sample
