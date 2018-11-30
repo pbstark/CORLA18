@@ -61,6 +61,14 @@ def write_audit_results(filename, \
         json.dump(results, f)
 
 
+def write_ballots_to_sample(filename, sample_info):
+    with open(filename, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["sampled ballot", "batch label", "which ballot in batch", "# times sampled"])
+        for row in sample_info:
+            writer.writerow(row)
+    print("succesfully wrote sampled ballots to", filename)
+
 ################################################################################
 ############################# Check valid inputs ###############################
 ################################################################################
