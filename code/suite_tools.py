@@ -5,6 +5,7 @@ from itertools import product
 import math
 import numpy as np
 import json
+import csv
 import matplotlib.pyplot as plt
 
 from ballot_comparison import ballot_comparison_pvalue
@@ -59,6 +60,14 @@ def write_audit_results(filename, \
     with open(filename, 'w') as f:
         json.dump(results, f)
 
+
+def write_ballots_to_sample(filename, sample_info):
+    with open(filename, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["sampled ballot", "batch label", "which ballot in batch", "# times sampled"])
+        for row in sample_info:
+            writer.writerow(row)
+    print("succesfully wrote sampled ballots to", filename)
 
 ################################################################################
 ############################# Check valid inputs ###############################
@@ -699,6 +708,20 @@ def estimate_escalation_n(N_w1, N_w2, N_l1, N_l2, N1, N2, n1, n2, \
 ########################## Ballot manifest tools ###############################
 ################################################################################
 
+def read_manifest_from_csv(filename):
+    """
+    Read the ballot manifest into a list in the format ['batch id : number of ballots']
+    from CSV file named filename
+    """
+    manifest = []
+    with open(filename, newline='') as csvfile:
+        reader = csv.reader(csvfile, delimiter = ",")
+        for row in reader:
+            row.remove(row[1])
+            batch = " , ".join(row)
+            manifest.append(batch)
+    return manifest[1:]
+
 
 def parse_manifest(manifest):
     """
@@ -759,7 +782,7 @@ def unique_manifest(parsed_manifest):
     return second_manifest
 
 
-def find_ballot(ballot_num, unique_ballot_manifest, parsed_ballot_manifest):
+def find_ballot(ballot_num, unique_ballot_manifest):
     """
     Find ballot among all the batches
 
@@ -769,8 +792,7 @@ def find_ballot(ballot_num, unique_ballot_manifest, parsed_ballot_manifest):
         a ballot number that was sampled
     unique_ballot_manifest : dict
         ballot manifest with unique IDs across batches
-    parsed_ballot_manifest : dict
-        ballot manifest with original ballot IDs supplied in the manifest
+
 
     Returns
     -------
@@ -779,10 +801,41 @@ def find_ballot(ballot_num, unique_ballot_manifest, parsed_ballot_manifest):
     for batch, ballots in unique_ballot_manifest.items():
         if ballot_num in ballots:
             position = ballots.index(ballot_num) + 1
-            original_ballot_label = parsed_ballot_manifest[batch][position]
-            return (original_ballot_label, batch, position)
+            return (batch, position)
     print("Ballot %i not found" % ballot_num)
     return None
+
+
+def sample_from_manifest(filename, sample, stratum_size):
+    """
+    Sample from the ballot manifest
+    
+    
+    """
+    ballot_manifest = read_manifest_from_csv(filename)
+    manifest_parsed = parse_manifest(ballot_manifest)
+    listed = np.sum([len(v) for v in manifest_parsed.values()])
+    if listed != stratum_size:
+        print("WARNING: the number of ballots in the ballot manifest is ",\
+              listed, "but total number of reported votes is", stratum_size)
+    
+    unique_ballot_manifest = unique_manifest(manifest_parsed)
+
+    ballots_sampled = []
+    m = np.zeros_like(sample, dtype=bool)
+    m[np.unique(sample, return_index=True)[1]] = True
+    for s in sample[m]:
+        batch_label, which_ballot = find_ballot(s, unique_ballot_manifest)
+        if s in sample[~m]:
+            ballots_sampled.append([s, batch_label, which_ballot, np.sum(np.array(sample) == s)])
+        else:
+            ballots_sampled.append([s, batch_label, which_ballot, 1])
+        
+    ballots_sampled.sort(key=lambda x: x[2]) # Sort second on order within batches
+    ballots_sampled.sort(key=lambda x: x[1]) # Sort first based on batch label
+    ballots_sampled.insert(0,["sampled ballot", "batch label", "which ballot in batch", "# times sampled"])
+    return ballots_sampled
+
 
 
 ################################################################################
