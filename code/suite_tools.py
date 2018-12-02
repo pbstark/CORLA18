@@ -717,7 +717,7 @@ def read_manifest_from_csv(filename):
     with open(filename, newline='') as csvfile:
         reader = csv.reader(csvfile, delimiter = ",")
         for row in reader:
-            row.remove(row[1])
+#            row.remove(row[1])
             batch = " , ".join(row)
             manifest.append(batch)
     return manifest[1:]
