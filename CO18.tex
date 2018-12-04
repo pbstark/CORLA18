@@ -136,7 +136,9 @@ The basic building block for the method is testing whether the overstatement err
 Fisher's combining function is used to merge $P$-values for tests in different strata into a single $P$-value for the hypothesis that the overstatement in every stratum is greater than or equal to its quota.
 If that hypothesis can be rejected for \emph{all} stratum-level quotas that could change the outcome---that is, if the maximum combined $P$-value is sufficiently small---the audit can stop.
 
-It is not actually necessary to consider all possible quotas: the $P$-value involves a sum of monotonic functions, which allows us to find upper and lower bounds everywhere using only values on a discrete grid.
+It is not actually necessary to consider all possible quotas: the $P$-value
+has a bounded modulus of continuity, which allows us to find upper and lower bounds 
+everywhere using only values on a discrete grid.
 We present a numerical procedure, implemented in Python,
 to find bounds on the maximum $P$-value when there are two strata.
 The procedure can be generalized to more than two strata.
@@ -273,6 +275,7 @@ Some values of $\lambda$ can be ruled out \emph{a priori}, because (for instance
 \eeq
 Let $\lambda_-$ and $\lambda_+$ be lower and upper bounds on $\lambda$.
 
+\comment{Replace the paragraph with an argument from the local modulus of continuity}
 When the $p_s(\cdot)$ are monotonically increasing functions of $\lambda$, $p_1(\lambda)$ increases monotonically and $p_2(1-\lambda)$ decreases monotonically.
 Suppose $[a, b) \subset [\lambda_-, \lambda_+]$.
 Then for all $\lambda \in [a, b)$, $-2\ln p_1(\lambda) \ge -2\ln p_1(b)$ and
@@ -645,47 +648,50 @@ The value of $c$ is inferred from the definition $\omega_{w\ell, s} \equiv V_{w\
 Thus,
 $$ c = V_{w, s} - V_{\ell, s} - \omega_{w\ell, s} = V_{w\ell, s} - \lambda_s V_{w\ell}.$$
 
-In this problem, $N_{u,s}$ (equivalently, $N_{w,s} + N_{\ell,s}$) is a nuisance parameter: we care about $ N_{w,s} - N_{\ell,s}$.
+In this problem, $N_{u,s}$ (equivalently, $N_{w,s} + N_{\ell,s}$) is a nuisance parameter: we care about $ N_{w,s} - N_{\ell,s}$, but the probability distribution of the sample depends also on $N_{u,s}$.
 
 Let $X_k$ be $w$, $\ell$, or $u$ according to whether the ballot selected on the $k$th draw 
 shows a vote for $w$ but not $\ell$, $\ell$ but not $w$, or something else.
 Let $W_n \equiv \sum_{k=1}^n 1_{X_k = w}$; and define $L_n$ and $U_n$ analogously.
+Then $W_n + L_n + U_n = n$.
 
 The probability of a given data sequence $X_1, \ldots, X_n$ under the alternative hypothesis is
-$$
+\begin{equation} \label{eq:alternative_prob}
     \frac{\prod_{i=0}^{W_n-1} (V_{w,s}-i) \; 
              \prod_{i=0}^{L_n-1} (V_{\ell,s}-i) \;
              \prod_{i=0}^{U_n-1} (V_{u,s}-i)}
-            {\prod_{i=0}^{n-1} (N_s-i)}.
-$$
+            {\prod_{i=0}^{n-1} (N_s-i)},
+\end{equation}
+using the convention that $\prod_{i=0}^{-1} d_i \equiv 1$.
 If $L_n \ge W_n - cn/N_s$, the data obviously do not provide evidence against the null, so we suppose that
 $L_n < W_n - cn/N_s$, in which case, the element of the null that will maximize the probability of the observed data has $N_{w,s} - c = N_{\ell,s}$.
 Under the null hypothesis, the probability of $X_1, \ldots, X_n$ is
-$$
+\begin{equation} \label{eq:null_prob}
     \frac{ \prod_{i=0}^{W_n-1} (N_{w,s}-i) \;
              \prod_{i=0}^{L_n-1}(N_{w,s}-c - i)
              \prod_{i=0}^{U_n-1} (N_{u,s}-i)}
-             {\prod_{i=0}^n (N_s-i)},
-$$
+             {\prod_{i=0}^{n-1} (N_s-i)},
+\end{equation}
 for some value $N_{w,s}$ and the corresponding $N_{u,s} = N_s - 2N_{w,s}+c$.
 How large can that probability be under the null? 
 The probability under the null is maximized by any integer 
 $x \in \{ \max(W_n, L_n+c), \ldots, (N_s-U_n)/2 \}$ that maximizes 
 $$
-\prod_{i=0}^{W_n-1} (x-i) \; \prod_{i=0}^{L_n-1} (x-c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x+c - i).
+\prod_{i=0}^{W_n-1} (x-i) \; \prod_{i=0}^{L_n-1} (x-c-i) \; \prod_{i=0}^{U_n-1} (N_s-2x+c - i),
 $$
+again using the convention that $\prod_{i=0}^{-1} d_i \equiv 1$.
 The logarithm is monotonic, so any maximizer $x^*$ also maximizes
 $$ f(x) = \sum_{i=0}^{W_n-1} \ln (x-i) + \sum_{i=0}^{L_n-1} \ln (x-c-i) + \sum_{i=0}^{U_n-1} \ln (N_s-2x+ c - i).$$
-
-The second derivative of $f$ is everywhere negative, so $f$ has a unique maximum on $[ \max(W_n, L_n+c), (N_s-U_n)/2]$,
+(Here, we use the convention that $\sum_{i=0}^{-1} d_i \equiv 0$.)
+If we consider the domain of $f$ to be real numbers, not just integers, the second derivative of $f$ is everywhere negative, so $f$ has a unique maximum on $[ \max(W_n, L_n+c), (N_s-U_n)/2]$,
 either at one of the endpoints or somewhere on the interval.
 The derivative $f'(x)$ gives information about where the maximum occurs:
 $$ f'(x) = \sum_{i=0}^{W_n-1} \frac{1}{ x-i } + \sum_{i=0}^{L_n-1} \frac{1}{ x-c-i} -2 \sum_{i=0}^{U_n-1} \frac{1}{N_s-2x+ c - i}.$$
 
 If $f'(x)$ does not change signs, then the maximum is at one of the endpoints;
 set $x^*$ to be the endpoint that makes $f$ larger.
-Otherwise, the maximum occurs where $f'(x) = 0$ and can be found using a root finder such as Brent's method.
-Since the maximizer must be an integer, set $x^*$ to be the value of $\{\lfloor x \rfloor, \lceil x \rceil\}$ that makes $f$ larger.
+Otherwise, the (real-valued) maximum occurs where $f'(x) = 0$ and can be found using a root finder such as Brent's method; alternatively, the maximum can be found using concave optimization.
+Since the maximizer for the original problem must be an integer, set $x^*$ to be the value in $\{\lfloor x \rfloor, \lceil x \rceil\}$ that makes $f$ larger; by concavity, that is the integer maximizer.
 
 %The first two terms on the right increase monotonically with $x$ and the last term decreases monotonically with $x$.
 %This yields bounds without having to evaluate $f$ everywhere.
@@ -720,7 +726,7 @@ $$
 $$
 Because the test is built on Wald's SPRT,  the sample can expand sequentially and 
 (if the null hypothesis is true) the chance that $P_n < p$ is never larger than $p$.
-That is, $\Pr \{ \inf_n P_n < p \} \le p$ if the null is true.
+That is, $\Pr \{ \inf_n P_n \le p \} \le p$ if the null is true.
 
 A Jupyter notebook implementing this approach is given in \url{https://github.com/pbstark/CORLA18}.
 
@@ -728,56 +734,50 @@ A Jupyter notebook implementing this approach is given in \url{https://github.co
 
 \section{Maximizing Fisher's combined $P$-value for a hybrid stratified audit}\label{sec:appendix-max-fisher}
 
-Below, we present an algorithm for maximizing the $P$-value of a hybrid stratified audit that combines
-ballot comparison with ballot polling.
+Below, we present an algorithm for finding the maximum $P$-value in a hybrid stratified audit that combines
+ballot-level comparison with ballot polling.
 Let $p_1(\lambda)$ be the $P$-value from a ballot-polling audit and $p_2(1-\lambda)$ be the
 $P$-value from a ballot comparison audit.
 The calculation of these $P$-values is derived in Appendix~\ref{sec:appendix-polling} 
 and~\ref{sec:appendix-comparison}, respectively.
 
-The algorithm computes $\chi(\lambda)$ along a discrete grid of $\lambda$ values separated by distance $\delta$
-and estimates the minimum of $\chi$ as $\chi^*(\delta)$, the minimum along the $\delta$-grid
-(equivalently, the maximum $P$-value is estimated to be the area under the chi-square distribution
-with $4$ degrees of freedom, to the right of $\chi^*(\delta)$).
-How do we know if the minimum is approximated sufficiently?
-
-One way to guarantee that the true minimum is not much smaller than the one estimated from a grid search
-is by bounding how much the function can change between grid points.
-The \emph{modulus of continuity}, $\omega(\delta)$, is an upper bound on how much $\chi$ can change on an interval
-of a given size $\delta$:
-
-$$\lvert \chi(\lambda) - \chi(\lambda + \delta) \rvert \leq \omega(\delta).$$
-
-We'd like to be certain that the true minimum value of $\chi$ is not smaller than $\chi_\alpha$,
-the $\alpha$ quantile of the chi-square distribution on 4 degrees of freedom.
-Using the modulus of continuity, we know that the distance between the estimated minimum and the
-true minimum is at most $\omega(\delta)$.
-This provides us with a sufficient condition to check whether the minimum has been approximated to
-sufficient accuracy:
-If $\min_\lambda \chi(\lambda) \ge \chi_\alpha$, then
-
+To find the minimum combined $P$-value, we first compute $\chi(\lambda)$ 
+for a grid of values $\lambda_0 = \lambda_- < \lambda_1 < \cdots < \lambda_n = \lambda_+$,
+where $\lambda_{j+1} - \lambda_j = \delta$.
+To account for the fact that $\chi$ may be smaller for values of $\lambda$ between the 
+sampled values, we bound its variation between grid points.
+The \emph{local modulus of continuity}, $\omega(\delta; \lambda)$, is an upper bound on how much $\chi$ can change in a $\delta$-neighborhood of $\lambda$:
+$$\lvert \chi(\lambda) - \chi(\lambda + \delta) \rvert \leq \omega(\delta; \lambda).$$
+For all $\lambda \in [\lambda_j, \lambda_{j+1}]$, 
 \begin{equation}
-\chi^*(\delta) - \min_\lambda \chi(\lambda)  \le \omega(\delta) \le \chi^*(\delta) - \chi_\alpha.
+    \chi(\lambda) \ge \max \{ \chi(\lambda_j) - \omega(\lambda-\lambda_j; \lambda_j), 
+                                            \chi(\lambda_{j+1}) - \omega(\lambda_{j+1}-\lambda; \lambda_{j+1}) \}.
 \end{equation}
+Thus for all $\lambda \in [\lambda_-, \lambda_+]$,
+\begin{equation}
+    \chi(\lambda) \ge \chi^*_n \equiv \min_{j=0}^{n-1} \min_{\mu \in [\lambda_j, \lambda_{j+1}]}
+                 \max \{ \chi(\lambda_j) - \omega(\mu-\lambda_j; \lambda_j), 
+                                            \chi(\lambda_{j+1}) - \omega(\lambda_{j+1}-\mu; \lambda_{j+1}) \}.
+\end{equation}
+If that lower bound is above $\chi_\alpha$, the audit can stop.
+If not, then either the true minimum is below $\chi_\alpha$ or the grid $\{\lambda_j \}$ is too coarse.
 
-If this condition holds, then it's guaranteed that the true minimum is above $\chi_\alpha$.
-The audit can stop here.
-If not, then either the true minimum is above $\chi_\alpha$ or the grid size $\delta$ is too coarse.
+Finding a lower bound on $\chi(\lambda)$ between gridpoints can be simplified in a number of ways, for instance, using a (bound on a) global modulus of continuity instead of a local modulus of continuity.
 
 The algorithm to approximate $\min_\lambda \chi(\lambda)$ is as follows:
 
 \begin{enumerate}
-\item Perform a $\delta$-grid search over $\chi$ to find $\chi^*(\delta)$.
-\item If $\chi^*(\delta) < \chi_\alpha$, stop. The audit must escalate.
-\item Otherwise, check whether $\omega(\delta) \le \chi^*(\delta) - \chi_\alpha$.
-\item If yes, stop: the minimum $\chi$ is above $\chi_\alpha$. 
-If no, decrease to step size $\delta'$ ,
-e.g. $\delta' = \delta/10$, and return to step 1.
+    \item Pick a grid of values $\lambda_0 \equiv \lambda_- < \lambda_1 < \cdots < \lambda_n \equiv \lambda_+$.
+    \item Evaluate $\chi(\lambda_j)$, $j=0, \ldots, n$.
+    \item If, for any $j$, $\chi(\lambda_j) \le \chi_\alpha$, the audit must escalate.
+    \item Otherwise, check whether $\chi^*_n \ge \chi_\alpha$.
+    \item If so, the audit can stop: the minimum $\chi(\lambda)$ is above $\chi_\alpha$. 
+             If not, refine the grid of values of $\lambda$ and return to step~2.
 \end{enumerate}
 
-\subsection{The modulus of continuity for Fisher's combining function}
+\subsection{Bounding the local modulus of continuity for Fisher's combining function}
 
-Fisher's combining function is
+Fisher's combining function applied to the stratumwise $P$-values is
 
 \begin{align}\label{eq:fisher-hybrid}
 \chi(\lambda) = -2 & \Bigg[ n_1 \log\left( 1 - \frac{\lambda V_{w\ell}}{2N_1 \gamma}\right) - o_1 \log(1 - 1/2\gamma) - o_2 \log(1 - 1/\gamma) \nonumber \\
@@ -786,15 +786,19 @@ Fisher's combining function is
   & - \sum_{i=0}^{W_n - 1} \log(V_{w,2} - i) - \sum_{i=0}^{L_n - 1} \log(V_{\ell,2} - i) - \sum_{i=0}^{U_n - 1} \log(V_{u,2} - i)  \Bigg].
 \end{align}
 
-We'd like to calculate the modulus of continuity (or an upper bound on it) for this function.
-While in reality, $c(\lambda)$ and $N_w(\lambda)$ must be integer values
+We seek the modulus of continuity (or an upper bound on it) for this function.
+While $c(\lambda)$ and $N_w(\lambda)$ must be integer values
 (as they represent numbers of ballots),
-the $P$-value from the ballot-polling SPRT and thus $\chi(\lambda)$ will be continuous by allowing
-$c(\lambda)$ and $N_w(\lambda)$ to be continuous.
+the $P$-value from the ballot-polling SPRT and thus $\chi(\lambda)$ make sense for non-integer values of
+$c(\lambda)$ and $N_w(\lambda)$, so to allow the use of calculus, we will extend the domain
+to real values.
+
+\comment{Maybe try $\omega(\delta) \le \sup_{\lambda} | d \chi(\lambda)/d\lambda)| \delta$?}
+
 Moduli of continuity obey two key properties:
 
 \begin{itemize}
-\item \textbf{Linearity}: $\omega(a f + b g, \delta) = \lvert a \rvert \omega_f(\delta) + \lvert b \rvert \omega_g (\delta)$
+\item \textbf{Sublinearity}: $\omega(a f + b g, \delta) \le \lvert a \rvert \omega_f(\delta) + \lvert b \rvert \omega_g (\delta)$
 \item \textbf{Composition}: $\omega(g \circ f, \delta) = \omega_g(\omega_f(\delta))$
 \end{itemize}
 
@@ -804,13 +808,13 @@ Moduli of continuity obey two key properties:
 \item $\log(ax - b)$: the modulus of continuity is $\log(1 + a\delta)$.
 \item $c(\lambda) = (V_{w,2}-V_{\ell,2}) - \lambda V_{w\ell}$: since this function is linear in $\lambda$, the modulus of continuity is $V_{w\ell}\delta$.
 \item $N_{w,2}(\lambda)$. When $N_{u,2}$ is known, this is also linear in $c(\lambda)$. 
-When $N_{u,2}$ is not known but $\delta$ is small, this will still be linear in $c(\lambda)$.
+When $N_{u,2}$ is not known but $\delta$ is small, this will still be linear in $c(\lambda)$. \comment{Where does this bound come from? It isn't OK just to linearize in $\delta$---that begs the question.}
 Thus it also has modulus of continuity $V_{w\ell}\delta$.
 \item For terms that don't involve $\lambda$, the modulus of continuity is 0.
 \end{itemize}
 
 There are four terms in $\chi(\lambda)$ that involve $\lambda$.
-Using the two key properties of linearity and composition, as well as the moduli for simple functions above, we obtain the following:
+Using the two key properties of linearity and composition, as well as the moduli for simple functions above, we obtain the following bound on the global modulus of continuity:
 
 \begin{align}
 \omega_\chi(\delta) = & 2W_n \log(1 + V_{w\ell}\delta) + 2L_n \log(1+ 2V_{w\ell}\delta) + \nonumber \\
