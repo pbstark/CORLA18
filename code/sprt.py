@@ -6,37 +6,38 @@ import scipy as sp
 import scipy.stats
 import scipy.optimize
 
-
 def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl, 
                         null_margin=0, number_invalid=None):
     """
-    Conduct Wald's SPRT for the difference in population counts for two out of three categories:
+    Wald's SPRT for the difference in true number of votes for the winner, Nw, and the loser, Nl:
     
-    H_0: Nl = Nw + null_margin
-    H_1: Nl = Vl, Nw = Vw with Vw>Vl
+    H_0: Nw = Nl + null_margin
+    H_1: Nw = Vw, Nl = Vl
     
-    The type II error rate, usually denoted beta, is set to 0%.
-    In doing so, the inverse of the likelihood ratio can be interpreted as a
-    p-value.
+    The type II error rate for the test, usually denoted beta, is set to 0%: if the data do not
+    support rejecting the null, there is a full hand count.
+    
+    Because beta=0, the reciprocal of the likelihood ratio is a conservative p-value.
     
     Parameters
     ----------
     sample : array-like
-        random sample to audit. Elements should be labelled 1 (ballots for w),
-        0 (ballots for l), and np.nan (the rest)
+        audit sample. Elements should equal 1 (ballots for w), 0 (ballots for l), or np.nan (the rest)
     popsize : int
-        total size of population being audited
+        number of ballots cast in the stratum
     alpha : float
         desired type 1 error rate
     Vw : int
-        total number of votes for w under the alternative hypothesis
+        number of votes for w in the stratum, under the alternative hypothesis
     Vl : int
-        total number of votes for l under the alternative hypothesis
+        total number of votes for l in the stratum, under the alternative hypothesis
     null_margin : int
         vote margin between w and l under the null hypothesis; optional
         (default 0)
     number_invalid : int
-        total number of invalid items in the population; optional (default None)
+        number of invalid ballots, undervoted ballots, or ballots for other candidates in 
+        the stratum, if known; optional (default None)
+        
     Returns
     -------
     dict
@@ -45,34 +46,50 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
     # Set parameters
     upper = 1/alpha
     n = len(sample)
-    sample = np.array(sample)
+    assert n <= popsize, "Sample size greater than population size"
+    
+    sample = np.array(sample)    
     Wn = np.sum(sample == 1)
     Ln = np.sum(sample == 0)
     Un = n - Wn - Ln
+    
+    upper_Nw_limit = popsize - Un - Ln
+    lower_Nw_limit = np.max([Wn, Ln+null_margin, 0])  # if the null hypothesis is true
+    
+    if Wn > upper_Nw_limit or (lower_Nw_limit + Ln + Un) > popsize:
+        return {'decision' : 'Null is impossible, given the sample',
+                'upper_threshold' : upper,
+                'LR' : np.inf,
+                'pvalue' : 0,
+                'sample_proportion' : (Wn/n, Ln/n, Un/n),
+                'Nu_used' : None,
+                'Nw_used' : None
+                }
+    
     decision = "None"
 
     # Set up likelihood for null and alternative hypotheses
-#    assert Vw > Vl, "Invalid alternative hypothesis. Vw must be larger than Vl"
     Vw = int(Vw)
     Vl = int(Vl)
     Vu = int(popsize - Vw - Vl)
     assert Vw >= Wn and Vl >= Ln and Vu >= Un, "Alternative hypothesis isn't consistent with the sample"
+    
     alt_logLR = np.sum(np.log(Vw - np.arange(Wn))) + \
                 np.sum(np.log(Vl - np.arange(Ln))) + \
                 np.sum(np.log(Vu - np.arange(Un)))
         
-#    np.seterr(divide='ignore', invalid='ignore')
-    null_logLR = lambda Nw: np.sum(np.log(Nw - np.arange(Wn))) + \
-                np.sum(np.log(Nw - null_margin - np.arange(Ln))) + \
-                np.sum(np.log(popsize - 2*Nw + null_margin - np.arange(Un)))
+    null_logLR = lambda Nw: (Wn > 0)*np.sum(np.log(Nw - np.arange(Wn))) + \
+                (Ln > 0)*np.sum(np.log(Nw - null_margin - np.arange(Ln))) + \
+                (Un > 0)*np.sum(np.log(popsize - 2*Nw + null_margin - np.arange(Un)))
     
-    # This is for testing purposes. In practice, number_invalid will be unknown.
+
+    # This is just for testing the code. In practice, number_invalid is unknown.
     if number_invalid is not None:
         assert isinstance(number_invalid, int)
         assert number_invalid < popsize
         nuisance_param = (popsize - number_invalid + null_margin)/2
-        if nuisance_param < 0 or nuisance_param > popsize:
-            return {'decision' : 'Number invalid is incompatible with the null',
+        if nuisance_param < lower_Nw_limit or nuisance_param > upper_Nw_limit:
+            return {'decision' : 'Number invalid is incompatible with the null and the data',
                     'upper_threshold' : upper,
                     'LR' : np.inf,
                     'pvalue' : 0,
@@ -80,84 +97,33 @@ def ballot_polling_sprt(sample, popsize, alpha, Vw, Vl,
                     'Nu_used' : number_invalid,
                     'Nw_used' : nuisance_param
                     }
-        if nuisance_param < Wn or (nuisance_param - null_margin) < Ln \
-            or number_invalid < Un:
-            return {'decision' : 'Null is impossible, given the sample',
-                    'upper_threshold' : upper,
-                    'LR' : np.inf,
-                    'pvalue' : 0,
-                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
-                    'Nu_used' : number_invalid,
-                    'Nw_used' : nuisance_param
-                    }
+        
         res = alt_logLR - null_logLR(nuisance_param)
         LR = np.exp(res)
 
-    else:
-        upper_Nw_limit = (popsize - Un + null_margin)/2
-        lower_Nw_limit = np.max([Wn, Ln+null_margin])
-        
-        # For extremely small or large null_margins, the limits do not
-        # make sense with the sample values.
-        if upper_Nw_limit < Wn or (upper_Nw_limit - null_margin) < Ln:
-            return {'decision' : 'Null is impossible, given the sample',
-                    'upper_threshold' : upper,
-                    'LR' : np.inf,
-                    'pvalue' : 0,
-                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
-                    'Nu_used' : None,
-                    'Nw_used' : None
-                    }
-        
-        if lower_Nw_limit > upper_Nw_limit:
-            lower_Nw_limit, upper_Nw_limit = upper_Nw_limit, lower_Nw_limit
-        
-        LR_derivative = lambda Nw: np.sum([1/(Nw - i) for i in range(Wn)]) + \
-                    np.sum([1/(Nw - null_margin - i) for i in range(Ln)]) - \
-                    2*np.sum([1/(popsize - 2*Nw + null_margin - i) for i in range(Un)])
+    else:   # this is the typical case, Nu unknown                
+        LR_derivative = lambda Nw: (Wn > 0)*np.sum([1/(Nw - i) for i in range(Wn)]) + \
+                    (Ln > 0)*np.sum([1/(Nw - null_margin - i) for i in range(Ln)]) - \
+                    (Un > 0)*2*np.sum([1/(popsize - 2*Nw + null_margin - i) for i in range(Un)])
 
         # Sometimes the upper_Nw_limit is too extreme, causing illegal 0s.
         # Check and change the limit when that occurs.
-        if np.isinf(null_logLR(upper_Nw_limit)) or np.isinf(LR_derivative(upper_Nw_limit)):
+        if np.isinf(null_logLR(upper_Nw_limit)):
             upper_Nw_limit -= 1
 
         # Check if the maximum occurs at an endpoint
-        if LR_derivative(upper_Nw_limit)*LR_derivative(lower_Nw_limit) > 0:
+        if LR_derivative(upper_Nw_limit)*LR_derivative(lower_Nw_limit) > 0:  # deriv has no sign change
             nuisance_param = upper_Nw_limit if null_logLR(upper_Nw_limit)>=null_logLR(lower_Nw_limit) else lower_Nw_limit
         # Otherwise, find the (unique) root of the derivative of the log likelihood ratio
         else:
             nuisance_param = sp.optimize.brentq(LR_derivative, lower_Nw_limit, upper_Nw_limit)
 #            nuisance_param = np.floor(nuisance_param) if null_logLR(np.floor(nuisance_param))>=null_logLR(np.ceil(nuisance_param)) else np.ceil(nuisance_param)
-        number_invalid = popsize - nuisance_param*2 + null_margin
-
-        if nuisance_param < 0 or nuisance_param > popsize:
-            return {'decision' : 'Number invalid is incompatible with the null',
-                    'upper_threshold' : upper,
-                    'LR' : np.inf,
-                    'pvalue' : 0,
-                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
-                    'Nu_used' : number_invalid,
-                    'Nw_used' : nuisance_param
-                    }
-        if nuisance_param < Wn or (nuisance_param - null_margin) < Ln \
-            or number_invalid < Un:
-            return {'decision' : 'Null is impossible, given the sample',
-                    'upper_threshold' : upper,
-                    'LR' : np.inf,
-                    'pvalue' : 0,
-                    'sample_proportion' : (Wn/n, Ln/n, Un/n),
-                    'Nu_used' : number_invalid,
-                    'Nw_used' : nuisance_param
-                    }
+        number_invalid = popsize - 2*nuisance_param + null_margin  # N - Nw - Nl
         
         logLR = alt_logLR - null_logLR(nuisance_param)
         LR = np.exp(logLR)
 
-    if LR <= 0:
-        # accept the null and stop
-        decision = 0
-                
-    if LR >= upper:
+    if logLR >= np.log(upper):
         # reject the null and stop
         decision = 1
             
