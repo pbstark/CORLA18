@@ -92,7 +92,7 @@ intersection-union test}
 
 \noindent
 \textbf{Acknowledgements.}
-We are grateful to Ronald L.~Rivest and Steven N.~Evans for helpful conversations and suggestions.
+We are grateful to Ronald L.~Rivest, Steven N.~Evans, and Wentao Zhan for helpful conversations and suggestions.
 
 \section{Introduction}
 A risk-limiting audit (RLA) of an election contest is a procedure that
@@ -793,8 +793,6 @@ the $P$-value from the ballot-polling SPRT and thus $\chi(\lambda)$ make sense f
 $c(\lambda)$ and $N_w(\lambda)$, so to allow the use of calculus, we will extend the domain
 to real values.
 
-\comment{Maybe try $\omega(\delta) \le \sup_{\lambda} | d \chi(\lambda)/d\lambda)| \delta$?}
-
 Moduli of continuity obey two key properties:
 
 \begin{itemize}
@@ -808,8 +806,13 @@ Moduli of continuity obey two key properties:
 \item $\log(ax - b)$: the modulus of continuity is $\log(1 + a\delta)$.
 \item $c(\lambda) = (V_{w,2}-V_{\ell,2}) - \lambda V_{w\ell}$: since this function is linear in $\lambda$, the modulus of continuity is $V_{w\ell}\delta$.
 \item $N_{w,2}(\lambda)$. When $N_{u,2}$ is known, this is also linear in $c(\lambda)$. 
-When $N_{u,2}$ is not known but $\delta$ is small, this will still be linear in $c(\lambda)$. \comment{Where does this bound come from? It isn't OK just to linearize in $\delta$---that begs the question.}
-Thus it also has modulus of continuity $V_{w\ell}\delta$.
+When $N_{u,2}$ is not known, $N_{w,2}(\lambda)$ increases with $c$, at a rate between $0$ and $1$.
+For $N_{w,2}(\lambda)$ in the interior of the domain, taking the implicit derivative with respect to $c$ shows that
+
+$$\frac{d N_{w, 2}}{dc} = \frac{ \sum_{i=0}^{L_n-1} \frac{1}{(N_{w,2} - c - i)^2} + \sum_{i=0}^{U_n-1} \frac{2}{(N_2 - 2N_{w,2} + c - i)^2} }{\sum_{i=0}^{W_n-1} \frac{1}{(N_{w,2} - i)^2} + \sum_{i=0}^{L_n-1} \frac{1}{(N_{w,2} - c - i)^2} + \sum_{i=0}^{U_n-1} \frac{4}{(N_2 - 2N_{w,2} + c - i)^2} } \in [0, 1].$$
+Thus it also has modulus of continuity at most $V_{w\ell}\delta$.
+Moreover, since $N_{w,2}$ is dominated by $c$, the terms $N_{w,2}(\lambda)-c(\lambda)$ and $-2N_{w,2}(\lambda)+c(\lambda)$ have modulus of continuity $V_{w\ell}\delta$ and $2V_{w\ell}\delta$, respectively.
+
 \item For terms that don't involve $\lambda$, the modulus of continuity is 0.
 \end{itemize}
 
@@ -817,8 +820,8 @@ There are four terms in $\chi(\lambda)$ that involve $\lambda$.
 Using the two key properties of linearity and composition, as well as the moduli for simple functions above, we obtain the following bound on the global modulus of continuity:
 
 \begin{align}
-\omega_\chi(\delta) = & 2W_n \log(1 + V_{w\ell}\delta) + 2L_n \log(1+ 2V_{w\ell}\delta) + \nonumber \\
-& 2U_n \log(1 + 3V_{w\ell}\delta) + 2n_1 \log\left(1 + \frac{V_{w\ell}}{2N_1\gamma}\delta\right)
+\omega_\chi(\delta) = & 2W_n \log(1 + V_{w\ell}\delta) + 2L_n \log(1+ V_{w\ell}\delta) + \nonumber \\
+& 2U_n \log(1 + 2V_{w\ell}\delta) + 2n_1 \log\left(1 + \frac{V_{w\ell}}{2N_1\gamma}\delta\right)
 \end{align}
 
 

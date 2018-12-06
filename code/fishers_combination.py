@@ -28,7 +28,7 @@ def fisher_combined_pvalue(pvalues):
     return 1-scipy.stats.chi2.cdf(obs, df=2*len(pvalues))
 
 
-def create_modulus(n1, n2, n_w2, n_l2, N1, V_wl, gamma):
+def create_modulus_old(n1, n2, n_w2, n_l2, N1, V_wl, gamma):
     """
     The modulus of continuity for the Fisher's combined p-value.
     This function returns the modulus of continuity, as a function of
@@ -59,6 +59,39 @@ def create_modulus(n1, n2, n_w2, n_l2, N1, V_wl, gamma):
     
     return lambda delta: 2*Wn*np.log(1 + V_wl*delta) + 2*Ln*np.log(1 + 2*V_wl*delta) + \
             2*Un*np.log(1 + 3*V_wl*delta) + T2(delta)
+            
+            
+def create_modulus(n1, n2, n_w2, n_l2, N1, V_wl, gamma):
+    """
+    The modulus of continuity for the Fisher's combined p-value.
+    This function returns the modulus of continuity, as a function of
+    the distance between two lambda values.
+    
+    n1 : int
+        sample size in the ballot comparison stratum
+    n2 : int
+        sample size in the ballot polling stratum
+    n_w2 : int
+        votes for the reported winner in the ballot polling sample
+    n_l2 : int
+        votes for the reported loser in the ballot polling sample
+    N1 : int
+        total number of votes in the ballot comparison stratum
+    V_wl : int
+        margin (in votes) between w and l in the whole contest
+    gamma : float
+        gamma from the ballot comparison audit
+    """
+    Wn = n_w2; Ln = n_l2; Un = n2-n_w2-n_l2
+    assert Wn>=0 and Ln>=0 and Un>=0
+    
+    if N1 == 0:
+        T2 = lambda delta: 0
+    else:
+        T2 = lambda delta: 2*n1*np.log(1 + V_wl*delta/(2*N1*gamma))
+    
+    return lambda delta: 2*Wn*np.log(1 + V_wl*delta) + 2*Ln*np.log(1 + V_wl*delta) + \
+            2*Un*np.log(1 + 2*V_wl*delta) + T2(delta)
 
 
 def maximize_fisher_combined_pvalue(N_w1, N_l1, N1, N_w2, N_l2, N2,
@@ -471,5 +504,11 @@ def test_modulus1():
     np.testing.assert_array_less(v1, v2)
     
     
+    mod_old = create_modulus_old(n1, n2, nw2, nl2, N1, Vwl, gamma)
+    np.testing.assert_array_less(mod(0.1), mod_old(0.1))
+    np.testing.assert_array_less(mod(0.01), mod_old(0.01))
+    np.testing.assert_array_less(mod(0.001), mod_old(0.001))
+
+
 if __name__ == "__main__":
     test_modulus1()
