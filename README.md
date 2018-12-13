@@ -1,4 +1,4 @@
-[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/pbstark/CORLA18/master?filepath=code%2Fhybrid-audit-example-1.ipynb)
+[![Binder](https://mybinder.org/badge.svg)](https://mybinder.org/v2/gh/pbstark/CORLA18/master?filepath=code%2Fsuite_toolkit.ipynb)
 
 # Risk-Limiting Audits by Stratified Union-Intersection Tests of Elections (SUITE)
 
