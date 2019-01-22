@@ -320,7 +320,7 @@ def simulate_fisher_combined_audit(N_w1, N_l1, N1, N_w2, N_l2, N2, n1, n2, alpha
                                N1, N_w2, N_l2, N2,
                                pvalue_funs=[cvr_pvalue, nocvr_pvalue],
                                modulus=mod,
-                               plausible_lambda_range=plausible_lambda_range)['max_pvalue']
+                               feasible_lambda_range=feasible_lambda_range)['max_pvalue']
     return np.mean(fisher_pvalues <= alpha)
 
 

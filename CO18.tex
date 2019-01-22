@@ -397,7 +397,7 @@ Appendix~\ref{sec:appendix-polling} develops the test.
 
 Jupyter notebooks containing calculations for hybrid stratified audits intended to be relevant for Colorado are available at \url{https://www.github.com/pbstark/CORLA18}.
 
-\texttt{hybrid-audit-example-1} contains two hypothetical examples. 
+\texttt{hybrid-audit-example-1} contains two hypothetical elections. 
 The first has $110,000$ cast ballots, of which 
 9.1\% were in no-CVR counties. 
 The \emph{diluted margin} (the margin in votes, divided by the total number of ballots cast) is $1.8\%$.
@@ -412,12 +412,12 @@ an RLA with risk limit 10\% could terminate after examining 263~ballots if it fo
 A ballot-polling audit of the entire contest would have been expected to examine about 14,000 ballots, more than 10\% of ballots cast.
 The hybrid audit is less efficient than a ballot-level comparison audit, but far more efficient than a ballot-polling audit.
 
-The second contest has 2~million cast ballots, of which 5\% were cast in no-CVR counties.
+The second hypothetical election has 2~million cast ballots, of which 5\% were cast in no-CVR counties.
 The diluted margin is about $20\%$.
 The workload for SUITE at 5\% risk is quite low:
-In 100\% of 10,000 simulations in which
-the reported results were correct, auditing 43~ballots from the 
-CVR stratum and 15~ballots from the no-CVR stratum
+In 93\% of 10,000 simulations in which
+the reported results were correct, auditing 50~ballots from the 
+CVR stratum and 25~ballots from the no-CVR stratum
 would have confirmed the outcome.
 If it were possible to conduct a ballot-level comparison audit for the entire contest, 
 an RLA at risk limit 5\% could terminate after examining 31~ballots if it found no errors.
@@ -428,15 +428,16 @@ workflow for SUITE for an election with 2~million ballots cast.
 The reported margin is just over $1\%$, but the reported winner
 and reported loser are actually tied in both strata.  
 The risk limit is 5\%.
-For a sample of 500~ballots from the CVR stratum and 1000~ballots from the no-CVR stratum, 
-the maximum combined $P$-value is over 25\%, so the audit cannot stop there.
+For a sample of 7600~ballots from the CVR stratum and 400~ballots from the no-CVR stratum, 
+the maximum combined $P$-value is 1, so the audit cannot stop there.
 
 A third notebook, \texttt{fisher\_combined\_pvalue}, illustrates the numerical methods used
 to check whether the maximum combined $P$-value is below the risk limit.
 It includes code for the tests in the two strata,
 for the lower and upper bounds $\lambda_-$ and $\lambda_+$ for $\lambda$,
 for evaluating Fisher's combining function on a grid,
-and for computing bounds on the $P$-value via Equation~\ref{eq:lowerbound}.
+and for maximizing the $P$-value, using the local modulus of continuity
+for Equation~\ref{eq:fisher-hybrid} to bound any approximation error.
 
 \section{Discussion} \label{sec:discussion}
 
