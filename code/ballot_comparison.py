@@ -8,7 +8,7 @@ import scipy.stats
 
 def ballot_comparison_pvalue(n, gamma, o1, u1, o2, u2, reported_margin, N, null_lambda=1):
     """
-    Compute the p-value for a ballot comparison audit using Kaplan-Markov
+    Compute the p-value for a ballot comparison audit using the Kaplan-Markov method
     
     Parameters
     ----------
@@ -30,10 +30,11 @@ def ballot_comparison_pvalue(n, gamma, o1, u1, o2, u2, reported_margin, N, null_
         the smallest reported margin *in votes* between a winning
         and losing candidate for the contest as a whole, including any other strata
     N : int
-        number of votes cast in the stratum
+        number of ballots cast in the stratum
     null_lambda : float
-        fraction of the overall margin (in votes) to test for in the stratum. If the overall margin is reported_margin,
-        test that the overstatement in this stratum does not exceed null_lambda*reported_margin
+        fraction of the overall margin (in votes) to test for in the stratum. 
+        If the overall margin is reported_margin, test that the overstatement in this stratum 
+        does not exceed null_lambda*reported_margin
 
     Returns
     -------
@@ -76,7 +77,7 @@ def findNmin_ballot_comparison(alpha, gamma, o1, u1, o2, u2,
         the smallest reported margin *in votes* between a winning
         and losing candidate in the contest as a whole, including any other strata
     N : int
-        number of votes cast in the stratum 
+        number of ballots cast in the stratum 
     null_lambda : float
         fraction of the overall margin (in votes) to test for in the stratum. If the overall margin is reported_margin,
         test that the overstatement in this stratum does not exceed null_lambda*reported_margin
@@ -122,7 +123,7 @@ def findNmin_ballot_comparison_rates(alpha, gamma, r1, s1, r2, s2,
         the smallest reported margin *in votes* between a winning
         and losing candidate in the contest as a whole, including any other strata
     N : int
-        number of votes cast in the stratum
+        number of ballots cast in the stratum
     null_lambda : float
         fraction of the overall margin (in votes) to test for in the stratum. If the overall margin is reported_margin,
         test that the overstatement in this stratum does not exceed null_lambda*reported_margin
