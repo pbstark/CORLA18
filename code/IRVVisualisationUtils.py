@@ -22,3 +22,28 @@ def printSixTrees(elimTrees):
     print("Warning: hardcoded to print 6 trees!")
     Caption(RowByRow(RowByRow(RowByRow(elimTrees[0],elimTrees[1]),RowByRow(elimTrees[2],elimTrees[3])),RowByRow(elimTrees[4],elimTrees[5])   ), "Whole trees excluded.")
 
+def parseAssertions(assertions):
+# WOLosers is a set of tuples - the first element of the tuple is the loser,
+# the second element is a list of all the candidates it loses wrt.
+# WOLosers = list()
+    WOLosers = []
+    IRVElims = []
+    for a in assertions:
+        if a["Winner-Only"]=="true":
+            l = a["Loser"]
+            w = a["Winner"]
+            # if we haven't already encountered this loser, add a new element to WOLosers.
+            # if we have, add a new winner to this loser's set.
+            losers = [ll for ll,_ in WOLosers]
+            if l not in losers:
+                #if l not in [losers[0] for losers in WOLosers]
+                WOLosers.append((l,set(w)))
+            else:
+                for losers in WOLosers:
+                    if l == losers[0]:
+                        losers[1].add(w)
+                    
+        if a["Winner-Only"]=="false":
+            l = a["Winner"]
+            IRVElims.append((l,set(a["Already-Eliminated"])  ))
+    return(WOLosers,IRVElims)
