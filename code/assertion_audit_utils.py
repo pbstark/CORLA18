@@ -5,7 +5,6 @@ import scipy as sp
 import json
 import csv
 
-    
 class Assertion:
     def __init__(self, assorter = None):
         self.assorter = assorter
@@ -178,8 +177,8 @@ class Assertion:
         def get_assort(self):
             return(self.assort)
       
-
-    def make_plurality_assertions(winners, losers):
+    @classmethod
+    def make_plurality_assertions(self, winners, losers):
         """
         Construct a set of assertions that imply that the winner(s) got more votes than the loser(s).
         
@@ -202,8 +201,8 @@ class Assertion:
         assertions = set()
         for winr in winners:
             for losr in losers:
-                winr_func = lambda c: CVR.is_votefor(winr, c)
-                losr_func = lambda c: CVR.is_votefor(losr, c)
+                winr_func = lambda c: int(bool(CVR.get_vote_from_votes(winr, c)))
+                losr_func = lambda c: int(bool(CVR.get_vote_from_votes(losr, c)))
                 assertions.add(Assertion(Assorter(winner=winr_func, loser=losr_func)))
         return assertions
                 
@@ -211,30 +210,70 @@ class CVR:
     """
     Generic class for cast-vote records.
     
-    Class method for determining whether a CVR shows a vote for a particular candidate
+    Note that the CVR class DOES NOT IMPOSE VOTING RULES. For instance, the social choice
+    function might consider a CVR that contains two votes in a contest to be an overvote.
     
+    Class method get_votefor returns the vote for a given candidate if the candidate is a key in the CVR,
+        or False if the candidate is not in the CVR. 
+        This allows very flexible representation of votes, including ranked voting.
+        
+        For instance, in a plurality contest with four candidates, a vote for Alice (and only Alice)
+        could be represented by any of the following:
+            {"Alice": True}
+            {"Alice": "marked"}
+            {"Alice": 5}
+            {"Alice": 1, "Bob": 0, "Candy": 0, "Dan": ""}
+            {"Alice": True, "Bob": False}
+            
+        bool(vote_for("Alice"))==True iff the CVR contains a vote for Alice, and 
+        int(bool(vote_for("Alice")))==1 if the CVR contains a vote for Alice, and 0 otherwise.
+                
+        Ranked votes also have simple representation, e.g.,
+            {"Alice": 1, "Bob": 2, "Candy": 3, "Dan": ''}
+        Then int(vote_for("Alice")) is Alice's rank.
+    
+     
     Methods:
     --------
     
-    is_votefor : maps (cvr, candidate) into {False, True}. 
-         is_votefor(cvr, candidate) = True iff the cvr shows a vote for candidate
-         if None, the constructor checks whether candidate in cvr
-    
+    get_votefor :  
+         get_votefor(candidate, cvr) = returns the value in the votes dict for the key `candidate`, or
+         False if no such key exists
+    set_votes :  
+         updates the votes dict; overrides previous votes and/or creates votes for additional candidates
+    get_votes : returns complete votes dict
     """
     
-    def __init__(self, is_votefor = None):
-        if is_votefor is not None:
-            assert callable(is_votefor), "is_votefor must be callable"                
-            self.is_votefor = is_votefor
-        else:
-            self.is_votefor = lambda cvr, cand: cand in cvr
+    def __init__(self, votes = {}):
+        self.votes = votes
         
-    def get_is_votefor:
-        return self.is_votefor
+    def get_votes(self):
+        return self.votes
     
-    def set_is_votefor:
-        self.is_votefor = is_votefor
+    def set_votes(self, votes):
+        self.votes.update(votes)
     
+    def get_votefor(self, candidate):
+        return get_vote_from_votes(candidate, self.votes)
+    
+    @classmethod
+    def get_vote_from_votes(self, candidate, votes):
+        """
+        Returns the vote for a candidate if the CVR contains a vote for that candidate; otherwise False
+        
+        Parameters:
+        -----------
+        candidate : 
+            identifier for candidate
+        
+        votes : dict
+            a dict where candidate identifiers are keys
+        
+        Returns:
+        --------
+        vote
+        """
+        return False if candidate not in votes else votes[candidate]
 
 
 # utilities
