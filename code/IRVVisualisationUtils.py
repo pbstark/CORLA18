@@ -1,3 +1,6 @@
+import svgling
+from svgling.figure import Caption
+
 # Convert a tree in list form into the same tree in tuple form suitable for
 # svgling.
 def treeListToTuple(t):
