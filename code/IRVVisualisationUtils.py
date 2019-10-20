@@ -18,8 +18,7 @@ def treeListToTuple(t):
         return ((t[0],)+tuple(tList))
 
 def printSixTrees(elimTrees):
-	print("Built "+str(len(elimTrees))+" trees.")
-	print("Warning: hardcoded to print 6 trees!")
-
-	Caption(RowByRow(RowByRow(RowByRow(elimTrees[0],elimTrees[1]),RowByRow(elimTrees[2],elimTrees[3])),RowByRow(elimTrees[4],elimTrees[5])   ), "Whole trees excluded.")
+    print("Built "+str(len(elimTrees))+" trees.")
+    print("Warning: hardcoded to print 6 trees!")
+    Caption(RowByRow(RowByRow(RowByRow(elimTrees[0],elimTrees[1]),RowByRow(elimTrees[2],elimTrees[3])),RowByRow(elimTrees[4],elimTrees[5])   ), "Whole trees excluded.")
 
