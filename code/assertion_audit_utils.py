@@ -10,13 +10,13 @@ class Assertion:
     def __init__(self, assorter = None):
         self.assorter = assorter
         
-    def set_assorter(assorter):
+    def set_assorter(self, assorter):
         self.assorter = assorter
         
     def get_assorter(self):
         return self.assorter
 
-    def assort(self,cvr):
+    def assort(self, cvr):
         return self.assorter(cvr)
     
     def category_sum(self, cvr_list):
@@ -177,29 +177,66 @@ class Assertion:
 
         def get_assort(self):
             return(self.assort)
-            
-        def assort(self, cvr):
-            """
-            Classifies a CVR as 0, 1/2, or 1 depending on whether it shows a vote 
-            for the loser (but not the winner), a vote for neither or both, or a vote 
-            for the winner (but not the loser)
-            
-            Parameters:
-            -----------
-            cvr : Cvr
-                a cast vote record
+      
+
+    def make_plurality_assertions(winners, losers):
+        """
+        Construct a set of assertions that imply that the winner(s) got more votes than the loser(s).
+        
+        The assertions are that every winner beat every loser: there are
+              len(winners)*len(losers) 
+        pairwise assertions in all.
+        
+        Parameters:
+        -----------
+        winners : list
+            list of identifiers of winning candidate(s)
+        losers : list
+            list of identifiers of losing candidate(s)
+        
+        Returns:
+        --------
+        a set of Assertion objects
+        
+        """
+        assertions = set()
+        for winr in winners:
+            for losr in losers:
+                winr_func = lambda c: CVR.is_votefor(winr, c)
+                losr_func = lambda c: CVR.is_votefor(losr, c)
+                assertions.add(Assertion(Assorter(winner=winr_func, loser=losr_func)))
+        return assertions
                 
-            Returns:
-            --------
-            cat : double
-               0 if loser==1 and winner==0
-               1 if loser==0 and winner==1
-               1/2 otherwise
-            """
-            winr = self.winner(cvr)
-            losr = self.loser(cvr)
-            return winr if winr != losr else 1/2       
-            
+class CVR:
+    """
+    Generic class for cast-vote records.
+    
+    Class method for determining whether a CVR shows a vote for a particular candidate
+    
+    Methods:
+    --------
+    
+    is_votefor : maps (cvr, candidate) into {False, True}. 
+         is_votefor(cvr, candidate) = True iff the cvr shows a vote for candidate
+         if None, the constructor checks whether candidate in cvr
+    
+    """
+    
+    def __init__(self, is_votefor = None):
+        if is_votefor is not None:
+            assert callable(is_votefor), "is_votefor must be callable"                
+            self.is_votefor = is_votefor
+        else:
+            self.is_votefor = lambda cvr, cand: cand in cvr
+        
+    def get_is_votefor:
+        return self.is_votefor
+    
+    def set_is_votefor:
+        self.is_votefor = is_votefor
+    
+
+
 # utilities
             
 def check_audit_parameters(gamma, error_rates, contests):
