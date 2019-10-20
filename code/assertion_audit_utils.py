@@ -5,7 +5,203 @@ import scipy as sp
 import json
 import csv
 
+    
+class Assertion:
+    def __init__(self, assorter = None):
+        self.assorter = assorter
+        
+    def set_assorter(assorter):
+        self.assorter = assorter
+        
+    def get_assorter(self):
+        return self.assorter
 
+    def assort(self,cvr):
+        return self.assorter(cvr)
+    
+    def category_sum(self, cvr_list):
+        """
+        find the sum of the category values for a list of CVRs        
+        Parameters:
+        ----------
+        cvr_list : list
+            a list of cast-vote records
+        
+        Returns:
+        ----------
+        total : double
+        """
+        return np.sum(map(self.assorter, cvr_list))        
+        
+    def margin_votes(self, cvr_list):
+        """
+        find the margin in votes for a list of CVRs
+        
+        Parameters:
+        ----------
+        cvr_list : list
+            a list of cast-vote records
+        
+        Returns:
+        ----------
+        margin : double
+        """
+        return 2*(self.category_sum(cvr_list)-len(cvr_list)/2)
+        
+    def margin_fraction(self, cvr_list):
+        """
+        find the diluted margin (as a fraction) for a list of CVRs
+        
+        Parameters:
+        ----------
+        cvr_list : list
+            a list of cast-vote records
+        
+        Returns:
+        ----------
+        margin : double
+        """
+        return self.margin_votes(cvr_list)/len(cvr_list)
+    
+    def overstatement(self, mvr, cvr):
+        """
+        Find the overstatement error (in votes) in a CVR compared to the human 
+        reading of the ballot
+        
+        Parameters:
+        -----------
+        mvr : Cvr
+            the manual interpretation of voter intent
+        cvr : Cvr
+            the machine-reported cast vote record
+            
+        Returns:
+        --------
+        overstatement error
+        """
+        return 2*(self.assorter(mvr)-self.assorter(cvr))
+    
+    def overstatement_count(self, mvr_list, cvr_list):
+        """
+        Count the discrepancies between human reading of a collection of ballots and the
+        CVRs for those ballots
+        
+        Parameters:
+        -----------
+        mvr_list : list
+            list of manually determined CVRs
+        cvr_list : list
+            list of the machine-reported CVRs
+            
+        Returns:
+        --------
+        tuple : number of ballots with overstatements of -2, -1, 1, and 2.
+        
+        """
+        assert len(mvr_list) == len(cvr_list), "number of mvrs differs from number of cvrs"
+        discrepancies = np.array(map(self.overstatement, mvr_list, cvr_list))
+        o2 = np.sum(discrepancies == 2)
+        o1 = np.sum(discrepancies == 1)
+        u1 = np.sum(discrepancies == -1)
+        u2 = np.sum(discrepancies == -2)
+        return [o2, o1, u1, u2]
+        
+        
+    class Assorter:
+        """
+        Class for generic Assorter.
+        
+        Class parameters:
+        -----------------
+        winner : callable
+            maps a CVR into the value 1 if the CVR represents a vote for the winner        
+        loser  : callable
+            maps a CVR into the value 1 if the CVR represents a vote for the winner
+        
+        assort : callable
+            maps cvr into {0, 1/2, 1}:
+               0 if loser==1 and winner==0
+               1 if loser==0 and winner==1
+               1/2 otherwise
+
+        The basic method is assort, but the constructor can be called with (winner, loser)
+        instead. In that case, assort is defined as follows:
+        
+            If the they both map the same CVR to the same value, assort = 1/2. 
+            Otherwise, assort=0 if loser==1 and assort=1 if winner==1.
+        """
+            
+        def __init__(self, assort=None, winner=None, loser=None):
+            """
+            Constructs an Assorter.
+            
+            If assort is defined and callable, is becomes the class instance of assort
+            
+            If assort is None but both winner and loser are defined and callable,
+               assort=1/2 if winner=loser; assort=winner, otherwise
+            
+            Parameters:
+            -----------
+            assort : callable
+                maps a CVR into {0, 1/2, 1}
+            winner : callable
+                maps a CVR into {0, 1}
+            loser  : callable
+                maps a CVR into {0, 1}
+            """            
+            self.winner = winner
+            self.loser = loser
+            if assort is not None:
+                assert callable(assort), "assort must be callable"
+                self.assort = assort
+            else:
+                assert callable(winner), "assort is None so winner must be callable"
+                assert callable(loser), "assort is None so loser must be callable"
+                self.assort = lambda cvr: self.winner(cvr) \
+                              if self.winner(cvr) != self.loser(cvr) else 1/2 
+        
+        def set_winner(self, winner):
+            self.winner = winner
+
+        def get_winner(self):
+            return(self.winner)
+
+        def set_loser(self, loser):
+            self.loser = loser
+
+        def get_loser(self):
+            return(self.loser)
+        
+        def set_assort(self):
+            self.assort = assort
+
+        def get_assort(self):
+            return(self.assort)
+            
+        def assort(self, cvr):
+            """
+            Classifies a CVR as 0, 1/2, or 1 depending on whether it shows a vote 
+            for the loser (but not the winner), a vote for neither or both, or a vote 
+            for the winner (but not the loser)
+            
+            Parameters:
+            -----------
+            cvr : Cvr
+                a cast vote record
+                
+            Returns:
+            --------
+            cat : double
+               0 if loser==1 and winner==0
+               1 if loser==0 and winner==1
+               1/2 otherwise
+            """
+            winr = self.winner(cvr)
+            losr = self.loser(cvr)
+            return winr if winr != losr else 1/2       
+            
+# utilities
+            
 def check_audit_parameters(gamma, error_rates, contests):
     """
     Check whether the audit parameters are valid; complain if not.
