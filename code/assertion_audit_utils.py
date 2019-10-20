@@ -105,77 +105,6 @@ class Assertion:
         u2 = np.sum(discrepancies == -2)
         return [o2, o1, u1, u2]
         
-        
-    class Assorter:
-        """
-        Class for generic Assorter.
-        
-        Class parameters:
-        -----------------
-        winner : callable
-            maps a CVR into the value 1 if the CVR represents a vote for the winner        
-        loser  : callable
-            maps a CVR into the value 1 if the CVR represents a vote for the winner
-        
-        assort : callable
-            maps cvr into {0, 1/2, 1}:
-               0 if loser==1 and winner==0
-               1 if loser==0 and winner==1
-               1/2 otherwise
-
-        The basic method is assort, but the constructor can be called with (winner, loser)
-        instead. In that case, assort is defined as follows:
-        
-            If the they both map the same CVR to the same value, assort = 1/2. 
-            Otherwise, assort=0 if loser==1 and assort=1 if winner==1.
-        """
-            
-        def __init__(self, assort=None, winner=None, loser=None):
-            """
-            Constructs an Assorter.
-            
-            If assort is defined and callable, is becomes the class instance of assort
-            
-            If assort is None but both winner and loser are defined and callable,
-               assort=1/2 if winner=loser; assort=winner, otherwise
-            
-            Parameters:
-            -----------
-            assort : callable
-                maps a CVR into {0, 1/2, 1}
-            winner : callable
-                maps a CVR into {0, 1}
-            loser  : callable
-                maps a CVR into {0, 1}
-            """            
-            self.winner = winner
-            self.loser = loser
-            if assort is not None:
-                assert callable(assort), "assort must be callable"
-                self.assort = assort
-            else:
-                assert callable(winner), "assort is None so winner must be callable"
-                assert callable(loser), "assort is None so loser must be callable"
-                self.assort = lambda cvr: self.winner(cvr) \
-                              if self.winner(cvr) != self.loser(cvr) else 1/2 
-        
-        def set_winner(self, winner):
-            self.winner = winner
-
-        def get_winner(self):
-            return(self.winner)
-
-        def set_loser(self, loser):
-            self.loser = loser
-
-        def get_loser(self):
-            return(self.loser)
-        
-        def set_assort(self):
-            self.assort = assort
-
-        def get_assort(self):
-            return(self.assort)
       
     @classmethod
     def make_plurality_assertions(self, winners, losers):
@@ -195,17 +124,129 @@ class Assertion:
         
         Returns:
         --------
-        a set of Assertion objects
+        a dict of Assertions
         
         """
-        assertions = set()
+        assertions = {}
         for winr in winners:
+            winr_func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(winr, c))
             for losr in losers:
-                winr_func = lambda c: int(bool(CVR.get_vote_from_votes(winr, c)))
-                losr_func = lambda c: int(bool(CVR.get_vote_from_votes(losr, c)))
-                assertions.add(Assertion(Assorter(winner=winr_func, loser=losr_func)))
+                wl_pair = winr + ' v ' + losr                
+                losr_func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(losr, c))
+                assertions[wl_pair] = Assertion(Assorter(winner=winr_func, loser=losr_func))
         return assertions
-                
+    
+    @classmethod
+    def make_supermajority_assertion(self, winner, losers, share_to_win):
+        """
+        Construct a set of assertions that imply that the winner got at least a fraction fraction_to_win
+        of the valid votes.
+        
+        An equivalent condition is derived as follows:
+            (votes for winner) >= share_to_win*(total valid votes)
+            (1-share_to_win)*(votes for winner) >= share_to_win*(votes for losers)
+            (votes for winner) >= (share_to_win/(1-share_to_win))*(votes for losers)
+        
+        Thus the reported winner really won iff
+        
+        (votes for winner)/(votes for winner + (share_to_win/(1-share_to_win))*(votes for losers)) > 1/2
+            
+        **WARNING:** the assertion this function constructs does not check whether the CVR is 
+        an overvote.
+        
+        Parameters:
+        -----------
+        winner : 
+            identifiers of winning candidate
+        losers : list
+            list of identifiers of losing candidate(s)
+        share_to_win : double
+            fraction of the valid votes the winner must get to win        
+        
+        Returns:
+        --------
+        a dict containing one Assertion
+        
+        """
+        assert share_to_win > 0, "share_to_win must be positive"
+        assert share_to_win <= 1, "share_to_win cannot exceed 1"
+        assertions = {}
+        wl_pair = winner + ' v all'
+        func = lambda c: (1 + CVR.as_vote(CVR.get_vote_from_votes(winner, c)) - \
+                         (share_to_win/(1-share_to_win))* \
+                          np.max([CVR.as_vote(CVR.get_vote_from_votes(losr, c)) for losr in losers]))/2       
+        assertions[wl_pair] = Assertion(Assorter(assort = func))
+        return assertions
+
+
+class Assorter:
+    """
+    Class for generic Assorter.
+    
+    Class parameters:
+    -----------------
+    winner : callable
+        maps a CVR into the value 1 if the CVR represents a vote for the winner    
+    loser  : callable
+        maps a CVR into the value 1 if the CVR represents a vote for the winner
+    
+    assort : callable
+        maps cvr into double
+
+    The basic method is assort, but the constructor can be called with (winner, loser)
+    instead. In that case,
+    
+        assort = (winner - loser + 1)/2
+
+    """
+        
+    def __init__(self, assort=None, winner=None, loser=None):
+        """
+        Constructs an Assorter.
+        
+        If assort is defined and callable, it becomes the class instance of assort
+        
+        If assort is None but both winner and loser are defined and callable,
+           assort is defined to be 1/2 if winner=loser; winner, otherwise
+           
+        
+        Parameters:
+        -----------
+        assort : callable
+            maps a CVR into a double
+        winner : callable
+            maps a CVR into {0, 1}
+        loser  : callable
+            maps a CVR into {0, 1}
+        """        
+        self.winner = winner
+        self.loser = loser
+        if assort is not None:
+            assert callable(assort), "assort must be callable"
+            self.assort = assort
+        else:
+            assert callable(winner), "winner must be callable if assort is None"
+            assert callable(loser),  "loser must be callable if assort is None"
+            self.assort = lambda cvr: (self.winner(cvr) - self.loser(cvr) + 1)/2 
+    
+    def set_winner(self, winner):
+        self.winner = winner
+
+    def get_winner(self):
+        return(self.winner)
+
+    def set_loser(self, loser):
+        self.loser = loser
+
+    def get_loser(self):
+        return(self.loser)
+    
+    def set_assort(self):
+        self.assort = assort
+
+    def get_assort(self):
+        return(self.assort)
+    
 class CVR:
     """
     Generic class for cast-vote records.
@@ -255,6 +296,14 @@ class CVR:
     
     def get_votefor(self, candidate):
         return get_vote_from_votes(candidate, self.votes)
+    
+    @classmethod
+    def as_vote(self, v):
+        return int(bool(v))
+    
+    @classmethod
+    def as_rank(self, v):
+        return int(v)
     
     @classmethod
     def get_vote_from_votes(self, candidate, votes):
