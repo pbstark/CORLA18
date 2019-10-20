@@ -1,5 +1,5 @@
 import svgling
-from svgling.figure import Caption
+from svgling.figure import Caption, SideBySide, RowByRow
 
 # Convert a tree in list form into the same tree in tuple form suitable for
 # svgling.
