@@ -96,7 +96,7 @@ def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
 def printAssertions(WOLosers,IRVElims):    
     print("Not-Eliminated-Before assertions: ")
     for loser in WOLosers:
-        print('NEB %4d: Candidate '.format(WOLosers.index(loser))+str(loser[0])+' cannot be eliminated before '+str(loser[1]))
+        print('NEB {0:2d}: Candidate '.format(WOLosers.index(loser))+str(loser[0])+' cannot be eliminated before '+str(loser[1]))
     
     print("\n")
     print("Not-Eliminated-Next assertions: ")
