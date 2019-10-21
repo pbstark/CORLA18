@@ -6,7 +6,17 @@ import json
 import csv
 
 class Assertion:
+    """
+    Objects and methods for assertions about elections.
+    An _assertion_ is a statement of the form 
+      "the average value of this assorter applied to the ballots is greater than 1/2"
+    The _assorter_ maps votes to nonnegative numbers not exceeding `upper_bound`
+    """
+    
     def __init__(self, assorter = None):
+        """
+        The assorter is callable; the upper bound is a nonnegative real.
+        """
         self.assorter = assorter
         
     def set_assorter(self, assorter):
@@ -18,9 +28,9 @@ class Assertion:
     def assort(self, cvr):
         return self.assorter(cvr)
     
-    def category_sum(self, cvr_list):
+    def assorter_mean(self, cvr_list):
         """
-        find the sum of the category values for a list of CVRs        
+        find the mean of the assorter values for a list of CVRs        
         Parameters:
         ----------
         cvr_list : list
@@ -28,10 +38,24 @@ class Assertion:
         
         Returns:
         ----------
-        total : double
+        double
+        """
+        return np.mean(map(self.assorter, cvr_list))        
+        
+    def assorter_sum(self, cvr_list):
+        """
+        find the sum of the assorter values for a list of CVRs        
+        Parameters:
+        ----------
+        cvr_list : list
+            a list of cast-vote records
+        
+        Returns:
+        ----------
+        double
         """
         return np.sum(map(self.assorter, cvr_list))        
-        
+
     def margin_votes(self, cvr_list):
         """
         find the margin in votes for a list of CVRs
@@ -45,7 +69,7 @@ class Assertion:
         ----------
         margin : double
         """
-        return 2*(self.category_sum(cvr_list)-len(cvr_list)/2)
+        return 2*(self.assorter_sum(cvr_list)-len(cvr_list)/2)
         
     def margin_fraction(self, cvr_list):
         """
@@ -133,7 +157,8 @@ class Assertion:
             for losr in losers:
                 wl_pair = winr + ' v ' + losr                
                 losr_func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(losr, c))
-                assertions[wl_pair] = Assertion(Assorter(winner=winr_func, loser=losr_func))
+                assertions[wl_pair] = Assertion(Assorter(winner=winr_func, loser=losr_func, \
+                                      upper_bound = 1))
         return assertions
     
     @classmethod
@@ -172,7 +197,7 @@ class Assertion:
         cands.append(winner)
         func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(winner, c))/(2*share_to_win) \
                          if CVR.has_one_vote(cands, c) else 1/2   
-        assertions[wl_pair] = Assertion(Assorter(assort = func))
+        assertions[wl_pair] = Assertion(Assorter(assort = func, upper_bound = 1/(2*share_to_win)))
         return assertions
 
 
@@ -189,6 +214,9 @@ class Assorter:
     
     assort : callable
         maps cvr into double
+    
+    upper_bound : double
+        a priori upper bound on the value the assorter assigns to any CVR
 
     The basic method is assort, but the constructor can be called with (winner, loser)
     instead. In that case,
@@ -197,7 +225,7 @@ class Assorter:
 
     """
         
-    def __init__(self, assort=None, winner=None, loser=None):
+    def __init__(self, assort=None, winner=None, loser=None, upper_bound = 1):
         """
         Constructs an Assorter.
         
@@ -218,6 +246,7 @@ class Assorter:
         """        
         self.winner = winner
         self.loser = loser
+        self.upper_bound = upper_bound
         if assort is not None:
             assert callable(assort), "assort must be callable"
             self.assort = assort
@@ -243,7 +272,14 @@ class Assorter:
 
     def get_assort(self):
         return(self.assort)
-    
+
+    def set_upper_bound(self, upper_bound):
+        self.upper_bound = upper_bound
+        
+    def get_upper_bound(self):
+        return self.upper_bound
+
+
 class CVR:
     """
     Generic class for cast-vote records.
