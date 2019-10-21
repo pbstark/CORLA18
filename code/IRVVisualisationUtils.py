@@ -100,7 +100,7 @@ def printAssertions(WOLosers,IRVElims):
     
     print("Not-Eliminated-Next assertions: ")
     for winner in IRVElims:
-        print('NEN {0:2d}: Candidate {1:2d} cannot be eliminated next when '.format(IRVElims.index(winner),winner[0])+str(winner[1])+' are eliminated.')
+        print('NEN {0:2d}: Candidate '.format(IRVElims.index(winner))+str(winner[0])+' cannot be eliminated next when '+str(winner[1])+' are eliminated.')
 
 
 # Build printable pretty trees.
