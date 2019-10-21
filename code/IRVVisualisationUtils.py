@@ -107,7 +107,7 @@ def printAssertions(WOLosers,IRVElims):
             " cannot be eliminated next when "+str(winner[1])+" are eliminated.")
 
 # Build printable pretty trees.
-def buildPrintedResults(apparentWinner, apparentNonWinners, WOLosers,IRVElims)
+def buildPrintedResults(apparentWinner, apparentNonWinners, WOLosers,IRVElims):
     elimTrees=[]
     for c in apparentNonWinners:
         candidateSet=set(apparentNonWinners).copy()
