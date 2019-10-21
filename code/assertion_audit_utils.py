@@ -472,7 +472,7 @@ def write_ballots_sampled(ballot_file, ballots):
 
 # Unit tests
 
-def test_supermajority_assorter:
+def test_supermajority_assorter():
     losers = ["Bob","Candy"]
     share_to_win = 2/3
     assn = Assertion.make_supermajority_assertion("Alice", losers, share_to_win)
