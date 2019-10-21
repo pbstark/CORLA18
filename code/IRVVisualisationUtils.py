@@ -21,12 +21,12 @@ def parseAssertions(auditfile):
     apparentWinner = auditfile["Audits"][0]["Winner"]
     print("Apparent winner: "+apparentWinner)
     apparentNonWinners=auditfile["Audits"][0]["Eliminated"]
-    print("Apparently eliminated: ")
-    print(apparentNonWinners)
+    print("Apparently eliminated: "+str(apparentNonWinners))
+    print("\n")
     assertions = auditfile["Audits"][0]["Assertions"]
 
     # WOLosers is a set of tuples - the first element of the tuple is the loser,
-    # the second element is a list of all the candidates it loses wrt.
+    # the second element is a list of all the candidates it loses relative to.
     WOLosers = []
     # IRVElims is also a set of tuples - the first element is the candidate,
     # the second is the set of candidates already eliminated.
@@ -99,12 +99,12 @@ def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
 def printAssertions(WOLosers,IRVElims):    
     print("Not-Eliminated-Before assertions: ")
     for loser in WOLosers:
-        print("NEB"+str(WOLosers.index(loser))+": Candidate "+str(loser[1])+" cannot be eliminated before "+str(loser[0]))
+        print("NEB%4d: Candidate "+str(loser[1])+" cannot be eliminated before "+str(loser[0]),WOLosers.index(loser))
     
     print("Not-Eliminated-Next assertions: ")
     for winner in IRVElims:
-        print("NEN"+str(IRVElims.index(winner))+": Candidate "+str(winner[0])+
-            " cannot be eliminated next when "+str(winner[1])+" are eliminated.")
+        print("NEN%$d:: Candidate "+str(winner[0])+
+            " cannot be eliminated next when "+str(winner[1])+" are eliminated.",str(IRVElims.index(winner))
 
 # Build printable pretty trees.
 def buildPrintedResults(apparentWinner, apparentNonWinners, WOLosers,IRVElims):
