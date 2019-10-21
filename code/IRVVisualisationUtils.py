@@ -105,3 +105,17 @@ def printAssertions(WOLosers,IRVElims):
     for winner in IRVElims:
         print("NEN"+str(IRVElims.index(winner))+": Candidate "+str(winner[0])+
             " cannot be eliminated next when "+str(winner[1])+" are eliminated.")
+
+# Build printable pretty trees.
+def buildPrintedResults(apparentWinner, apparentNonWinners, WOLosers,IRVElims)
+    elimTrees=[]
+    for c in apparentNonWinners:
+        candidateSet=set(apparentNonWinners).copy()
+        candidateSet.add(apparentWinner)
+        candidateSet.remove(c)
+        treeAsLists=buildRemainingTreeAsLists(c,candidateSet, WOLosers, IRVElims)
+        treeAsTuples=treeListToTuple(treeAsLists)
+        drawnTree = svgling.draw_tree(treeAsTuples)
+        elimTrees.append(Caption(drawnTree,"Remaining orders in which "+c+" wins."))
+    return elimTrees
+
