@@ -53,3 +53,54 @@ def parseAssertions(auditfile):
             l = a["Winner"]
             IRVElims.append((l,set(a["Already-Eliminated"])  ))
     return(apparentWinner, apparentNonWinners, WOLosers, IRVElims)
+
+# This takes a root candidate c and a set S of candidates still to
+# be built in to the tree (i.e. those to be eliminated earlier, closer to the leaves)
+# it checks whether c is winner-only dominated by any candidate in S and, if so,
+# prunes the tree here.
+def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
+    # If c is in the list of candidates yet to be eliminated, this is a bug.
+    if c in S:
+        print("Oops c is in S.  c = ")
+        print(c)
+        print(" S = ")
+        print(S)
+    # if S is empty, return the leaf
+    # Note that this indicates an error in the RAIRE audit
+    # process - we're producing a tree 
+    # in which we haven't pruned all the leaves.  
+    # The intention is to make it visually obvious to an auditor.
+    # Hence the ***
+    if not S:
+        return [[c, "***Unpruned leaf - ", "this is a problem!***"]]
+
+    # if c is a loser defeated by a candidate in S, prune here.
+    # Tag with NEB assertion number we used to prune.
+    for loser in WOLosers:
+        if c==loser[0] and ((loser[1] & S)):
+            return [[c, "NEB",WOLosers.index(loser)]]
+    
+    # if c cannot be eliminated by IRV in exactly the case where S is the already-eliminated set, 
+    # prune here.  Tag with NEN assertion number we used to prune.
+    for winner in IRVElims:
+        if c==winner[0] and winner[1]==S:
+            return [[c, "NEN",IRVElims.index(winner)]]
+
+            
+    tree=[c,[]]
+    for c2 in S:
+        smallerSet = S.copy()
+        smallerSet.remove(c2)
+        tree[1].append(buildRemainingTreeAsLists(c2,smallerSet))
+    
+    return tree
+
+def printAssertions(WOLosers,IRVElims):    
+    print("Not-Eliminated-Before assertions: ")
+    for loser in WOLosers:
+        print("NEB"+str(WOLosers.index(loser))+": Candidate "+str(loser[1])+" cannot be eliminated before "+str(loser[0]))
+    
+    print("Not-Eliminated-Next assertions: ")
+    for winner in IRVElims:
+        print("NEN"+str(IRVElims.index(winner))+": Candidate "+str(winner[0])+
+            " cannot be eliminated next when "+str(winner[1])+" are eliminated.")
