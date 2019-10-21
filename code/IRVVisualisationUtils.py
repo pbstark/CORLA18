@@ -72,7 +72,8 @@ def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
     # The intention is to make it visually obvious to an auditor.
     # Hence the ***
     if not S:
-        return [[c, "***Unpruned leaf - ", "this is a problem!***"]]
+        return [[c, "***Unpruned leaf - ", 
+            "RAIRE assertions do not exclude all other winners!***"]]
 
     # if c is a loser defeated by a candidate in S, prune here.
     # Tag with NEB assertion number we used to prune.
@@ -91,7 +92,7 @@ def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
     for c2 in S:
         smallerSet = S.copy()
         smallerSet.remove(c2)
-        tree[1].append(buildRemainingTreeAsLists(c2,smallerSet))
+        tree[1].append(buildRemainingTreeAsLists(c2,smallerSet,WOLosers,IRVElims))
     
     return tree
 
