@@ -28,12 +28,14 @@ def parseAssertions(auditfile):
     # WOLosers is a set of tuples - the first element of the tuple is the loser,
     # the second element is a list of all the candidates it loses relative to.
     WOLosers = []
+
     # IRVElims is also a set of tuples - the first element is the candidate,
     # the second is the set of candidates already eliminated.
     # An IRVElim assertion states that the candidate can't be the next
     # eliminated when the already-eliminated candidates are exactly the set
     # in the second element of the tuple.
     IRVElims = []
+
     for a in assertions:
         if a["Winner-Only"]=="true":
             l = a["Loser"]
@@ -96,7 +98,7 @@ def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
 def printAssertions(WOLosers,IRVElims):    
     print("Not-Eliminated-Before assertions: ")
     for loser in WOLosers:
-        print('NEB {0:2d}: Candidate '.format(WOLosers.index(loser))+str(loser[0])+' cannot be eliminated before '+str(loser[1]))
+        print('NEB {0:2d}: Candidates '.format(WOLosers.index(loser))+str(loser[1])+' cannot be eliminated before '+str(loser[0])+'.')
     
     print("\n")
     print("Not-Eliminated-Next assertions: ")
