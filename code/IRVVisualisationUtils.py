@@ -61,10 +61,7 @@ def parseAssertions(auditfile):
 def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
     # If c is in the list of candidates yet to be eliminated, this is a bug.
     if c in S:
-        print("Oops c is in S.  c = ")
-        print(c)
-        print(" S = ")
-        print(S)
+        print("Error: c is in S.  c = "+str(c)+". S = "+str(S)+.\n")
     # if S is empty, return the leaf
     # Note that this indicates an error in the RAIRE audit
     # process - we're producing a tree 
@@ -103,7 +100,7 @@ def printAssertions(WOLosers,IRVElims):
     
     print("Not-Eliminated-Next assertions: ")
     for winner in IRVElims:
-        print("NEN%$d:: Candidate "+str(winner[0])+
+        print("NEN%4d: Candidate "+str(winner[0])+
             " cannot be eliminated next when "+str(winner[1])+" are eliminated.",str(IRVElims.index(winner))
 
 # Build printable pretty trees.
