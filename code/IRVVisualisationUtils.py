@@ -22,11 +22,22 @@ def printSixTrees(elimTrees):
     print("Warning: hardcoded to print 6 trees!")
     Caption(RowByRow(RowByRow(RowByRow(elimTrees[0],elimTrees[1]),RowByRow(elimTrees[2],elimTrees[3])),RowByRow(elimTrees[4],elimTrees[5])   ), "Whole trees excluded.")
 
-def parseAssertions(assertions):
-# WOLosers is a set of tuples - the first element of the tuple is the loser,
-# the second element is a list of all the candidates it loses wrt.
-# WOLosers = list()
+def parseAssertions(auditfile):
+    apparentWinner = auditfile["Audits"][0]["Winner"]
+    print("Apparent winner: "+apparentWinner)
+    apparentNonWinners=auditfile["Audits"][0]["Eliminated"]
+    print("Apparently eliminated: ")
+    print(apparentNonWinners)
+    assertions = auditfile["Audits"][0]["Assertions"]
+
+    # WOLosers is a set of tuples - the first element of the tuple is the loser,
+    # the second element is a list of all the candidates it loses wrt.
     WOLosers = []
+    # IRVElims is also a set of tuples - the first element is the candidate,
+    # the second is the set of candidates already eliminated.
+    # An IRVElim assertion states that the candidate can't be the next
+    # eliminated when the already-eliminated candidates are exactly the set
+    # in the second element of the tuple.
     IRVElims = []
     for a in assertions:
         if a["Winner-Only"]=="true":
@@ -46,4 +57,4 @@ def parseAssertions(assertions):
         if a["Winner-Only"]=="false":
             l = a["Winner"]
             IRVElims.append((l,set(a["Already-Eliminated"])  ))
-    return(WOLosers,IRVElims)
+    return(apparentWinner, apparentLoser, WOLosers, IRVElims)
