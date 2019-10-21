@@ -142,18 +142,14 @@ class Assertion:
         Construct a set of assertions that imply that the winner got at least a fraction fraction_to_win
         of the valid votes.
         
-        An equivalent condition is derived as follows:
-            (votes for winner) >= share_to_win*(total valid votes)
-            (1-share_to_win)*(votes for winner) >= share_to_win*(votes for losers)
-            (votes for winner) >= (share_to_win/(1-share_to_win))*(votes for losers)
+        An equivalent condition is:
         
-        Thus the reported winner really won iff
+        (votes for winner)/(2*share_to_win) + (invalid votes)/2 > 1/2.
         
-        (votes for winner)/(votes for winner + (share_to_win/(1-share_to_win))*(votes for losers)) > 1/2
+        Thus the correctness of a super-majority outcome can be checked with a single assertion.
+        
+        A CVR with a mark for more than one candidate in the contest is considered an invalid vote.
             
-        **WARNING:** the assertion this function constructs does not check whether the CVR is 
-        an overvote.
-        
         Parameters:
         -----------
         winner : 
@@ -168,13 +164,14 @@ class Assertion:
         a dict containing one Assertion
         
         """
-        assert share_to_win > 0, "share_to_win must be positive"
-        assert share_to_win <= 1, "share_to_win cannot exceed 1"
+        assert share_to_win > 1/2, "share_to_win must be at least 1/2"
+        assert share_to_win < 1, "share_to_win must be less than 1"
         assertions = {}
         wl_pair = winner + ' v all'
-        func = lambda c: (1 + CVR.as_vote(CVR.get_vote_from_votes(winner, c)) - \
-                         (share_to_win/(1-share_to_win))* \
-                          np.max([CVR.as_vote(CVR.get_vote_from_votes(losr, c)) for losr in losers]))/2       
+        cands = losers.copy()
+        cands.append(winner)
+        func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(winner, c))/(2*share_to_win) \
+                         if CVR.has_one_vote(cands, c) else 1/2   
         assertions[wl_pair] = Assertion(Assorter(assort = func))
         return assertions
 
@@ -293,7 +290,7 @@ class CVR:
     
     def set_votes(self, votes):
         self.votes.update(votes)
-    
+            
     def get_votefor(self, candidate):
         return get_vote_from_votes(candidate, self.votes)
     
@@ -308,7 +305,8 @@ class CVR:
     @classmethod
     def get_vote_from_votes(self, candidate, votes):
         """
-        Returns the vote for a candidate if the CVR contains a vote for that candidate; otherwise False
+        Returns the vote for a candidate if the CVR contains a vote for that candidate; 
+        otherwise returns False
         
         Parameters:
         -----------
@@ -323,7 +321,24 @@ class CVR:
         vote
         """
         return False if candidate not in votes else votes[candidate]
-
+    
+    @classmethod
+    def has_one_vote(self, candidates, votes):
+        """
+        Is there exactly one vote among the candidates?
+        
+        Parameters:
+        -----------
+        candidates : list
+            list of identifiers of candidates
+        
+        Returns:
+        ----------
+        True if there is exactly one vote among those candidates, where a vote means that the 
+        value for that key casts as boolean True.
+        """
+        votes = np.sum([0 if c not in votes else bool(votes[c]) for c in candidates])
+        return True if votes==1 else False
 
 # utilities
             
@@ -419,6 +434,28 @@ def write_ballots_sampled(ballot_file, ballots):
         for row in ballots:
             writer.writerow(row)
 
+# Unit tests
+
+def test_supermajority_assorter:
+    losers = ["Bob","Candy"]
+    share_to_win = 2/3
+    assn = Assertion.make_supermajority_assertion("Alice", losers, share_to_win)
+
+    votes = {"Alice": 1}
+    assert assn['Alice v all'].assorter.assort(votes) == 3/4, "wrong value for vote for winner"
+    
+    votes = {"Bob": True}
+    assert assn['Alice v all'].assorter.assort(votes) == 0, "wrong value for vote for loser"
+    
+    votes = {"Dan": True}
+    assert assn['Alice v all'].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Dan"
+
+    votes = {"Alice": True, "Bob": True}
+    assert assn['Alice v all'].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Alice & Bob"
+
+    votes = {"Alice": False, "Bob": True, "Candy": True}
+    assert assn['Alice v all'].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Bob & Candy"
+    
 if __name__ == "__main__":
-    pass
+    test_supermajority_assorter()
     
