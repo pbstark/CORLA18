@@ -61,7 +61,7 @@ def parseAssertions(auditfile):
 def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
     # If c is in the list of candidates yet to be eliminated, this is a bug.
     if c in S:
-        print("Error: c is in S.  c = "+str(c)+". S = "+str(S)+.\n")
+        print("Error: c is in S.  c = "+str(c)+". S = "+str(S)+".\n")
     # if S is empty, return the leaf
     # Note that this indicates an error in the RAIRE audit
     # process - we're producing a tree 
