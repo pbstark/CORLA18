@@ -267,7 +267,7 @@ class Assorter:
         Parameters:
         -----------
         assort : callable
-            maps a CVR into a double
+            maps a CVR into [0, \infty)
         winner : callable
             maps a CVR into {0, 1}
         loser  : callable
