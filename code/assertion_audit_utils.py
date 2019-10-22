@@ -200,6 +200,35 @@ class Assertion:
         assertions[wl_pair] = Assertion(Assorter(assort = func, upper_bound = 1/(2*share_to_win)))
         return assertions
 
+    @classmethod
+    def make_assertions_from_json(self, json_assertions):
+        """
+        Construct a dict of Assertion objects from a RAIRE-style json representation 
+        of a list of assertions
+        """        
+        # @Vanessa, @Michelle
+        # 
+        assertions = {}
+        return assertions
+    
+    @classmethod
+    def make_all_assertions(self, contests):
+        all_assertions = {}
+        for c in contests:
+            scf = contests[c]['choice_function']
+            winrs = contests[c]['reported_winners']
+            losrs = [cand for cand in contests[c]['candidates'] if cand not in winrs]
+            if scf == 'plurality':
+                all_assertions[c] = Assertion.make_plurality_assertions(winrs, losrs)
+            elif scf == 'supermajority':
+                all_assertions[c] = Assertion.make_supermajority_assertion(winrs[0], losrs, \
+                                  contests[c]['share_to_win'])
+            elif scf == 'IRV':
+                pass # @Vanessa, @Michelle: I need help here!
+                # need to generate the assertions from RAIRE json and add them to the dict
+            else:
+                raise NotImplementedError("Social choice function " + scf + " is not supported")
+        return all_assertions
 
 class Assorter:
     """
@@ -402,16 +431,21 @@ def check_audit_parameters(gamma, error_rates, contests):
     for c in contests.keys():
         assert contests[c]['risk_limit'] > 0, 'risk limit must be nonnegative in ' + c + ' contest'
         assert contests[c]['risk_limit'] < 1, 'risk limit must be less than 1 in ' + c + ' contest'
-        assert contests[c]['choice_function'] in ['IRV','plurality','super-majority'], \
+        assert contests[c]['choice_function'] in ['IRV','plurality','supermajority'], \
                   'unsupported choice function ' + contests[c]['choice_function'] + ' in ' + c + ' contest'
-        assert contests[c]['n_winners'] <= len(contests[c]['candidates']), 'fewer candidates than winners in ' + c + ' contest'
-        assert len(contests[c]['reported_winners']) == contests[c]['n_winners'], 'number of reported winners does not equal n_winners in ' + c + ' contest'
+        assert contests[c]['n_winners'] <= len(contests[c]['candidates']), \
+            'fewer candidates than winners in ' + c + ' contest'
+        assert len(contests[c]['reported_winners']) == contests[c]['n_winners'], \
+            'number of reported winners does not equal n_winners in ' + c + ' contest'
         for w in contests[c]['reported_winners']:
-            assert w in contests[c]['candidates'], 'reported winner ' + w + ' is not a candidate in ' + c + 'contest'
-        if contests[c]['choice_function'] in ['IRV','super-majority']:
-            assert contests[c]['n_winners'] == 1, contests[c]['choice_function'] + ' can have only 1 winner in ' + c + ' contest'
-        if contests[c]['choice_function'] == 'super-majority':
-            assert contests[c]['super_majority'] >= 0.5, 'super-majority contest requires winning at least 50% of votes in ' + c + ' contest'
+            assert w in contests[c]['candidates'], \
+                'reported winner ' + w + ' is not a candidate in ' + c + 'contest'
+        if contests[c]['choice_function'] in ['IRV','supermajority']:
+            assert contests[c]['n_winners'] == 1, \
+                contests[c]['choice_function'] + ' can have only 1 winner in ' + c + ' contest'
+        if contests[c]['choice_function'] == 'supermajority':
+            assert contests[c]['share_to_win'] >= 0.5, \
+                'super-majority contest requires winning at least 50% of votes in ' + c + ' contest'
 
 def write_audit_parameters(log_file, seed, replacement, gamma, N_ballots, error_rates, contests):
     """
