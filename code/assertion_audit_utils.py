@@ -229,11 +229,11 @@ class Assertion:
             if assrtn['Winner-Only'] == "true":
                 # CVR is a vote for the winner only if it has the 
                 # winner as its first preference
-                winner_func = lambda v: 1 if CVR.get_vote_from_votes(winner, v) == 1 else 0
+                winner_func = lambda v, wc=winner: 1 if CVR.get_vote_from_votes(wc, v) == 1 else 0
 
                 # CVR is a vote for the loser if they appear and the 
                 # winner does not, or they appear before the winner
-                loser_func = lambda v : rcv_lfunc_wo(winner, loser, v)
+                loser_func = lambda v, wc=winner, lc=loser : rcv_lfunc_wo(wc, lc, v)
 
                 wl_pair = winner + ' v ' + loser
                 assertions[wl_pair] = Assertion(Assorter(winner=winner_func,
@@ -247,15 +247,14 @@ class Assertion:
             eliminated = [e for e in assrtn['Already-Eliminated']]
             remaining = [c for c in candidates if not c in eliminated]
 
-            winner_func = lambda v : rcv_votefor_cand(winner, remaining, v)        
-            loser_func = lambda v : rcv_votefor_cand(loser, remaining, v)
+            winner_func = lambda v, wc=winner, rem=remaining : rcv_votefor_cand(wc, rem, v)        
+            loser_func = lambda v, lc=loser, rem=remaining: rcv_votefor_cand(lc, rem, v)
         
             # Don't know what key should be for assertion. Made something up.
             wl_given = winner + ' v ' + loser + ' elim ' + ' '.join(eliminated)
 
             assertions[wl_given] = Assertion(Assorter(winner=winner_func,
-                loser = loser_func, upper_bound = 1))
-
+                loser=loser_func, upper_bound = 1))
         return assertions
     
     @classmethod
