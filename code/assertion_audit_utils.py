@@ -226,8 +226,7 @@ class Assertion:
             loser = assrtn['Loser']
 
             # Is this a 'winner only' assertion
-            wonly = bool(assrtn['Winner-Only'])
-            if wonly:
+            if assrtn['Winner-Only'] == "true":
                 # CVR is a vote for the winner only if it has the 
                 # winner as its first preference
                 winner_func = lambda c: 1 if int(CVR.vote_for(winner, c)) == 1 else 0
@@ -245,8 +244,8 @@ class Assertion:
             # The assertion is of type 'irv elimination'. 
             # Context is that all candidates in 'eliminated' have been
             # eliminated and their votes distributed to later preferences
-            eliminated = [e for e in assrtn['Already-Eliminated']
-            remaining = [c for c in candidates if not(c in eliminated)]
+            eliminated = [e for e in assrtn['Already-Eliminated']]
+            remaining = [c for c in candidates if not c in eliminated]
 
             winner_func = lambda c : rcv_votefor_cand(winner, remaining, c)        
             loser_func = lambda c : rcv_votefor_cand(loser, remaining, c)
@@ -406,7 +405,7 @@ class CVR:
         self.votes.update(votes)
             
     def get_votefor(self, candidate):
-        return get_vote_from_votes(candidate, self.votes)
+        return CVR.get_vote_from_votes(candidate, self.votes)
     
     @classmethod
     def as_vote(self, v):
@@ -473,13 +472,13 @@ def rcv_lfunc_wo(winner, loser, cvr):
     --------
     1 if the given CVR is a vote for 'loser' and 0 otherwise
     """
-    rank_winner = CVR.get_votefor(winner, cvr)
-    rank_loser = CVR.get_votefor(loser, cvr)
+    rank_winner = cvr.get_votefor(winner)
+    rank_loser = cvr.get_votefor(loser)
 
     if not bool(rank_winner) and bool(rank_loser):
         return 1
 
-    if bool(rank_winner) and bool(rank_loser) and rloser < rwinner:
+    if bool(rank_winner) and bool(rank_loser) and rank_loser < rank_winner:
         return 1
 
     return 0 
@@ -503,7 +502,10 @@ def rcv_votefor_cand(cand, remaining, cvr):
     if you reduce the ballot down to only those canidates in 'remaining',
     and 'cand' is the first preference, we return 1 and 0 otherwise.
     """
-    rank_cand = CVR.get_votefor(cand, cvr)
+    if not cand in remaining:
+        return 0
+
+    rank_cand = cvr.get_votefor(cand)
 
     if not bool(rank_cand):
         return 0
@@ -512,7 +514,7 @@ def rcv_votefor_cand(cand, remaining, cvr):
         if altc == cand:
             continue
 
-        rank_altc = CVR.get_votefor(altc, cvr)
+        rank_altc = cvr.get_votefor(altc)
 
         if bool(rank_altc) and rank_altc < rank_cand:
             return 0
@@ -638,7 +640,30 @@ def test_supermajority_assorter():
 
     votes = {"Alice": False, "Bob": True, "Candy": True}
     assert assn['Alice v all'].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Bob & Candy"
-    
+   
+
+def test_rcv_lfunc_wo():
+    votes = {"Alice": 1, "Bob": 2, "Candy": 3, "Dan": ''}
+    assert rcv_lfunc_wo("Bob", "Alice", CVR(votes = votes)) == 1
+    assert rcv_lfunc_wo("Alice", "Candy", CVR(votes = votes)) == 0
+    assert rcv_lfunc_wo("Dan", "Candy", CVR(votes = votes)) == 1
+
+def test_rcv_votefor_cand():
+    votes = {"Alice": 1, "Bob": 2, "Candy": 3, "Dan": '', "Ross" : 4, "Aaron" : 5}
+    remaining = ["Bob","Dan","Aaron","Candy"]
+    assert rcv_votefor_cand("Candy", remaining, CVR(votes = votes)) == 0 
+    assert rcv_votefor_cand("Alice", remaining, CVR(votes = votes)) == 0 
+    assert rcv_votefor_cand("Bob", remaining, CVR(votes = votes)) == 1 
+    assert rcv_votefor_cand("Aaron", remaining, CVR(votes = votes)) == 0
+
+    remaining = ["Dan","Aaron","Candy"]
+    assert rcv_votefor_cand("Candy", remaining, CVR(votes = votes)) == 1 
+    assert rcv_votefor_cand("Alice", remaining, CVR(votes = votes)) == 0 
+    assert rcv_votefor_cand("Bob", remaining, CVR(votes = votes)) == 0 
+    assert rcv_votefor_cand("Aaron", remaining, CVR(votes = votes)) == 0
+ 
+
 if __name__ == "__main__":
     test_supermajority_assorter()
-    
+    test_rcv_lfunc_wo()
+    test_rcv_votefor_cand()    
