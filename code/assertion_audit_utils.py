@@ -363,17 +363,20 @@ class CVR:
     Note that the CVR class DOES NOT IMPOSE VOTING RULES. For instance, the social choice
     function might consider a CVR that contains two votes in a contest to be an overvote.
     
+    Rather, a CVR is supposed to reflect what the ballot shows, even if the ballot does not
+    contain a valid vote in one or more contests.
+    
     Class method get_votefor returns the vote for a given candidate if the candidate is a key in the CVR,
         or False if the candidate is not in the CVR. 
         This allows very flexible representation of votes, including ranked voting.
         
         For instance, in a plurality contest with four candidates, a vote for Alice (and only Alice)
         could be represented by any of the following:
-            {"Alice": True}
-            {"Alice": "marked"}
-            {"Alice": 5}
-            {"Alice": 1, "Bob": 0, "Candy": 0, "Dan": ""}
-            {"Alice": True, "Bob": False}
+            {"ID": "A-001-01", "votes": {"Alice": True}}
+            {"ID": "A-001-01", "votes": {"Alice": "marked"}}
+            {"ID": "A-001-01", "votes": {"Alice": 5}}
+            {"ID": "A-001-01", "votes": {"Alice": 1, "Bob": 0, "Candy": 0, "Dan": ""}}
+            {"ID": "A-001-01", "votes": {"Alice": True, "Bob": False}}
             
         bool(vote_for("Alice"))==True iff the CVR contains a vote for Alice, and 
         int(bool(vote_for("Alice")))==1 if the CVR contains a vote for Alice, and 0 otherwise.
@@ -392,10 +395,14 @@ class CVR:
     set_votes :  
          updates the votes dict; overrides previous votes and/or creates votes for additional candidates
     get_votes : returns complete votes dict
+    get_ID : returns ballot ID
+    set_ID : updates the ballot ID
+        
     """
     
-    def __init__(self, votes = {}):
+    def __init__(self, ID = {}, votes = {}):
         self.votes = votes
+        self.ID = ID
         
     def get_votes(self):
         return self.votes
@@ -403,6 +410,12 @@ class CVR:
     def set_votes(self, votes):
         self.votes.update(votes)
             
+    def get_ID(self):
+        return self.ID
+    
+    def set_ID(self, ID):
+        self.ID = ID
+        
     def get_votefor(self, candidate):
         return CVR.get_vote_from_votes(candidate, self.votes)
     
@@ -491,10 +504,10 @@ def rcv_votefor_cand(cand, remaining, vote):
 
     Parameters:
     -----------
-    cand : 
+    cand : string or int
         identifier for candidate
 
-    remaining : 
+    remaining : list
         list of identifiers of candidates still standing
 
     vote : dict
@@ -550,7 +563,8 @@ def check_audit_parameters(gamma, error_rates, contests):
         assert contests[c]['risk_limit'] > 0, 'risk limit must be nonnegative in ' + c + ' contest'
         assert contests[c]['risk_limit'] < 1, 'risk limit must be less than 1 in ' + c + ' contest'
         assert contests[c]['choice_function'] in ['IRV','plurality','supermajority'], \
-                  'unsupported choice function ' + contests[c]['choice_function'] + ' in ' + c + ' contest'
+                  'unsupported choice function ' + contests[c]['choice_function'] + ' in ' \
+                  + c + ' contest'
         assert contests[c]['n_winners'] <= len(contests[c]['candidates']), \
             'fewer candidates than winners in ' + c + ' contest'
         assert len(contests[c]['reported_winners']) == contests[c]['n_winners'], \
