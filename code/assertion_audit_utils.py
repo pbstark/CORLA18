@@ -201,14 +201,62 @@ class Assertion:
         return assertions
 
     @classmethod
-    def make_assertions_from_json(self, json_assertions):
+    def make_assertions_from_json(self, candidates, json_assertions):
         """
         Construct a dict of Assertion objects from a RAIRE-style json representation 
-        of a list of assertions
+        of a list of assertions for a given contest.
+
+        Parameters:
+        -----------
+        candidates : 
+            list of identifiers for all candidates in relevant contest.
+
+        json_assertions:
+            Assertions to be tested for the relevant contest.
+
+        Returns:
+        --------
+        A dict of assertions for each assertion specified in 'json_assertions'.
         """        
         # @Vanessa, @Michelle
         # 
         assertions = {}
+        for assrtn in json_assertions:
+            winner = assrtn['Winner']
+            loser = assrtn['Loser']
+
+            # Is this a 'winner only' assertion
+            wonly = bool(assrtn['Winner-Only'])
+            if wonly:
+                # CVR is a vote for the winner only if it has the 
+                # winner as its first preference
+                winner_func = lambda c: 1 if int(CVR.vote_for(winner, c)) == 1 else 0
+
+                # CVR is a vote for the loser if they appear and the 
+                # winner does not, or they appear before the winner
+                loser_func = lambda c : rcv_lfunc_wo(winner, loser, c)
+
+                wl_pair = winner + ' v ' + loser
+                assertions[wl_pair] = Assertion(Assorter(winner=winner_func,
+                    loser=loser_func, upper_bound=1))
+
+                continue
+
+            # The assertion is of type 'irv elimination'. 
+            # Context is that all candidates in 'eliminated' have been
+            # eliminated and their votes distributed to later preferences
+            eliminated = [e for e in assrtn['Already-Eliminated']
+            remaining = [c for c in candidates if not(c in eliminated)]
+
+            winner_func = lambda c : rcv_votefor_cand(winner, remaining, c)        
+            loser_func = lambda c : rcv_votefor_cand(loser, remaining, c)
+        
+            # Don't know what key should be for assertion. Made something up.
+            wl_given = winner + ' v ' + loser + ' elim ' + ' '.join(eliminated)
+
+            assertions[wl_given] = Assertion(Assorter(winner=winner_func,
+                loser = loser_func, upper_bound = 1))
+
         return assertions
     
     @classmethod
@@ -224,8 +272,9 @@ class Assertion:
                 all_assertions[c] = Assertion.make_supermajority_assertion(winrs[0], losrs, \
                                   contests[c]['share_to_win'])
             elif scf == 'IRV':
-                pass # @Vanessa, @Michelle: I need help here!
-                # need to generate the assertions from RAIRE json and add them to the dict
+                # Assumption: contests[c]['assertions'] yields list assertions in JSON format.
+                all_assertions[c] = Assertion.make_assertions_from_json(contests[c]['candidates'], \
+                    contests[c]['assertions'])
             else:
                 raise NotImplementedError("Social choice function " + scf + " is not supported")
         return all_assertions
@@ -406,7 +455,71 @@ class CVR:
         return True if votes==1 else False
 
 # utilities
-            
+
+def rcv_lfunc_wo(winner, loser, cvr):
+    """
+    Check whether CVR is a vote for the loser with respect to a 'winner only' 
+    assertion between the given 'winner' and 'loser'.  
+
+    Parameters:
+    -----------
+    winner : 
+        identifier for winning candidate
+
+    loser : 
+        identifier for losing candidate
+
+    Returns:
+    --------
+    1 if the given CVR is a vote for 'loser' and 0 otherwise
+    """
+    rank_winner = CVR.get_votefor(winner, cvr)
+    rank_loser = CVR.get_votefor(loser, cvr)
+
+    if not bool(rank_winner) and bool(rank_loser):
+        return 1
+
+    if bool(rank_winner) and bool(rank_loser) and rloser < rwinner:
+        return 1
+
+    return 0 
+
+def rcv_votefor_cand(cand, remaining, cvr):
+    """
+    Check whether CVR is a vote for the given candidate in the context
+    where only candidates in 'remaining' remain standing.
+
+    Parameters:
+    -----------
+    cand : 
+        identifier for candidate
+
+    remaining : 
+        list of identifiers of candidates still standing
+
+    Returns:
+    --------
+    1 if the given CVR is a vote for 'cand' and 0 otherwise. Essentially,
+    if you reduce the ballot down to only those canidates in 'remaining',
+    and 'cand' is the first preference, we return 1 and 0 otherwise.
+    """
+    rank_cand = CVR.get_votefor(cand, cvr)
+
+    if not bool(rank_cand):
+        return 0
+
+    for altc in remaining:
+        if altc == cand:
+            continue
+
+        rank_altc = CVR.get_votefor(altc, cvr)
+
+        if bool(rank_altc) and rank_altc < rank_cand:
+            return 0
+
+    return 1 
+
+       
 def check_audit_parameters(gamma, error_rates, contests):
     """
     Check whether the audit parameters are valid; complain if not.
