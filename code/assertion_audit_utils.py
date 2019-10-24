@@ -4,6 +4,8 @@ import numpy as np
 import scipy as sp
 import json
 import csv
+import warnings
+from numpy import testing
 
 class Assertion:
     """
@@ -13,9 +15,11 @@ class Assertion:
     The _assorter_ maps votes to nonnegative numbers not exceeding `upper_bound`
     """
     
+    JSON_ASSERTION_TYPES = ["WINNER_ONLY", "IRV_ELIMINATION"]
+    
     def __init__(self, assorter = None):
         """
-        The assorter is callable; the upper bound is a nonnegative real.
+        The assorter is callable; should produce a non-negative real.
         """
         self.assorter = assorter
         
@@ -54,7 +58,7 @@ class Assertion:
         ----------
         double
         """
-        return np.sum(map(self.assorter, cvr_list))        
+        return np.sum(map(self.assorter, [k.votes for k in cvr_list]))   # BROKEN     
 
     def margin_votes(self, cvr_list):
         """
@@ -131,13 +135,12 @@ class Assertion:
         
       
     @classmethod
-    def make_plurality_assertions(self, winners, losers):
+    def make_plurality_assertions(cls, winners, losers):
         """
         Construct a set of assertions that imply that the winner(s) got more votes than the loser(s).
         
         The assertions are that every winner beat every loser: there are
-              len(winners)*len(losers) 
-        pairwise assertions in all.
+        len(winners)*len(losers) pairwise assertions in all.
         
         Parameters:
         -----------
@@ -153,19 +156,19 @@ class Assertion:
         """
         assertions = {}
         for winr in winners:
-            winr_func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(winr, c))
             for losr in losers:
                 wl_pair = winr + ' v ' + losr                
-                losr_func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(losr, c))
-                assertions[wl_pair] = Assertion(Assorter(winner=winr_func, loser=losr_func, \
-                                      upper_bound = 1))
+                assertions[wl_pair] = Assertion(Assorter(assort = lambda c, winr=winr, losr=losr:\
+                                      ( CVR.as_vote(CVR.get_vote_from_votes(winr, c)) \
+                                      - CVR.as_vote(CVR.get_vote_from_votes(losr, c)) \
+                                      + 1)/2, upper_bound = 1))
         return assertions
     
     @classmethod
-    def make_supermajority_assertion(self, winner, losers, share_to_win):
+    def make_supermajority_assertion(cls, winner, losers, share_to_win):
         """
-        Construct a set of assertions that imply that the winner got at least a fraction fraction_to_win
-        of the valid votes.
+        Construct a set of assertions that imply that the winner got at least a fraction 
+        fraction_to_win of the valid votes.
         
         An equivalent condition is:
         
@@ -191,20 +194,25 @@ class Assertion:
         """
         assert share_to_win > 1/2, "share_to_win must be at least 1/2"
         assert share_to_win < 1, "share_to_win must be less than 1"
+
         assertions = {}
         wl_pair = winner + ' v all'
         cands = losers.copy()
         cands.append(winner)
-        func = lambda c: CVR.as_vote(CVR.get_vote_from_votes(winner, c))/(2*share_to_win) \
-                         if CVR.has_one_vote(cands, c) else 1/2   
-        assertions[wl_pair] = Assertion(Assorter(assort = func, upper_bound = 1/(2*share_to_win)))
+        assertions[wl_pair] = Assertion(Assorter(assort = lambda c: \
+                                 CVR.as_vote(CVR.get_vote_from_votes(winner, c))/(2*share_to_win) \
+                                 if CVR.has_one_vote(cands, c) else 1/2,\
+                                 upper_bound = 1/(2*share_to_win) ))
         return assertions
 
     @classmethod
-    def make_assertions_from_json(self, candidates, json_assertions):
+    def make_assertions_from_json(cls, candidates, json_assertions):
         """
         Construct a dict of Assertion objects from a RAIRE-style json representation 
         of a list of assertions for a given contest.
+        
+        The assertion_type for each assertion must be one of the JSON_ASSERTION_TYPES (class constants)
+        Each assertion should contain a winner and a 
 
         Parameters:
         -----------
@@ -218,47 +226,47 @@ class Assertion:
         --------
         A dict of assertions for each assertion specified in 'json_assertions'.
         """        
-        # @Vanessa, @Michelle
-        # 
         assertions = {}
         for assrtn in json_assertions:
-            winner = assrtn['Winner']
-            loser = assrtn['Loser']
+            winr = assrtn['winner']
+            losr = assrtn['loser']
 
             # Is this a 'winner only' assertion
-            if assrtn['Winner-Only'] == "true":
+            if assrtn['assertion_type'] not in JSON_ASSERTION_TYPES:
+                raise ValueError("assertion type " + assrtn['assertion_type'])
+            
+            elif assrtn['assertion_type'] == "WINNER_ONLY":
                 # CVR is a vote for the winner only if it has the 
                 # winner as its first preference
-                winner_func = lambda v, wc=winner: 1 if CVR.get_vote_from_votes(wc, v) == 1 else 0
+                winner_func = lambda v, winr=winr : 1 if CVR.get_vote_from_votes(winr, v) == 1 else 0
 
                 # CVR is a vote for the loser if they appear and the 
                 # winner does not, or they appear before the winner
-                loser_func = lambda v, wc=winner, lc=loser : rcv_lfunc_wo(wc, lc, v)
+                loser_func = lambda v, winr=winr, losr=losr : rcv_lfunc_wo(winr, losr, v)
 
-                wl_pair = winner + ' v ' + loser
-                assertions[wl_pair] = Assertion(Assorter(winner=winner_func,
-                    loser=loser_func, upper_bound=1))
+                wl_pair = winr + ' v ' + losr
+                assertions[wl_pair] = Assertion(Assorter(winner=winner_func, \
+                                                loser=loser_func, upper_bound=1))
 
-                continue
-
-            # The assertion is of type 'irv elimination'. 
+            elif assrtn['assertion_type'] == "IRV_ELIMINATION": 
             # Context is that all candidates in 'eliminated' have been
             # eliminated and their votes distributed to later preferences
-            eliminated = [e for e in assrtn['Already-Eliminated']]
-            remaining = [c for c in candidates if not c in eliminated]
-
-            winner_func = lambda v, wc=winner, rem=remaining : rcv_votefor_cand(wc, rem, v)        
-            loser_func = lambda v, lc=loser, rem=remaining: rcv_votefor_cand(lc, rem, v)
-        
-            # Don't know what key should be for assertion. Made something up.
-            wl_given = winner + ' v ' + loser + ' elim ' + ' '.join(eliminated)
-
-            assertions[wl_given] = Assertion(Assorter(winner=winner_func,
-                loser=loser_func, upper_bound = 1))
+                elim = [e for e in assrtn['already_eliminated']]
+                remn = [c for c in candidates if c not in eliminated]
+           # Identifier for tracking which assertions have been proved
+                wl_given = winr + ' v ' + losr + ' elim ' + ' '.join(eliminated)
+                assertions[wl_given] = Assertion(Assorter(assort =
+                                       lambda v, winr=winr, losr=losr, remn=remn : \
+                                       ( rcv_votefor_cand(winr, remn, v) \
+                                       - rcv_votefor_cand(losr, remn, v) +1)/2,\
+                                       upper_bound = 1))
+            else:
+                raise NotImplemented('JSON assertion type %s not implemented. ' \
+                                      % assertn['assertion_type'])
         return assertions
     
     @classmethod
-    def make_all_assertions(self, contests):
+    def make_all_assertions(cls, contests):
         all_assertions = {}
         for c in contests:
             scf = contests[c]['choice_function']
@@ -281,18 +289,21 @@ class Assorter:
     """
     Class for generic Assorter.
     
+    An assorter must either have an `assort` method or both `winner` and `loser` must be defined
+    (in which case assort(c) = (winner(c) - loser(c) + 1)/2. )
+    
     Class parameters:
     -----------------
     winner : callable
-        maps a CVR into the value 1 if the CVR represents a vote for the winner    
+        maps a dict of selections into the value 1 if the dict represents a vote for the winner    
     loser  : callable
-        maps a CVR into the value 1 if the CVR represents a vote for the winner
+        maps a dict of selections into the value 1 if the dict represents a vote for the winner
     
     assort : callable
-        maps cvr into double
+        maps dict of selections into double
     
     upper_bound : double
-        a priori upper bound on the value the assorter assigns to any CVR
+        a priori upper bound on the value the assorter assigns to any dict of selections
 
     The basic method is assort, but the constructor can be called with (winner, loser)
     instead. In that case,
@@ -314,11 +325,11 @@ class Assorter:
         Parameters:
         -----------
         assort : callable
-            maps a CVR into [0, \infty)
+            maps a dict of votes into [0, \infty)
         winner : callable
-            maps a CVR into {0, 1}
+            maps a pattern into {0, 1}
         loser  : callable
-            maps a CVR into {0, 1}
+            maps a pattern into {0, 1}
         """        
         self.winner = winner
         self.loser = loser
@@ -343,7 +354,7 @@ class Assorter:
     def get_loser(self):
         return(self.loser)
     
-    def set_assort(self):
+    def set_assort(self, assort):
         self.assort = assort
 
     def get_assort(self):
@@ -382,7 +393,7 @@ class CVR:
         int(bool(vote_for("Alice")))==1 if the CVR contains a vote for Alice, and 0 otherwise.
                 
         Ranked votes also have simple representation, e.g.,
-            {"Alice": 1, "Bob": 2, "Candy": 3, "Dan": ''}
+            {"ID": "A-001-01", "votes": {"Alice": 1, "Bob": 2, "Candy": 3, "Dan": ''}}
         Then int(vote_for("Alice")) is Alice's rank.
     
      
@@ -420,17 +431,17 @@ class CVR:
         return CVR.get_vote_from_votes(candidate, self.votes)
     
     @classmethod
-    def as_vote(self, v):
+    def as_vote(cls, v):
         return int(bool(v))
     
     @classmethod
-    def as_rank(self, v):
+    def as_rank(cls, v):
         return int(v)
     
     @classmethod
-    def get_vote_from_votes(self, candidate, votes):
+    def get_vote_from_votes(cls, candidate, votes):
         """
-        Returns the vote for a candidate if the CVR contains a vote for that candidate; 
+        Returns the vote for a candidate if the dict of votes contains a vote for that candidate; 
         otherwise returns False
         
         Parameters:
@@ -439,7 +450,7 @@ class CVR:
             identifier for candidate
         
         votes : dict
-            a dict where candidate identifiers are keys
+            a dict of votes with candidate identifiers are keys
         
         Returns:
         --------
@@ -448,7 +459,26 @@ class CVR:
         return False if candidate not in votes else votes[candidate]
     
     @classmethod
-    def has_one_vote(self, candidates, votes):
+    def get_vote_from_cvr(cls, candidate, cvr):
+        """
+        Returns the vote for a candidate if the cvr contains a vote for that candidate; 
+        otherwise returns False
+        
+        Parameters:
+        -----------
+        candidate : 
+            identifier for candidate
+        
+        cvr : a CVR object
+        
+        Returns:
+        --------
+        vote
+        """
+        return False if candidate not in cvr.votes else cvr.votes[candidate]
+    
+    @classmethod
+    def has_one_vote(cls, candidates, votes):
         """
         Is there exactly one vote among the candidates?
         
@@ -464,79 +494,77 @@ class CVR:
         """
         votes = np.sum([0 if c not in votes else bool(votes[c]) for c in candidates])
         return True if votes==1 else False
+    
+    @classmethod
+    def rcv_lfunc_wo(cls, winner, loser, vote):
+        """
+        Check whether vote is a vote for the loser with respect to a 'winner only' 
+        assertion between the given 'winner' and 'loser'.  
 
-# utilities
+        Parameters:
+        -----------
+        winner : 
+            identifier for winning candidate
 
-def rcv_lfunc_wo(winner, loser, vote):
-    """
-    Check whether vote is a vote for the loser with respect to a 'winner only' 
-    assertion between the given 'winner' and 'loser'.  
+        loser : 
+            identifier for losing candidate
 
-    Parameters:
-    -----------
-    winner : 
-        identifier for winning candidate
+        vote : dict
 
-    loser : 
-        identifier for losing candidate
+        Returns:
+        --------
+        1 if the given vote is a vote for 'loser' and 0 otherwise
+        """
+        rank_winner = CVR.get_vote_from_votes(winner, vote)
+        rank_loser = CVR.get_vote_from_votes(loser, vote)
 
-    vote : dict
+        if not bool(rank_winner) and bool(rank_loser):
+            return 1
+        elif bool(rank_winner) and bool(rank_loser) and rank_loser < rank_winner:
+            return 1
+        else:
+            return 0 
 
-    Returns:
-    --------
-    1 if the given vote is a vote for 'loser' and 0 otherwise
-    """
-    rank_winner = CVR.get_vote_from_votes(winner, vote)
-    rank_loser = CVR.get_vote_from_votes(loser, vote)
+    @classmethod
+    def rcv_votefor_cand(cls, cand, remaining, vote):
+        """
+        Check whether 'vote' is a vote for the given candidate in the context
+        where only candidates in 'remaining' remain standing.
 
-    if not bool(rank_winner) and bool(rank_loser):
-        return 1
+        Parameters:
+        -----------
+        cand : string or int
+            identifier for candidate
 
-    if bool(rank_winner) and bool(rank_loser) and rank_loser < rank_winner:
-        return 1
+        remaining : list
+            list of identifiers of candidates still standing
 
-    return 0 
+        vote : dict
 
-def rcv_votefor_cand(cand, remaining, vote):
-    """
-    Check whether 'vote' is a vote for the given candidate in the context
-    where only candidates in 'remaining' remain standing.
-
-    Parameters:
-    -----------
-    cand : string or int
-        identifier for candidate
-
-    remaining : list
-        list of identifiers of candidates still standing
-
-    vote : dict
-
-    Returns:
-    --------
-    1 if the given vote is a vote for 'cand' and 0 otherwise. Essentially,
-    if you reduce the ballot down to only those canidates in 'remaining',
-    and 'cand' is the first preference, we return 1 and 0 otherwise.
-    """
-    if not cand in remaining:
-        return 0
-
-    rank_cand = CVR.get_vote_from_votes(cand, vote)
-
-    if not bool(rank_cand):
-        return 0
-
-    for altc in remaining:
-        if altc == cand:
-            continue
-
-        rank_altc = CVR.get_vote_from_votes(altc, vote)
-
-        if bool(rank_altc) and rank_altc < rank_cand:
+        Returns:
+        --------
+        1 if the given vote is a vote for 'cand' and 0 otherwise. Essentially,
+        if you reduce the ballot down to only those candidates in 'remaining',
+        and 'cand' is the first preference, we return 1 and 0 otherwise.
+        """
+        if not cand in remaining:
             return 0
 
-    return 1 
+        rank_cand = CVR.get_vote_from_votes(cand, vote)
 
+        if not bool(rank_cand):
+            return 0
+        else:
+            for altc in remaining:
+                if altc == cand:
+                    continue
+                rank_altc = CVR.get_vote_from_votes(altc, vote)
+                if bool(rank_altc) and rank_altc <= rank_cand:
+                    return 0
+            return 1 
+
+        
+# utilities
        
 def check_audit_parameters(gamma, error_rates, contests):
     """
@@ -575,6 +603,8 @@ def check_audit_parameters(gamma, error_rates, contests):
         if contests[c]['choice_function'] in ['IRV','supermajority']:
             assert contests[c]['n_winners'] == 1, \
                 contests[c]['choice_function'] + ' can have only 1 winner in ' + c + ' contest'
+        if contests[c]['choice_function'] == 'IRV':
+            assert contests[c]['assertion_file'], 'IRV contest ' + c + ' requires an assertion file'
         if contests[c]['choice_function'] == 'supermajority':
             assert contests[c]['share_to_win'] >= 0.5, \
                 'super-majority contest requires winning at least 50% of votes in ' + c + ' contest'
@@ -638,6 +668,30 @@ def write_ballots_sampled(ballot_file, ballots):
 
 # Unit tests
 
+def test_make_plurality_assertions():
+    winners = ["Alice","Bob"]
+    losers = ["Candy","Dan"]
+    asrtns = Assertion.make_plurality_assertions(winners, losers)
+    assert asrtns['Alice v Candy'].assorter.assort({"Alice": 1}) == 1
+    assert asrtns['Alice v Candy'].assorter.assort({"Bob": 1}) == 1/2
+    assert asrtns['Alice v Candy'].assorter.assort({"Candy": 1}) == 0
+    assert asrtns['Alice v Candy'].assorter.assort({"Dan": 1}) == 1/2
+
+    assert asrtns['Alice v Dan'].assorter.assort({"Alice": 1}) == 1
+    assert asrtns['Alice v Dan'].assorter.assort({"Bob": 1}) == 1/2
+    assert asrtns['Alice v Dan'].assorter.assort({"Candy": 1}) == 1/2
+    assert asrtns['Alice v Dan'].assorter.assort({"Dan": 1}) == 0
+    
+    assert asrtns['Bob v Candy'].assorter.assort({"Alice": 1}) == 1/2
+    assert asrtns['Bob v Candy'].assorter.assort({"Bob": 1}) == 1
+    assert asrtns['Bob v Candy'].assorter.assort({"Candy": 1}) == 0
+    assert asrtns['Bob v Candy'].assorter.assort({"Dan": 1}) == 1/2
+
+    assert asrtns['Bob v Dan'].assorter.assort({"Alice": 1}) == 1/2
+    assert asrtns['Bob v Dan'].assorter.assort({"Bob": 1}) == 1
+    assert asrtns['Bob v Dan'].assorter.assort({"Candy": 1}) == 1/2
+    assert asrtns['Bob v Dan'].assorter.assort({"Dan": 1}) == 0
+
 def test_supermajority_assorter():
     losers = ["Bob","Candy"]
     share_to_win = 2/3
@@ -657,30 +711,30 @@ def test_supermajority_assorter():
 
     votes = {"Alice": False, "Bob": True, "Candy": True}
     assert assn['Alice v all'].assorter.assort(votes) == 1/2, "wrong value for invalid vote--Bob & Candy"
-   
+
 
 def test_rcv_lfunc_wo():
     votes = {"Alice": 1, "Bob": 2, "Candy": 3, "Dan": ''}
-    assert rcv_lfunc_wo("Bob", "Alice", votes) == 1
-    assert rcv_lfunc_wo("Alice", "Candy", votes) == 0
-    assert rcv_lfunc_wo("Dan", "Candy", votes) == 1
+    assert CVR.rcv_lfunc_wo("Bob", "Alice", votes) == 1
+    assert CVR.rcv_lfunc_wo("Alice", "Candy", votes) == 0
+    assert CVR.rcv_lfunc_wo("Dan", "Candy", votes) == 1
 
 def test_rcv_votefor_cand():
     votes = {"Alice": 1, "Bob": 2, "Candy": 3, "Dan": '', "Ross" : 4, "Aaron" : 5}
     remaining = ["Bob","Dan","Aaron","Candy"]
-    assert rcv_votefor_cand("Candy", remaining, votes) == 0 
-    assert rcv_votefor_cand("Alice", remaining, votes) == 0 
-    assert rcv_votefor_cand("Bob", remaining, votes) == 1 
-    assert rcv_votefor_cand("Aaron", remaining, votes) == 0
+    assert CVR.rcv_votefor_cand("Candy", remaining, votes) == 0 
+    assert CVR.rcv_votefor_cand("Alice", remaining, votes) == 0 
+    assert CVR.rcv_votefor_cand("Bob", remaining, votes) == 1 
+    assert CVR.rcv_votefor_cand("Aaron", remaining, votes) == 0
 
     remaining = ["Dan","Aaron","Candy"]
-    assert rcv_votefor_cand("Candy", remaining, votes) == 1 
-    assert rcv_votefor_cand("Alice", remaining, votes) == 0 
-    assert rcv_votefor_cand("Bob", remaining, votes) == 0 
-    assert rcv_votefor_cand("Aaron", remaining, votes) == 0
- 
+    assert CVR.rcv_votefor_cand("Candy", remaining, votes) == 1 
+    assert CVR.rcv_votefor_cand("Alice", remaining, votes) == 0 
+    assert CVR.rcv_votefor_cand("Bob", remaining, votes) == 0 
+    assert CVR.rcv_votefor_cand("Aaron", remaining, votes) == 0
 
 if __name__ == "__main__":
+    test_make_plurality_assertions()
     test_supermajority_assorter()
     test_rcv_lfunc_wo()
     test_rcv_votefor_cand()    
