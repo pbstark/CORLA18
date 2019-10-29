@@ -232,7 +232,7 @@ class Assertion:
             losr = assrtn['loser']
 
             # Is this a 'winner only' assertion
-            if assrtn['assertion_type'] not in JSON_ASSERTION_TYPES:
+            if assrtn['assertion_type'] not in Assertion.JSON_ASSERTION_TYPES:
                 raise ValueError("assertion type " + assrtn['assertion_type'])
             
             elif assrtn['assertion_type'] == "WINNER_ONLY":
@@ -242,23 +242,23 @@ class Assertion:
 
                 # CVR is a vote for the loser if they appear and the 
                 # winner does not, or they appear before the winner
-                loser_func = lambda v, winr=winr, losr=losr : rcv_lfunc_wo(winr, losr, v)
+                loser_func = lambda v, winr=winr, losr=losr : CVR.rcv_lfunc_wo(winr, losr, v)
 
                 wl_pair = winr + ' v ' + losr
                 assertions[wl_pair] = Assertion(Assorter(winner=winner_func, \
                                                 loser=loser_func, upper_bound=1))
 
             elif assrtn['assertion_type'] == "IRV_ELIMINATION": 
-            # Context is that all candidates in 'eliminated' have been
-            # eliminated and their votes distributed to later preferences
+                # Context is that all candidates in 'eliminated' have been
+                # eliminated and their votes distributed to later preferences
                 elim = [e for e in assrtn['already_eliminated']]
-                remn = [c for c in candidates if c not in eliminated]
-           # Identifier for tracking which assertions have been proved
-                wl_given = winr + ' v ' + losr + ' elim ' + ' '.join(eliminated)
+                remn = [c for c in candidates if c not in elim]
+                # Identifier for tracking which assertions have been proved
+                wl_given = winr + ' v ' + losr + ' elim ' + ' '.join(elim)
                 assertions[wl_given] = Assertion(Assorter(assort =
                                        lambda v, winr=winr, losr=losr, remn=remn : \
-                                       ( rcv_votefor_cand(winr, remn, v) \
-                                       - rcv_votefor_cand(losr, remn, v) +1)/2,\
+                                       ( CVR.rcv_votefor_cand(winr, remn, v) \
+                                       - CVR.rcv_votefor_cand(losr, remn, v) +1)/2,\
                                        upper_bound = 1))
             else:
                 raise NotImplemented('JSON assertion type %s not implemented. ' \
