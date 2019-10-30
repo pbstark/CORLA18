@@ -733,8 +733,119 @@ def test_rcv_votefor_cand():
     assert CVR.rcv_votefor_cand("Bob", remaining, votes) == 0 
     assert CVR.rcv_votefor_cand("Aaron", remaining, votes) == 0
 
+def test_rcv_assorter():
+    import json
+    with open('Data/334_361_vbm.json') as fid:
+        data = json.load(fid)
+
+        assertions = {}
+        for audit in data['audits']:
+            cands = [audit['winner']]
+            for elim in audit['eliminated']:
+                cands.append(elim)
+
+            all_assertions = Assertion.make_assertions_from_json(cands, audit['assertions'])
+
+            assertions[audit['contest']] = all_assertions
+            
+        assorter = assertions['334']['5 v 47'].assorter
+        votes = {'5' : 1, '47' : 2}
+        assert(assorter.assort(votes) == 1)
+
+        votes = {'47' : 1, '5' : 2}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'3' : 1, '6' : 2}
+        assert(assorter.assort(votes) == 0.5)
+
+        votes = {'3' : 1, '47' : 2}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'3' : 1, '5' : 2}
+        assert(assorter.assort(votes) == 0.5)
+
+        assorter = assertions['334']['5 v 3 elim 1 6 47'].assorter
+        votes = {'5' : 1, '47' : 2}
+        assert(assorter.assort(votes) == 1)
+
+        votes = {'47' : 1, '5' : 2}
+        assert(assorter.assort(votes) == 1)
+
+        votes = {'6' : 1, '1' : 2, '3' : 3, '5' : 4}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'3' : 1, '47' : 2}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {}
+        assert(assorter.assort(votes) == 0.5)
+
+        votes = {'6' : 1, '47' : 2}
+        assert(assorter.assort(votes) == 0.5)
+
+        votes = {'6' : 1, '47' : 2, '5' : 3}
+        assert(assorter.assort(votes) == 1)
+
+        assorter = assertions['361']['28 v 50'].assorter
+        votes = {'28' : 1, '50' : 2}
+        assert(assorter.assort(votes) == 1)
+        votes = {'28' : 1}
+        assert(assorter.assort(votes) == 1)
+        votes = {'50' : 1}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'27' : 1, '28' : 2}
+        assert(assorter.assort(votes) == 0.5)
+
+        votes = {'50' : 1, '28' : 2}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'27' : 1, '26' : 2}
+        assert(assorter.assort(votes) == 0.5)
+
+        votes = {}
+        assert(assorter.assort(votes) == 0.5)
+
+        assorter = assertions['361']['27 v 26 elim 28 50'].assorter
+        votes = {'27' : 1}
+        assert(assorter.assort(votes) == 1)
+
+        votes = {'50' : 1, '27' : 2}
+        assert(assorter.assort(votes) == 1)
+
+        votes = {'28' : 1, '50' : 2, '27' : 3}
+        assert(assorter.assort(votes) == 1)
+
+        votes = {'28' : 1, '27' : 2, '50' : 3}
+        assert(assorter.assort(votes) == 1)
+
+        votes = {'26' : 1}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'50' : 1, '26' : 2}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'28' : 1, '50' : 2, '26' : 3}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'28' : 1, '26' : 2, '50' : 3}
+        assert(assorter.assort(votes) == 0)
+
+        votes = {'50' : 1}
+        assert(assorter.assort(votes) == 0.5)
+        votes = {}
+        assert(assorter.assort(votes) == 0.5)
+
+        votes = {'50' : 1, '28' : 2}
+        assert(assorter.assort(votes) == 0.5)
+
+        votes = {'28' : 1, '50' : 2}
+        assert(assorter.assort(votes) == 0.5)
+    
+
 if __name__ == "__main__":
     test_make_plurality_assertions()
     test_supermajority_assorter()
     test_rcv_lfunc_wo()
     test_rcv_votefor_cand()    
+    test_rcv_assorter()
