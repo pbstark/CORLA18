@@ -563,6 +563,51 @@ class CVR:
                     return 0
             return 1 
 
+class TestNonnegMean:
+    r"""Tests of the hypothesis that the mean of a non-negative population is less than
+        a threshold t.
+        Several tests are implemented, all ultimately based on martingales:
+            Kaplan-Markov
+            Kaplan-Wald
+            Wald SPRT with replacement (only for binary-valued populations)
+            Wald SPRT without replacement (only for binary-valued populations)
+            Kaplan's martingale (KMart)        
+    """
+    
+    @classmethod
+    def kaplan_markov(cls, s, t=1/2, g=0, random_order=True):
+        """
+        Kaplan-Markov p-value for the hypothesis that the sample s is drawn IID from a population
+        with mean t against the alternative that the mean is less than t.
+        
+        If there is a possibility that s has elements equal to zero, set g>0; otherwise, the p-value
+        will be 1.
+        
+        If the order of the values in the sample is random, you can set random_order = True to use 
+        optional stopping to increase the power. If the values are not in random order or if you want
+        to use all the data, set random_order = False
+        """       
+        if any(s < 0):
+            raise ValueError('Negative value in sample from a nonnegative population.')
+        return np.min([1, np.min(np.cumprod((t+g)/(s+g))) if random_order else np.prod((t+g)/(s+g))])
+
+    @classmethod
+    def kaplan_wald(cls, s, t=1/2, g=0, random_order=True):
+        """
+        Kaplan-Wald p-value for the hypothesis that the sample s is drawn IID from a population
+        with mean t against the alternative that the mean is less than t.
+        
+        If there is a possibility that s has elements equal to zero, set g \in (0, 1); 
+        otherwise, the p-value will be 1.
+        
+        If the order of the values in the sample is random, you can set random_order = True to use 
+        optional stopping to increase the power. If the values are not in random order or if you want
+        to use all the data, set random_order = False
+        """       
+        if any(s < 0):
+            raise ValueError('Negative value in sample from a nonnegative population.')
+        return np.min([1, 1/np.max(np.cumprod((1-g)*s/t + g)) if random_order \
+                       else 1/np.prod((1-g)*s/t + g)])
         
 # utilities
        
@@ -841,7 +886,34 @@ def test_rcv_assorter():
 
         votes = {'28' : 1, '50' : 2}
         assert(assorter.assort(votes) == 0.5)
-    
+
+def test_kaplan_markov():
+    s = np.ones(5)
+    np.testing.assert_almost_equal(TestNonnegMean.kaplan_markov(s), 2**-5)
+    s = np.array([1, 1, 1, 1, 1, 0])
+    np.testing.assert_almost_equal(TestNonnegMean.kaplan_markov(s, g=0.1),(1.1/.6)**-5)
+    np.testing.assert_almost_equal(TestNonnegMean.kaplan_markov(s, g=0.1, random_order = False),(1.1/.6)**-5 * .6/.1)
+    s = np.array([1, -1])
+    try:
+        TestNonnegMean.kaplan_markov(s)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError
+
+def test_kaplan_wald():
+    s = np.ones(5)
+    np.testing.assert_almost_equal(TestNonnegMean.kaplan_wald(s), 2**-5)
+    s = np.array([1, 1, 1, 1, 1, 0])
+    np.testing.assert_almost_equal(TestNonnegMean.kaplan_wald(s, g=0.1), (1.9)**-5)
+    np.testing.assert_almost_equal(TestNonnegMean.kaplan_wald(s, g=0.1, random_order = False),(1.9)**-5 * 10)
+    s = np.array([1, -1])
+    try:
+        TestNonnegMean.kaplan_wald(s)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError
 
 if __name__ == "__main__":
     test_make_plurality_assertions()
@@ -849,3 +921,5 @@ if __name__ == "__main__":
     test_rcv_lfunc_wo()
     test_rcv_votefor_cand()    
     test_rcv_assorter()
+    test_kaplan_markov()
+    test_kaplan_wald()
