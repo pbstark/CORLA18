@@ -18,18 +18,20 @@ def treeListToTuple(t):
         return ((t[0],)+tuple(tList))
 
 def parseAssertions(auditfile):
-    apparentWinner = auditfile["Audits"][0]["Winner"]
+    #FIXME: Hardcoded to just look at the first audit for now.
+    audit = auditfile["audits"][0]
+    apparentWinner = audit["winner"]
     print("Apparent winner: "+apparentWinner)
-    apparentNonWinners=auditfile["Audits"][0]["Eliminated"]
+    apparentNonWinners=audit["eliminated"]
     print("Apparently eliminated: "+str(apparentNonWinners))
     print("\n")
-    assertions = auditfile["Audits"][0]["Assertions"]
+    assertions = audit["assertions"]
 
-    # WOLosers is a set of tuples - the first element of the tuple is the loser,
-    # the second element is a list of all the candidates it loses relative to.
+    # WOLosers is a list of tuples - the first element of the tuple is the loser,
+    # the second element is the set of all the candidates it loses relative to.
     WOLosers = []
 
-    # IRVElims is also a set of tuples - the first element is the candidate,
+    # IRVElims is also a list of tuples - the first element is the candidate,
     # the second is the set of candidates already eliminated.
     # An IRVElim assertion states that the candidate can't be the next
     # eliminated when the already-eliminated candidates are exactly the set
@@ -37,9 +39,13 @@ def parseAssertions(auditfile):
     IRVElims = []
 
     for a in assertions:
-        if a["Winner-Only"]=="true":
-            l = a["Loser"]
-            w = a["Winner"]
+        if a["assertion_type"]=="WINNER_ONLY":
+            if a.["already_eliminated"] != "" :
+                # VT: Not clear whether we should go on or quit at this point.
+                print("Error: Not-Eliminated-Before assertion with nonempty already_eliminated list.")
+                
+            l = a["loser"]
+            w = a["winner"]
             # if we haven't already encountered this loser, add a new element to WOLosers.
             # if we have, add a new winner to this loser's set.
             losers = [ll for ll,_ in WOLosers]
@@ -51,8 +57,8 @@ def parseAssertions(auditfile):
                     if l == losers[0]:
                         losers[1].add(w)
                     
-        if a["Winner-Only"]=="false":
-            l = a["Winner"]
+        if a["assertion_type"]=="IRV_ELIMINATION":
+            l = a["winner"]
             IRVElims.append((l,set(a["Already-Eliminated"])  ))
     return(apparentWinner, apparentNonWinners, WOLosers, IRVElims)
 
