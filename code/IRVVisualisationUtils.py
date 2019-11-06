@@ -40,7 +40,7 @@ def parseAssertions(auditfile):
 
     for a in assertions:
         if a["assertion_type"]=="WINNER_ONLY":
-            if a.["already_eliminated"] != "" :
+            if a["already_eliminated"] != "" :
                 # VT: Not clear whether we should go on or quit at this point.
                 print("Error: Not-Eliminated-Before assertion with nonempty already_eliminated list.")
                 
