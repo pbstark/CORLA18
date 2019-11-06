@@ -137,6 +137,6 @@ def printTrees(elimTrees):
     #if len(elimTrees)==2:
     #    return RowByRow(elimTrees[0],elimTrees[1])
     
-    return RowByRow(elimTrees[0],printTrees(elimTrees[1:])
+    return RowByRow(elimTrees[0],printTrees(elimTrees[1:]))
         
     
