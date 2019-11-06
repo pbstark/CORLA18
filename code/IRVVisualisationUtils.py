@@ -125,3 +125,18 @@ def buildPrintedResults(apparentWinner, apparentNonWinners, WOLosers,IRVElims):
         elimTrees.append(Caption(drawnTree,"Remaining orders in which "+c+" wins."))
     return elimTrees
 
+# Takes the output of BuildPrintedResults and pretty-prints them one below the other along the page
+def printTrees(elimTrees):
+    if len(elimTrees)==0:
+        print("Error: printTrees received an empty list of trees.")
+        #VT: think about whether to exit here.
+        
+    if len(elimTrees)==1:
+        return elimTrees[0]
+    
+    #if len(elimTrees)==2:
+    #    return RowByRow(elimTrees[0],elimTrees[1])
+    
+    return RowByRow(elimTrees[0],printTrees(elimTrees[1:])
+        
+    
