@@ -59,7 +59,7 @@ def parseAssertions(auditfile):
                     
         if a["assertion_type"]=="IRV_ELIMINATION":
             l = a["winner"]
-            IRVElims.append((l,set(a["Already-Eliminated"])  ))
+            IRVElims.append((l,set(a["already_eliminated"])  ))
     return(apparentWinner, apparentNonWinners, WOLosers, IRVElims)
 
 # This takes a root candidate c and a set S of candidates still to
