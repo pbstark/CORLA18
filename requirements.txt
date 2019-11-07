@@ -3,3 +3,7 @@ scipy >= 0.17.1
 matplotlib
 cryptorandom >= 0.2
 ipywidgets
+svgling
+svgwrite
+
+
