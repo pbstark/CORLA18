@@ -107,7 +107,7 @@ def printAssertions(WOLosers,IRVElims):
     for loser in WOLosers:
         print('NEB {0:2d}: Candidates '.format(WOLosers.index(loser))+str(loser[1])+' cannot be eliminated before '+str(loser[0])+'.')
     
-    if len(IRVElims) != 0
+    if len(IRVElims) != 0:
         print("\n")
         print("Not-Eliminated-Next assertions: ")
     for winner in IRVElims:
