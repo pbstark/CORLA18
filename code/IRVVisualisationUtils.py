@@ -102,12 +102,14 @@ def buildRemainingTreeAsLists(c,S,WOLosers,IRVElims):
     return tree
 
 def printAssertions(WOLosers,IRVElims):    
-    print("Not-Eliminated-Before assertions: ")
+    if len(WOLosers) != 0:
+        print("Not-Eliminated-Before assertions: ")
     for loser in WOLosers:
         print('NEB {0:2d}: Candidates '.format(WOLosers.index(loser))+str(loser[1])+' cannot be eliminated before '+str(loser[0])+'.')
     
-    print("\n")
-    print("Not-Eliminated-Next assertions: ")
+    if len(IRVElims) != 0
+        print("\n")
+        print("Not-Eliminated-Next assertions: ")
     for winner in IRVElims:
         print('NEN {0:2d}: Candidate '.format(IRVElims.index(winner))+str(winner[0])+' cannot be eliminated next when '+str(winner[1])+' are eliminated.')
 
@@ -122,7 +124,7 @@ def buildPrintedResults(apparentWinner, apparentNonWinners, WOLosers,IRVElims):
         treeAsLists=buildRemainingTreeAsLists(c,candidateSet, WOLosers, IRVElims)
         treeAsTuples=treeListToTuple(treeAsLists)
         drawnTree = svgling.draw_tree(treeAsTuples)
-        elimTrees.append(Caption(drawnTree,"Remaining orders in which "+c+" wins."))
+        elimTrees.append(Caption(drawnTree,"Pruned tree in which "+c+" wins."))
     return elimTrees
 
 # Takes the output of BuildPrintedResults and pretty-prints them one below the other along the page
