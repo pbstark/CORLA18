@@ -51,7 +51,7 @@ def parseAssertions(auditfile):
             losers = [ll for ll,_ in WOLosers]
             if l not in losers:
                 #if l not in [losers[0] for losers in WOLosers]
-                WOLosers.append((l,set(w)))
+                WOLosers.append((l,set([w])))
             else:
                 for losers in WOLosers:
                     if l == losers[0]:
